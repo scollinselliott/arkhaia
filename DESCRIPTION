@@ -1,0 +1,17 @@
+Package: arkhaia
+Title: Archaeological and Historical Analysis
+Version: 0.5
+Date: 2026-04-11
+Authors@R: 
+    person(c("Stephen", "A."), "Collins-Elliott", , "sce@utk.edu", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-5642-6903"))
+Description: Collection of tools for quantitative analysis related to archaeological and historical data.
+License: GPL (>= 3)
+Imports: Rcpp (>= 1.1.0), Rdpack, stats
+RdMacros: Rdpack
+Encoding: UTF-8
+LinkingTo: Rcpp, RcppArmadillo
+RoxygenNote: 7.3.2
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
