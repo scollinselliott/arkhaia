@@ -153,108 +153,6 @@ VB_LOO_type.data.frame <- function(x, lambda = 2/3) {
 
 
 
-# effect_sizes <- function(mat, related, unrelated) {
-
-#   U <- numeric(nrow(unrelated))
-
-#   for (i in 1:nrow(unrelated)) {
-#     U[i] <- mat[unrelated[i, 1], unrelated[i, 2]]
-#   }
-
-#   W <- numeric(nrow(related))
-
-#   for (i in 1:nrow(related)) {
-#     W[i] <- mat[related[i,1], related[i,2]]
-#   }
-
-#   U_names <- numeric(nrow(unrelated))
-#   W_names <- numeric(nrow(related))
-  
-#   for (i in 1:nrow(unrelated)) {
-#     U_names[i] <- paste0(unrelated[i,1],'/', unrelated[i,2]) 
-#   }
-
-#   for (i in 1:nrow(related)) {
-#     W_names[i] <- paste0(related[i,1],'/', related[i,2]) 
-#   }
-#   names(U) <- U_names
-#   names(W) <- W_names
-
-#   Q <- c()
-
-#   for (i in 1:length(W)) {
-#     Q[i] <- mean(U > W[i])
-#   }
-
-#   names(Q) <- names(W)
-
-
-#   delta <- numeric(length(W) * length(U))
-#   k <- 1
-
-#   for (i in 1:length(U)) {
-#     for (j in 1:length(W)) {
-#       delta[k] <- U[i] - W[j]
-#       k <- k + 1
-#     }
-#   }
-
-#   res <- list(U = U, W = W, Q = Q, D = delta)
-
-#   return(res)
-# }
-
-
-
-
-
-# effect_sizes0 <- function(dat, related, unrelated, lambda = 2/3) {
-#   if (!("Count" %in% colnames(dat) & ("Context" %in% colnames(dat) & "Type" %in% colnames(dat))) ) {
-#     message('colnames in data frame must contain labels "Count", "Context", and "Type"')
-#   } else {
-#     Y <- xtabs(Count ~ Type + Context, dat) # Context along columns
-#     context_names <- colnames(Y)
-#     type_names <- rownames(Y)
-
-#     V_B <- V_B_mat(Y, lambda = lambda)
-#     eff <- effect_sizes(V_B, related, unrelated)
-#     EQ <- mean(eff$D > 0)
-
-#     # jackknife - type
-#     V_B_jt_3d <- V_B_jack_type(dat, lambda = lambda)
-#     EQ_jt0 <- numeric(length(type_names))
-#     EQ_jt0[] <- NA
-#     for (k in 1:(dim(V_B_jt_3d)[3])) {
-#       eff_jt00 <- effect_sizes(V_B_jt_3d[,,k], related, unrelated)
-#       EQ_jt0[k] <- mean(eff_jt00$D > 0)
-#     }
-
-#     eff_jt <- mean(EQ_jt0)
-#     eff_jt_var <- sum((EQ_jt0  - eff_jt)^2) * ((length(EQ_jt0) - 1)/length(EQ_jt0))
-
-#     EQ_jc0 <- numeric(length(context_names))
-#     EQ_jc0[] <- NA
-
-#     # jackknife - contexts
-#     for (i in 1:length(context_names)) {
-#       related_tmp <- matrix( related[rowSums(related == context_names[i]) == 0, ]   , ncol = 2)
-#       unrelated_tmp <- matrix( unrelated[rowSums(unrelated == context_names[i]) == 0, ] , ncol = 2)
-#       if (nrow(related_tmp) > 0 & nrow(unrelated_tmp) > 0) {
-#         eff_tmp <- effect_sizes(V_B, related_tmp, unrelated_tmp)
-#       }
-#       EQ_jc0[i] <- mean(eff_tmp$D >0)
-#     }
-
-#     eff_jc <- mean(EQ_jc0)
-#     eff_jc_var <- sum((EQ_jc0  - eff_jc)^2)  * ((length(EQ_jc0) - 1)/length(EQ_jc0))
-
-
-#   list(EQ = EQ, EQ_jt = eff_jt, EQ_jt_var = eff_jt_var, EQ_jc = eff_jc, EQ_jc_var = eff_jc_var)
-#   }
-# }
-
-
-
 
 #' Trace Coefficient
 #'
@@ -479,7 +377,7 @@ pa_matrix <- function(x) {
     UseMethod("pa_matrix")
 }
 
- 
+
 #' @rdname pa_matrix
 #' @export
 pa_matrix.matrix <- function(x) {
