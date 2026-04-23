@@ -7,8 +7,6 @@
 
 <!-- badges: end -->
 
-## Introduction
-
 This package contains a suite of tools developed for the analysis of
 archaeological and historical data.
 
@@ -17,5 +15,5 @@ Current functions center on:
 - Least squares spectral analysis via lowest frequency iteration
   (LSSA-LFI).
 - Measuring effect size (bias-corrected Cramér’s $V$) between
-  archaeological assmeblages.
+  archaeological assemblages.
 - Right-censored counts of archaeological finds.
