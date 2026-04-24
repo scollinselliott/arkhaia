@@ -31,6 +31,6 @@ To obtain the current development version of arkhaia from GitHub, install from G
 
 ``` r
 library(devtools)
-install_github("scollinselliott/arkaia", dependencies = TRUE) 
+install_github("scollinselliott/arkhaia", dependencies = TRUE) 
 ```
 

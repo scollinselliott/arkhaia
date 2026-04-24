@@ -24,5 +24,5 @@ install from GitHub in the R command line with:
 
 ``` r
 library(devtools)
-install_github("scollinselliott/arkaia", dependencies = TRUE) 
+install_github("scollinselliott/arkhaia", dependencies = TRUE) 
 ```
