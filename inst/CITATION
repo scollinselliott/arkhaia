@@ -1,0 +1,9 @@
+bibentry(
+  bibtype  = "Manual",
+  title    = "arkhaia: Archaeological and Historical Analysis",
+  author   = c(person(c("Stephen", "A."), "Collins-Elliott", role = c("aut", "cre"), email = "sce@utk.edu")),
+  year     = "2026",
+  note   =  "R package version 0.5",
+  url      = "https://github.com/scollinselliott/arkhaia",
+  key      = "collins-elliott_arkhaia_2026"
+)
