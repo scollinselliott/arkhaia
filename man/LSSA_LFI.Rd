@@ -6,14 +6,14 @@
 \alias{LSSA_LFI.data.frame}
 \title{Least Squares Spectral Analysis via Lowest Frequency Iteration (LSSA-LFI)}
 \usage{
-LSSA_LFI(dat, n_iter = 1, intercept = TRUE, AIC = FALSE)
+LSSA_LFI(x, n_iter = 1, intercept = TRUE, AIC = FALSE)
 
-\method{LSSA_LFI}{matrix}(dat, n_iter = 1, intercept = TRUE, AIC = FALSE)
+\method{LSSA_LFI}{matrix}(x, n_iter = 1, intercept = TRUE, AIC = FALSE)
 
-\method{LSSA_LFI}{data.frame}(dat, n_iter = 1, intercept = TRUE, AIC = FALSE)
+\method{LSSA_LFI}{data.frame}(x, n_iter = 1, intercept = TRUE, AIC = FALSE)
 }
 \arguments{
-\item{dat}{A data frame of two columns, with the first column containing time indices and the second containing values.}
+\item{x}{A data frame of two columns, with the first column containing time indices and the second containing values.}
 
 \item{n_iter}{The number of iterations to run. Default is 1.}
 

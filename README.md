@@ -16,4 +16,13 @@ Current functions center on:
   (LSSA-LFI).
 - Measuring effect size (bias-corrected Cramér’s $V$) between
   archaeological assemblages.
-- Right-censored counts of archaeological finds.
+
+## Installation
+
+To obtain the current development version of arkhaia from GitHub,
+install from GitHub in the R command line with:
+
+``` r
+library(devtools)
+install_github("scollinselliott/arkaia", dependencies = TRUE) 
+```

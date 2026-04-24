@@ -34,7 +34,7 @@ LSSA(
 
 \item{intercept}{Whether to include the intercept. Default is \code{TRUE}.}
 
-\item{type}{Can be either \code{"frequency"} (the default) or \code{"period"}.}
+\item{type}{Type of output. Can be either \code{"frequency"} (the default) or \code{"period"}.}
 }
 \value{
 The a data frame containing the power and residual sum of squares for each frequency, as well as coefficients.

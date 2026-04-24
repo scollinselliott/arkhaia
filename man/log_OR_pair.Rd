@@ -3,18 +3,38 @@
 \name{log_OR_pair}
 \alias{log_OR_pair}
 \alias{log_OR_pair.matrix}
-\title{Pairwise Log Odds Ratios with Haldane-Anscombe's Correction}
+\alias{log_OR_pair.data.frame}
+\alias{log_OR_pair.xtabs}
+\alias{log_OR_pair.table}
+\title{Log Odds Ratio with Haldane-Anscombe's Correction Pairwise between Columns}
 \usage{
 log_OR_pair(x)
 
 \method{log_OR_pair}{matrix}(x)
+
+\method{log_OR_pair}{data.frame}(x)
+
+\method{log_OR_pair}{xtabs}(x)
+
+\method{log_OR_pair}{table}(x)
 }
 \arguments{
-\item{x}{A data frame in which the first column is labeled \code{Context} and the second column is labeled \code{Type}, with each row containing a type present in that context.}
+\item{x}{A matrix or data frame with contexts along columns and types along rows.}
 }
 \value{
-A matrix of the pairwise log odds ratios giving the overlap in types between contexts.
+A matrix giving the log odds ratio between all columns of the input.
 }
 \description{
-Selecting all pairs of columns (contexts) of a contingency table, computes the log odds ratio of a 2 x 2 contingency table that indicates the number of matching types (rows) that are present. The addition of 0.5 to cells of the contingency table is performed  \insertCite{anscombe_estimating_1956,haldane_estimation_1956}{arkhaia}.
+For a contingency table with columns representing contexts and rows representing types, computes the log odds ratio of a 2 x 2 contingency table of the presence-absences across each pair of columns. The addition of 0.5 to cells of the contingency table is performed \insertCite{anscombe_estimating_1956,haldane_estimation_1956}{arkhaia}.
+}
+\examples{
+x1 <- c(2, 0, 0, 11, 5, 0, 2, 0, 4)
+x2 <- c(1, 1, 0, 23, 3, 3, 0, 0, 0)
+x3 <- c(1, 0, 0, 0, 10, 0, 4, 0, 1)
+
+x <- data.frame(S1 = x1, S2 = x2, S3 = x3)
+rownames(x) <- LETTERS[1:nrow(x)]
+
+log_OR_pair(x)
+
 }

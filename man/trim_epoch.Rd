@@ -13,12 +13,12 @@ trim_epoch(x, epoch = NULL)
 \method{trim_epoch}{data.frame}(x, epoch = NULL)
 }
 \arguments{
-\item{x}{A \code{data frame} or \code{matrix} containing time-indexed data, with time index in the first column and value in the second.}
+\item{x}{A data frame or matrix containing time-indexed data, with time index in the first column and value in the second.}
 
 \item{epoch}{A numeric vector given the start and end time indices of the epoch.}
 }
 \value{
-A \code{data frame} containing only those observations with time indices within the epoch.
+A data frame containing only those observations with time indices within the epoch.
 }
 \description{
 For a data frame in which the first column contains a time index and the second colum observations, trim the data frame to include observations only with a given epoch (time period).

@@ -3,11 +3,20 @@
 \name{CR}
 \alias{CR}
 \alias{CR.matrix}
+\alias{CR.data.frame}
+\alias{CR.xtabs}
+\alias{CR.table}
 \title{Cressie-Read Power-Divergence Statistic}
 \usage{
 CR(x, lambda = 2/3)
 
 \method{CR}{matrix}(x, lambda = 2/3)
+
+\method{CR}{data.frame}(x, lambda = 2/3)
+
+\method{CR}{xtabs}(x, lambda = 2/3)
+
+\method{CR}{table}(x, lambda = 2/3)
 }
 \arguments{
 \item{x}{A matrix of cross-tabulated counts.}

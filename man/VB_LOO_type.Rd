@@ -2,21 +2,47 @@
 % Please edit documentation in R/effect.R
 \name{VB_LOO_type}
 \alias{VB_LOO_type}
+\alias{VB_LOO_type.matrix}
 \alias{VB_LOO_type.data.frame}
-\title{Leave-One-Out Routine for Pairwise Effect Sizes of Archaeological Contexts}
+\alias{VB_LOO_type.xtabs}
+\alias{VB_LOO_type.table}
+\title{Leave-One-Out Type Routine for Pairwise Effect Sizes of Archaeological Contexts}
 \usage{
-VB_LOO_type(x, lambda = 2/3)
+VB_LOO_type(x, method = "CR", lambda = 2/3, simulate = TRUE)
 
-\method{VB_LOO_type}{data.frame}(x, lambda = 2/3)
+\method{VB_LOO_type}{matrix}(x, method = "CR", lambda = 2/3, simulate = TRUE)
+
+\method{VB_LOO_type}{data.frame}(x, method = "CR", lambda = 2/3, simulate = TRUE)
+
+\method{VB_LOO_type}{xtabs}(x, method = "CR", lambda = 2/3, simulate = TRUE)
+
+\method{VB_LOO_type}{table}(x, method = "CR", lambda = 2/3, simulate = TRUE)
 }
 \arguments{
-\item{x}{A data frame in which the first column is labeled \code{Context} and the second column is labeled \code{Type}, with each row containing a type present in that context.}
+\item{x}{A contingency table as a matrix or data frame expressing counts, with contexts along columns and types along rows.}
 
-\item{lambda}{The Cressie-Read power-divergence statistic parameter. Default is the recommended value of 2/3.}
+\item{method}{Method for estimating chi squared. Default is \code{CR}, the Cressie-Read method (see \code{\link[arkhaia]{CR}})). Other options include \code{Pearson}, which uses R's base \code{\link[stats]{chisq.test}}) function, and \code{G}, which computes the likelihood-ratio \eqn{G} statistic, which is the case for the Cressie-Read statistic as \eqn{\lambda} approaches 0.}
+
+\item{lambda}{Only applied to the method \code{CR}. Default is the recommended value of 2/3.}
+
+\item{simulate}{Only applied ot the method \code{Pearson}.  Whether to simulate \eqn{p} values in the \code{\link[stats]{chisq.test}}) function. Default is \code{TRUE}.}
 }
 \value{
 A three-dimensional array of the pairwise context-by-context effect sizes given the ommission of a type, for all types given in the input data frame.
 }
 \description{
 To evaluate the stability of estimates of effect sizes between archaeological contexts in light of the inclusion or exclusion of a given type, this routine computes bias-corrected Cramer's V \code{\link[arkhaia]{VB}}) omitting a type on each iteration.
+}
+\examples{
+x1 <- c(2, 0, 10, 11, 5)
+x2 <- c(1, 1, 17, 23, 3)
+x3 <- c(0, 0, 2, 81, 11)
+
+x <- matrix(c(x1, x2, x3), ncol = 3)
+
+rownames(x) <- LETTERS[1:nrow(x)]
+colnames(x) <- c("S1", "S2", "S3")
+
+VB_LOO_type(x)
+
 }

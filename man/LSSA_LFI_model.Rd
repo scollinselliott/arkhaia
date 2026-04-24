@@ -6,14 +6,14 @@
 \alias{LSSA_LFI_model.data.frame}
 \title{LSSA-LFI Model}
 \usage{
-LSSA_LFI_model(dat, t_ = NULL, n_iter = 1, intercept = TRUE, label = "model")
+LSSA_LFI_model(x, t_ = NULL, n_iter = 1, intercept = TRUE, label = "model")
 
-\method{LSSA_LFI_model}{matrix}(dat, t_ = NULL, n_iter = 1, intercept = TRUE, label = "model")
+\method{LSSA_LFI_model}{matrix}(x, t_ = NULL, n_iter = 1, intercept = TRUE, label = "model")
 
-\method{LSSA_LFI_model}{data.frame}(dat, t_ = NULL, n_iter = 1, intercept = TRUE, label = "model")
+\method{LSSA_LFI_model}{data.frame}(x, t_ = NULL, n_iter = 1, intercept = TRUE, label = "model")
 }
 \arguments{
-\item{dat}{A data frame where time indices are in the first column and values are in the second.}
+\item{x}{A data frame where time indices are in the first column and values are in the second.}
 
 \item{t_}{A vector giving samples range of \eqn{t} for computing \eqn{f(t)}. Default is from the minimum to maximum time index sampled at 0.01 intervals.}
 

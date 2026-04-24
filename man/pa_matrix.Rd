@@ -3,29 +3,37 @@
 \name{pa_matrix}
 \alias{pa_matrix}
 \alias{pa_matrix.matrix}
-\alias{pa_matrix.data.fame}
+\alias{pa_matrix.data.frame}
+\alias{pa_matrix.table}
+\alias{pa_matrix.xtabs}
 \title{Presence-Absence Matrix}
 \usage{
 pa_matrix(x)
 
 \method{pa_matrix}{matrix}(x)
 
-\method{pa_matrix}{data.fame}(x)
+\method{pa_matrix}{data.frame}(x)
+
+\method{pa_matrix}{table}(x)
+
+\method{pa_matrix}{xtabs}(x)
 }
 \arguments{
-\item{x}{A matrix or data frame where the two columns indicate contexts and the rows indicate types, with each cell containing counts of types in a context. 
-#' @examples 
-x1 <- c(2, 0, 10, 11, 5)
-x2 <- c(1, 1, 17, 23, 3)
-
-x <- data.frame(S1 = x1, S2 = x2)
-rownames(x) <- LETTERS[1:5]
-
-pa_matrix(x)}
+\item{x}{A matrix or data frame where the two columns indicate contexts and the rows indicate types, with each cell containing counts of types in a context.}
 }
 \value{
 A 2 x 2 contingency table of the counts of types present in both, either, or neither context.
 }
 \description{
 Create a 2 x 2 contingency table of the presence/absence of a given type
+}
+\examples{
+x1 <- c(2, 0, 10, 11, 5)
+x2 <- c(1, 1, 17, 23, 3)
+
+x <- data.frame(S1 = x1, S2 = x2)
+rownames(x) <- LETTERS[1:5]
+
+pa_matrix(x)
+
 }

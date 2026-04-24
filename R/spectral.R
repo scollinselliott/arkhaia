@@ -5,7 +5,7 @@
 #' @param x A data frame of two columns, the first containing time indices and the second containing values.
 #' @param freqs A vector of frequencies to evaluate. By default a grid from 0.001 to 0.5 is tested at an interval of 0.005.
 #' @param intercept Whether to include the intercept. Default is \code{TRUE}.
-#' @param type Can be either \code{"frequency"} (the default) or \code{"period"}.
+#' @param type Type of output. Can be either \code{"frequency"} (the default) or \code{"period"}.
 #' @returns The a data frame containing the power and residual sum of squares for each frequency, as well as coefficients.
 #' 
 #' @references
@@ -51,7 +51,7 @@ LSSA.data.frame <- function(x, freqs = seq(0.001, 0.5, by = 0.0005), intercept =
 #'
 #' Peforms a simple least squares fitting to time indexed data of the form y = SIGMA B cos(2 pi f t) + C sin(2 pi f t) + D, using an input of frequencies; the lowest frequency peak (not the highest power frequency) is chosen for regression, up to a chosen number of iterations. Intercept may be ommitted. The lowest frequency is equivalent to the longest period.
 #' 
-#' @param dat A data frame of two columns, with the first column containing time indices and the second containing values.
+#' @param x A data frame of two columns, with the first column containing time indices and the second containing values.
 #' @param n_iter The number of iterations to run. Default is 1.
 #' @param intercept Whether to include the intercept. Default is \code{TRUE}.
 #' @param AIC If \code{TRUE}, only the result that has yeilded the lowest AIC (Aikake Information Criterion) is given. Default is \code{FALSE}.
@@ -62,19 +62,19 @@ LSSA.data.frame <- function(x, freqs = seq(0.001, 0.5, by = 0.0005), intercept =
 #'   * The AIC upon each iteration. (If the paraemter AIC is \code{TRUE}, this will stop at the lowest AIC value produced by the frequencies tested).
 #' 
 #' @export
-LSSA_LFI <- function(dat, n_iter = 1, intercept = TRUE, AIC = FALSE) {
+LSSA_LFI <- function(x, n_iter = 1, intercept = TRUE, AIC = FALSE) {
     UseMethod("LSSA_LFI")
 }
 
 #' @rdname LSSA_LFI
 #' @export
-LSSA_LFI.matrix <- function(dat, n_iter = 1, intercept = TRUE, AIC = FALSE) {
+LSSA_LFI.matrix <- function(x, n_iter = 1, intercept = TRUE, AIC = FALSE) {
   coefs <- list()
   freqs <- numeric(n_iter)
   rss <- numeric(n_iter)
   aic <- numeric(n_iter)
 
-  first <- LSSA(dat, type = "period", intercept = intercept)
+  first <- LSSA(x, type = "period", intercept = intercept)
   idx <- which(diff(first$power) < 0)[1]
   freq1 <- 1/first[idx,1]
   epsilon2 <- first[idx,3]
@@ -83,17 +83,17 @@ LSSA_LFI.matrix <- function(dat, n_iter = 1, intercept = TRUE, AIC = FALSE) {
   rss[1] <- epsilon2
   coefs[[1]] <- first[idx, 4:6]
   
-  dat <- as.matrix(dat)
-  resid <- LSSA_resid_arma(dat, freq1, intercept = intercept)
+  x <- as.matrix(x)
+  resid <- LSSA_resid_arma(x, freq1, intercept = intercept)
 
   prev_freq <- freq1
-  dat0 <- data.frame(dat[,1], resid)
+  dat0 <- data.frame(x[,1], resid)
   dat0 <- as.matrix(dat0)
 
   if (intercept == TRUE) {
-    aic[1] <- 2 * (3 + 1) + log(epsilon2/nrow(dat)) * nrow(dat)
+    aic[1] <- 2 * (3 + 1) + log(epsilon2/nrow(x)) * nrow(x)
   } else {
-    aic[1] <- 2 * (2 + 1) + log(epsilon2/nrow(dat)) * nrow(dat)
+    aic[1] <- 2 * (2 + 1) + log(epsilon2/nrow(x)) * nrow(x)
   }
 
   if (n_iter > 1) {
@@ -109,15 +109,15 @@ LSSA_LFI.matrix <- function(dat, n_iter = 1, intercept = TRUE, AIC = FALSE) {
       freqs[j] <- freq_
 
       resid <- LSSA_resid_arma(dat0, freq_, intercept = FALSE)
-      dat0 <- data.frame(dat[,1], resid)
+      dat0 <- data.frame(x[,1], resid)
       dat0 <- as.matrix(dat0)
 
       prev_freq <- freq_
 
       if (intercept == TRUE) {
-          aic[j] <- 2 * (3 * j + 1) + log(epsilon2/nrow(dat)) * nrow(dat)
+          aic[j] <- 2 * (3 * j + 1) + log(epsilon2/nrow(x)) * nrow(x)
       } else {
-          aic[j] <- 2 * (3 * j) + log(epsilon2/nrow(dat)) * nrow(dat)
+          aic[j] <- 2 * (3 * j) + log(epsilon2/nrow(x)) * nrow(x)
       }
       
     }
@@ -129,16 +129,16 @@ LSSA_LFI.matrix <- function(dat, n_iter = 1, intercept = TRUE, AIC = FALSE) {
     idx <- which.min(aic)
     out <- list(coefs = coefs[1:idx], freqs = freqs[1:idx], rss = rss[1:idx], aic = aic[1:idx])
   }
-  class(out) <- c("LSSA_LFR", "list")
+  class(out) <- c("LSSA_LFI", "list")
 
   return(out)
 }
 
 #' @rdname LSSA_LFI
 #' @export
-LSSA_LFI.data.frame <- function(dat, n_iter = 1, intercept = TRUE, AIC = FALSE) {
-  dat <- as.matrix(dat)
-  out <- LSSA_LFI.matrix(dat, n_iter, intercept, AIC) 
+LSSA_LFI.data.frame <- function(x, n_iter = 1, intercept = TRUE, AIC = FALSE) {
+  x <- as.matrix(x)
+  out <- LSSA_LFI.matrix(x, n_iter, intercept, AIC) 
   return(out)
 }
 
@@ -229,9 +229,9 @@ LSSA_LFI_candidates.list <- function(x, sets = NULL, n_iter = 1, intercept = TRU
 #'
 #' For a data frame in which the first column contains a time index and the second colum observations, trim the data frame to include observations only with a given epoch (time period).
 #' 
-#' @param x A \code{data frame} or \code{matrix} containing time-indexed data, with time index in the first column and value in the second.
+#' @param x A data frame or matrix containing time-indexed data, with time index in the first column and value in the second.
 #' @param epoch A numeric vector given the start and end time indices of the epoch.
-#' @returns A \code{data frame} containing only those observations with time indices within the epoch.
+#' @returns A data frame containing only those observations with time indices within the epoch.
 #' 
 #' @export
 trim_epoch <- function(x, epoch = NULL) {
@@ -296,7 +296,7 @@ model_select.LSSA_LFI_AIC <- function(x) {
 #'
 #' Generates a data frame of values \eqn{f(t)} of the model generated by LSSA-LFI (see \code{\link[arkhaia]{LSSA_LFI}})).
 #' 
-#' @param dat A data frame where time indices are in the first column and values are in the second.
+#' @param x A data frame where time indices are in the first column and values are in the second.
 #' @param t_  A vector giving samples range of \eqn{t} for computing \eqn{f(t)}. Default is from the minimum to maximum time index sampled at 0.01 intervals.
 #' @param n_iter The number of iterations to run. Default is 1.
 #' @param intercept Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.
@@ -304,17 +304,17 @@ model_select.LSSA_LFI_AIC <- function(x) {
 #' @returns A data frame containing \eqn{t, f(t)}.
 #' 
 #' @export
-LSSA_LFI_model <- function(dat, t_ = NULL, n_iter = 1, intercept = TRUE, label = "model") {
+LSSA_LFI_model <- function(x, t_ = NULL, n_iter = 1, intercept = TRUE, label = "model") {
     UseMethod("LSSA_LFI_model")
 }
 
 #' @rdname LSSA_LFI_model
 #' @export
-LSSA_LFI_model.matrix <- function(dat, t_ = NULL, n_iter = 1, intercept = TRUE, label = "model") {  
-  dat_LSSA <- LSSA_LFI(dat[,1:2], n_iter = n_iter, intercept = intercept)
+LSSA_LFI_model.matrix <- function(x, t_ = NULL, n_iter = 1, intercept = TRUE, label = "model") {  
+  dat_LSSA <- LSSA_LFI(x[,1:2], n_iter = n_iter, intercept = intercept)
 
   if (is.null(t_)) {
-    t_ <- seq(min(dat[,1]), max(dat[,1]), by = 0.01)
+    t_ <- seq(min(x[,1]), max(x[,1]), by = 0.01)
   }
 
   theta <- t_ * 2 * pi * dat_LSSA$freqs[1]
@@ -337,14 +337,10 @@ LSSA_LFI_model.matrix <- function(dat, t_ = NULL, n_iter = 1, intercept = TRUE, 
 
 #' @rdname LSSA_LFI_model
 #' @export
-LSSA_LFI_model.data.frame <- function(dat, t_ = NULL, n_iter = 1, intercept = TRUE, label = "model") {  
-  dat <- as.matrix(dat[,1:2])
-  LSSA_LFI_model.matrix(dat, t_ = t_, n_iter = n_iter, intercept = intercept, label = label)
+LSSA_LFI_model.data.frame <- function(x, t_ = NULL, n_iter = 1, intercept = TRUE, label = "model") {  
+  x <- as.matrix(x[,1:2])
+  LSSA_LFI_model.matrix(x, t_ = t_, n_iter = n_iter, intercept = intercept, label = label)
 }
-
-
-
-
 
 
 
@@ -353,11 +349,11 @@ LSSA_LFI_model.data.frame <- function(dat, t_ = NULL, n_iter = 1, intercept = TR
 #' Probability of linear dependence between two groups of time series observations using a LSSA-LFI model selection (see \code{\link[arkhaia]{LSSA_LFI_candidates}})), given a list of at least three time series. Confounding variate is selected from the remaining time series in the list.
 #' 
 #' @param x A list of data frames.
-#' @param pair The pair of commodities to evaluate in the list \code{x}, either names or indices.
+#' @param pair The pair of series to evaluate in the list \code{x}, either names or indices.
 #' @param n_iter The number of iterations to run. Default is 1.
 #' @param intercept Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.
 
-#' @returns An upper-triangular matrix, in which 1 indicates linear dependence between two variates and 0 indicates independence.
+#' @returns The probability of linear dependence between two time series, in which 1 indicates linear dependence almost surely and 0 indicates independence.
 #' 
 #' @export
 LSSA_LFI_validated <- function(x, pair = NULL, n_iter = 1, intercept = TRUE) {
@@ -499,7 +495,7 @@ LSSA_LFI_epoch <- function(x, pair = NULL, n_iter = 1, intercept = TRUE, t_range
         out[(length(h_) - hi)+1,ti] <- LSSA_LFI_validated(tmp, pair = pair, n_iter = n_iter_, intercept = intercept)
       }
     }
-    cat("\n Percent complete: ", round(ti/length(t_), 2)*100, "%")
+    cat("Percent complete: ", round(ti/length(t_), 2)*100, "%")
   }
 
 
