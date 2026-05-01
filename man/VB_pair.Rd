@@ -27,7 +27,7 @@ VB_pair(x, lambda = 2/3)
 A matrix of Bergsma's bias-corrected etimate of Cramer's \eqn{V}, pairwise between columns of the input matrix, of class \code{effect_sizes}.
 }
 \description{
-For a matrix or data frame of cross-tabulated counts of observations, estimates Cramer's V using Bergsma's bias correction \insertCite{bergsma_bias-correction_2013}{arkhaia} by subsetting the table by pairs of columns (see \code{\link[arkhaia]{VB}}).
+For a matrix or data frame of cross-tabulated counts of observations, estimates Cramer's V using Bergsma's bias correction \insertCite{bergsma_bias-correction_2013}{arkhaia} by subsetting the table by pairs of columns (see \code{\link[arkhaia]{VB}}). In subsetting, zero row/columns are automatically removed from the subset matrix.
 }
 \examples{
 x1 <- c(2, 0, 10, 11, 5)

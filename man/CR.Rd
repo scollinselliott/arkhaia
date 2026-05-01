@@ -27,7 +27,7 @@ CR(x, lambda = 2/3)
 The Cressie-Read power-divergence statistic.
 }
 \description{
-For a matrix of cross-tabulated counts of observations, computes the Cressie-Read power-divergence statistic according to the selection of a parameter \eqn{\lambda} \insertCite{cressie_multinomial_1984,read_goodness--fit_1988}{arkhaia}.
+For a matrix of cross-tabulated counts of observations, computes the Cressie-Read power-divergence statistic according to the selection of a parameter \eqn{\lambda} \insertCite{cressie_multinomial_1984,read_goodnessfit_1988}{arkhaia}.
 }
 \examples{
 x1 <- c(2, 0, 10, 11, 5)
