@@ -141,8 +141,8 @@ trunc_pois.table <- function(x, lambda_grid = seq(0.01, 100, by = 0.01), omit_ze
 #' x2 <- c(9,2,5,15,7,90,0)
 #' x <- matrix(c(x1,x2), ncol = 2)
 #' 
-#' VB_trunc_pois(x, n_iter = 10^3)
-#' VB_trunc_pois(x, omit_zero = FALSE, n_iter = 10^3)
+#' VB_trunc_pois(x, n_iter = 10^2)
+#' VB_trunc_pois(x, omit_zero = FALSE, n_iter = 10^2)
 #'
 #' @returns A contingency table \eqn{Y} of the same size as \eqn{X}, with \eqn{y_{ij}} drawn according to a truncated Poisson distribution, \eqn{y_{ij} \geq x_{ij}}.
 #' 
