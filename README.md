@@ -39,7 +39,7 @@ finds assemblages in their depositional contexts. Whether or not a
 context is “representative” of another is assessed on the basis of the
 homogeneity of the distribution of finds. The relevant paper has been
 reviewed and is under revision: Collins-Elliott (Under Review),
-“Evaluating”.
+“Evaluating…”
 
 - Cressie-Read power-divergence statistic to estimate $\chi^2$ (Cressie
   and Read 1984; Read and Cressie 1988)
@@ -58,7 +58,7 @@ secondary or tertiary contexts), comprise a minimum amount of finds that
 were “is use” in a given locality. From a contingency table of those
 minimum counts, it is possible to generate distributions of counts in
 use from which to evaluate This paper is currently under review:
-Collins-Elliott (Under Review), “Random”.
+Collins-Elliott (Under Review), “Random…”
 
 - Estimating the rate of a Poisson distribution based on a contingency
   table of minimum counts.
@@ -73,7 +73,7 @@ fitting by lowest frequency iteratively (LSSA-LFI), to fit sparse
 time-indexed observations and then evaluate whether there exists linear
 dependence in their data-generating process via model comparison. The
 paper applying this method to Babylonian price data is under review:
-Collins-Elliott (Under Review), “Revisiting”
+Collins-Elliott (Under Review), “Revisiting…”
 
 ## References
 
