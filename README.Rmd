@@ -35,11 +35,9 @@ install_github("scollinselliott/arkhaia", dependencies = TRUE, build_vignettes =
 
 ## Methods
 
-Vignettes in the package illustrate 
-
 ### Homogeneity via Effect Size
 
-Establishing a measure of practical signficance for the comparison of finds assemblages in their depositional contexts. Whether or not a context is "representative" of another is assessed on the basis of the homogeneity of the distribution of finds. The relevant paper has been reviewed and is under revision [@collins-elliott_evaluating_nodate].
+Establishing a measure of practical signficance for the comparison of finds assemblages in their depositional contexts. Whether or not a context is "representative" of another is assessed on the basis of the homogeneity of the distribution of finds. The relevant paper has been reviewed and is under revision: @collins-elliott_evaluating_nodate, "Evaluating".
 
 * Cressie-Read power-divergence statistic to estimate $\chi^2$ [@cressie_multinomial_1984;@read_goodnessfit_1988]
 * Bergsma's bias-corrected Cramér's $V$ [@bergsma_bias-correction_2013]
@@ -49,12 +47,13 @@ Establishing a measure of practical signficance for the comparison of finds asse
 
 ### Random Right-Censored Count Data
 
-Random right-censoring of archaeological count data. Assemblages of artifacts that do _not_ belong to primary contexts (i.e., "random" secondary or tertiary contexts), comprise a minimum amount of finds that were "is use" in a given locality. From a contingency table of those minimum counts, it is possible to generate distributions of counts in use from which to evaluate This paper is currently under review [@collins-elliott_random_nodate].
+Random right-censoring of archaeological count data. Assemblages of artifacts that do _not_ belong to primary contexts (i.e., "random" secondary or tertiary contexts), comprise a minimum amount of finds that were "is use" in a given locality. From a contingency table of those minimum counts, it is possible to generate distributions of counts in use from which to evaluate This paper is currently under review: @collins-elliott_random_nodate, "Random".
 
 * Estimating the rate of a Poisson distribution based on a contingency table of minimum counts.
 * Resampling routines to generate contingency tables accoriding to a truncated Poisson distribution, representing counts "in use" as opposed to those deposied.
 
 ### Least Squares Sepctral Analysis 
 
-Least squares spectral analysis (LSSA), with an implementation of fitting by lowest frequency iteratively (LSSA-LFI), to fit sparse time-indexed observations and then evaluate whether there exists linear dependence in their data-generating process via model comparison. The paper applying this method to Babylonian price data is under review [@collins-elliott_revisiting_nodate].
+Least squares spectral analysis (LSSA), with an implementation of fitting by lowest frequency iteratively (LSSA-LFI), to fit sparse time-indexed observations and then evaluate whether there exists linear dependence in their data-generating process via model comparison. The paper applying this method to Babylonian price data is under review: @collins-elliott_revisiting_nodate, "Revisiting"
 
+# References
