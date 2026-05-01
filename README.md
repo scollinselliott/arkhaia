@@ -66,7 +66,7 @@ Collins-Elliott (Under Review), “Random…”
   truncated Poisson distribution, representing counts “in use” as
   opposed to those deposied.
 
-### Least Squares Sepctral Analysis
+### Least Squares Spectral Analysis
 
 Least squares spectral analysis (LSSA), with an implementation of
 fitting by lowest frequency iteratively (LSSA-LFI), to fit sparse

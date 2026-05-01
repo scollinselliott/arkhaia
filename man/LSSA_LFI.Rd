@@ -29,5 +29,5 @@ A list containing:
   * The AIC upon each iteration. (If the paraemter AIC is \code{TRUE}, this will stop at the lowest AIC value produced by the frequencies tested).
 }
 \description{
-Peforms a simple least squares fitting to time indexed data of the form y = SIGMA B cos(2 pi f t) + C sin(2 pi f t) + D, using an input of frequencies; the lowest frequency peak (not the highest power frequency) is chosen for regression, up to a chosen number of iterations. Intercept may be ommitted. The lowest frequency is equivalent to the longest period.
+Peforms a simple least squares fitting to time indexed data of the form  \eqn{x(t) = \beta_{0} + \sum_{i =1}^n \beta_{1i} \cos (2 \pi f t) + \beta_{2i} \sin(2 \pi f t)}, using an input of frequencies; the lowest frequency peak (not the highest power frequency) is chosen for regression, up to a chosen number of iterations. Intercept may be ommitted. The lowest frequency is equivalent to the longest period.
 }
