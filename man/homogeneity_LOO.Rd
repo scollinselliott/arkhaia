@@ -13,9 +13,7 @@ homogeneity_LOO(
   related = NULL,
   unrelated = NULL,
   direction = "UW",
-  method = "CR",
-  lambda = 2/3,
-  simulate = TRUE
+  lambda = 2/3
 )
 
 \method{homogeneity_LOO}{matrix}(
@@ -23,9 +21,7 @@ homogeneity_LOO(
   related = NULL,
   unrelated = NULL,
   direction = "UW",
-  method = "CR",
-  lambda = 2/3,
-  simulate = TRUE
+  lambda = 2/3
 )
 
 \method{homogeneity_LOO}{data.frame}(
@@ -33,9 +29,7 @@ homogeneity_LOO(
   related = NULL,
   unrelated = NULL,
   direction = "UW",
-  method = "CR",
-  lambda = 2/3,
-  simulate = TRUE
+  lambda = 2/3
 )
 
 \method{homogeneity_LOO}{table}(
@@ -43,9 +37,7 @@ homogeneity_LOO(
   related = NULL,
   unrelated = NULL,
   direction = "UW",
-  method = "CR",
-  lambda = 2/3,
-  simulate = TRUE
+  lambda = 2/3
 )
 
 \method{homogeneity_LOO}{xtabs}(
@@ -53,9 +45,7 @@ homogeneity_LOO(
   related = NULL,
   unrelated = NULL,
   direction = "UW",
-  method = "CR",
-  lambda = 2/3,
-  simulate = TRUE
+  lambda = 2/3
 )
 }
 \arguments{
@@ -67,22 +57,20 @@ homogeneity_LOO(
 
 \item{direction}{Whether the related or unrelated effect size should come first. Default is \code{"UW"}; alternative is \code{"WU"}.}
 
-\item{method}{Method for estimating chi squared. Default is \code{CR}, the Cressie-Read method (see \code{\link[arkhaia]{CR}})). Other options include \code{Pearson}, which uses R's base \code{\link[stats]{chisq.test}}) function, and \code{G}, which computes the likelihood-ratio \eqn{G} statistic, which is the case for the Cressie-Read statistic as \eqn{\lambda} approaches 0.}
-
-\item{lambda}{Only applied to the method \code{CR}. Default is the recommended value of 2/3.}
-
-\item{simulate}{Only applied ot the method \code{Pearson}.  Whether to simulate \eqn{p} values in the \code{\link[stats]{chisq.test}}) function. Default is \code{TRUE}.}
+\item{lambda}{Parameter of the Cressie-Read power-divergence statistic. Default is the recommended value of 2/3.}
 }
 \value{
 A list containing:
-  * \code{EQ} : The mean quantile expressing the degree of homogeneity among related contexts as computed by the \code{\link[arkhaia]{homogeneity}} function.
-  * \code{EQ_T_mean} : The mean quantile upon iterating over the omission of each type (of the LOO samples). 
-  * \code{EQ_T_var} : The variance of the LOO type samples.
-  * \code{EQ_C_mean} : The mean quantile upon iterating over the omission of each context.
-  * \code{EQ_C_var} : The variance of the LOO context samples.
+\itemize{
+ \item EQ - The mean quantile expressing the degree of homogeneity among related contexts.
+ \item EQ_T_mean - The mean quantile upon iterating over the omission of each type (of the LOO samples).
+ \item EQ_T_var - The variance of the LOO type samples.
+ \item EQ_C_mean - The mean quantile upon iterating over the omission of each context.
+ \item EQ_C_var - The variance of the LOO context samples.
+}
 }
 \description{
-To evaluate the stability of estimates of effect sizes between archaeological contexts in light of the inclusion or exclusion of types and contexts, this routine computes the homogeneity of related assemblages iteratively in two ways, first by leaving out a type on each iteration and second by leaving out a context on each iteration (see \code{\link[arkhaia]{homogeneity}} and \code{\link[arkhaia]{VB}}).
+To evaluate the stability of estimates of effect sizes between archaeological contexts in light of the inclusion or exclusion of types and contexts, this routine computes the homogeneity of related assemblages iteratively in two ways, first by leaving out a type on each iteration and second by leaving out a context on each iteration. For details on the arguments, see also \code{\link[arkhaia]{homogeneity}} and \code{\link[arkhaia]{VB}}).
 }
 \examples{
 x1 <- c(2, 0, 10, 11, 5)

@@ -21,7 +21,7 @@ CR(x, lambda = 2/3)
 \arguments{
 \item{x}{A matrix of cross-tabulated counts.}
 
-\item{lambda}{The model parameter of the Cressie-Read power-divergence statistic. Default is the recommended value of 2/3.}
+\item{lambda}{The parameter of the Cressie-Read power-divergence statistic. Default is the recommended value of 2/3. To use Pearson's method, set \code{lambda = 1}.}
 }
 \value{
 The Cressie-Read power-divergence statistic.

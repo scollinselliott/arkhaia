@@ -8,30 +8,26 @@
 \alias{VB_pair.table}
 \title{Bias-Corrected Cramer's V Pairwise between Columns}
 \usage{
-VB_pair(x, method = "CR", lambda = 2/3, simulate = TRUE)
+VB_pair(x, lambda = 2/3)
 
-\method{VB_pair}{matrix}(x, method = "CR", lambda = 2/3, simulate = TRUE)
+\method{VB_pair}{matrix}(x, lambda = 2/3)
 
-\method{VB_pair}{data.frame}(x, method = "CR", lambda = 2/3, simulate = TRUE)
+\method{VB_pair}{data.frame}(x, lambda = 2/3)
 
-\method{VB_pair}{xtabs}(x, method = "CR", lambda = 2/3, simulate = TRUE)
+\method{VB_pair}{xtabs}(x, lambda = 2/3)
 
-\method{VB_pair}{table}(x, method = "CR", lambda = 2/3, simulate = TRUE)
+\method{VB_pair}{table}(x, lambda = 2/3)
 }
 \arguments{
 \item{x}{A matrix or data frame of cross-tabulated counts.}
 
-\item{method}{Method for estimating chi squared. Default is \code{CR}, the Cressie-Read method (see \code{\link[arkhaia]{CR}})). Other options include \code{Pearson}, which uses R's base \code{\link[stats]{chisq.test}}) function, and \code{G}, which computes the likelihood-ratio \eqn{G} statistic, which is the case for the Cressie-Read statistic as \eqn{\lambda} approaches 0.}
-
-\item{lambda}{Only applied to the method \code{CR}. Default is the recommended value of 2/3.}
-
-\item{simulate}{Only applied ot the method \code{Pearson}.  Whether to simulate \eqn{p} values in the \code{\link[stats]{chisq.test}}) function. Default is \code{TRUE}.}
+\item{lambda}{Parameter of the Cressie-Read power-divergence statistic. Default is the recommended value of 2/3.}
 }
 \value{
 A matrix of Bergsma's bias-corrected etimate of Cramer's \eqn{V}, pairwise between columns of the input matrix, of class \code{effect_sizes}.
 }
 \description{
-For a matrix or data frame of cross-tabulated counts of observations, estimates Cramer's V using Bergsma's bias correction \insertCite{bergsma_bias-correction_2013}{arkhaia} by subsetting the table by pairs of columns. See \code{\link[arkhaia]{VB}}
+For a matrix or data frame of cross-tabulated counts of observations, estimates Cramer's V using Bergsma's bias correction \insertCite{bergsma_bias-correction_2013}{arkhaia} by subsetting the table by pairs of columns (see \code{\link[arkhaia]{VB}}).
 }
 \examples{
 x1 <- c(2, 0, 10, 11, 5)

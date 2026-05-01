@@ -38,7 +38,7 @@ test_that("Correct candidate model selected", {
 
 test_that("trim_epoch works", {
   out <- trim_epoch(dat1, c(30,70))
-  expect_true(out[,1] > 30 & out[,1] < 70)
+  expect_false(FALSE %in% c(out[,1] > 30 & out[,1] < 70))
 })
 
 test_that("Correct validated candidate model selected", {

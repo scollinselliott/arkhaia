@@ -29,8 +29,8 @@ For a contingency table with columns representing contexts and rows representing
 }
 \examples{
 x1 <- c(2, 0, 0, 11, 5, 0, 2, 0, 4)
-x2 <- c(1, 1, 0, 23, 3, 3, 0, 0, 0)
-x3 <- c(1, 0, 0, 0, 10, 0, 4, 0, 1)
+x2 <- c(1, 1, 0, 23, 3, 3, 1, 1, 1)
+x3 <- c(1, 0, 0, 0, 10, 0, 4, 0, 0)
 
 x <- data.frame(S1 = x1, S2 = x2, S3 = x3)
 rownames(x) <- LETTERS[1:nrow(x)]

@@ -1,0 +1,82 @@
+---
+title: "Measures of Homogeneity for Use Contexts"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Measures of Homogeneity for Use Contexts}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(arkhaia)
+```
+
+In contrast with counts of finds as a depositional phenomenon (see the vignette **Measures of Homogeneity for Depositional Contexts**), it is just as much of interest to evaluate the homogeneity between contexts for an amount that was "in use." Treating counts of finds as minimum thresholds in a random right-censored model, `arkhaia` offers functionality for simulating potential distributions of use counts. For more information, see the paper, "Random Right Censoring of Archaeological Count Data" (under review).
+
+Consider counts of artifacts at two different sites, S1 and S2, and two different time periods, T1 and T2. Have the distributional patterns of artifact use according to type become more or less homogenous across sites over time? This can be difficult to assess in this example, given that types A and B are not attested in the second time period (T2):
+
+```{r}
+x1 <- c(2, 0, 10, 11, 5)
+x2 <- c(1, 1, 17, 23, 3)
+x3 <- c(2, 81, 11)
+x4 <- c(5, 0, 1)
+T1 <- matrix(c(x1, x2), ncol = 2)
+T2 <- matrix(c(x3, x4), ncol = 2)
+colnames(T1) <- c("S1T1", "S2T1")
+rownames(T1) <- LETTERS[1:5]
+
+colnames(T2) <- c("S1T2", "S2T2")
+rownames(T2) <- LETTERS[3:5]
+
+T1
+T2
+```
+
+First, for counts of artifacts in use (as opposed to those deposited) the rate of a Poisson distribution is estimated for each artifact type, treating the counts for each type as a minimum threshold (i.e., it is not simply computing counts per context). For this task, the matrix should have types along columns, not rows, using the `pois_rens()` function, either retaining or omitting zeros (the latter is recommended):
+
+```{r}
+T1 <- t(T1)
+T2 <- t(T2)
+
+pois_rcens(T1, omit_zero = TRUE) # omit_zero = TRUE is default
+pois_rcens(T1, omit_zero = FALSE)
+```
+
+To generate a sample contingency table of use counts, the function `trunc_pois()` ensures that all counts are greater than or equal to those in the contingency table of counts deposited:
+
+```{r}
+set.seed(9)
+trunc_pois(T1) # omitting zeros
+trunc_pois(T2) # omitting zeros
+```
+
+One can estimate the effect size of the table (e.g., bias-corrected Cramér's $V$) in order to assess the homogeneity of its distribution. This can be done more effectively with the function `VB_trunc_pois()`, which will generate a number of samples of $V_B$ by sampling over a specified number of iterations:
+
+```{r}
+VB_T1 <- VB_trunc_pois(T1, n_iter = 10^2)
+VB_T2 <- VB_trunc_pois(T2, n_iter = 10^2)
+```
+As the bias-corrected estimate $V_B$ will be zero-inflated, it is recommend to retain samples on the support $(0,1)$ rather than $[0,1]$:
+```{r}
+VB_T1 <- VB_T1[VB_T1 > 0]
+VB_T2 <- VB_T2[VB_T2 > 0]
+
+VB_T1 <- sample(VB_T1, 10^3, replace = TRUE)
+VB_T2 <- sample(VB_T2, 10^3, replace = TRUE)
+```
+To evaluate the change in the homogeneity of artifact distributions between the two time periods, the difference fof the distributions is evaluated, as $D = V_{B1} - V_{B2}$, such that if $D > 0$ then the second time period has a more homogeneous distribution than the first.
+
+```{r, fig.height = 4, fig.width = 5, fig.align = 'center'}
+D <- VB_T1 - VB_T2
+hist(D)
+```
+
+As the distribution of $D$ is entirely negative, it instead indicates that the first time period has a more homogeneous distribution of artifact types than the second period.
+

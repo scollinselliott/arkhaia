@@ -241,7 +241,7 @@ trim_epoch <- function(x, epoch = NULL) {
 #' @rdname trim_epoch
 #' @export
 trim_epoch.matrix <- function(x, epoch = NULL) {
-  if (!(is.numeric(epoch) & length(epoch) ==2)  ) {
+  if (!(is.numeric(epoch) & length(epoch) == 2)  ) {
     stop("Epoch must a numeric vector of length 2 indicating start and end.")
   }
   if (epoch[2] < epoch[1]) {
@@ -249,8 +249,7 @@ trim_epoch.matrix <- function(x, epoch = NULL) {
   }
 
   out <- x[x[,1] > epoch[1] & x[,1] < epoch[2]  ,]
-
-  class(out) <- "data.frame"
+  out <- as.data.frame(out)
   return(out)
 }
 
@@ -495,7 +494,7 @@ LSSA_LFI_epoch <- function(x, pair = NULL, n_iter = 1, intercept = TRUE, t_range
         out[(length(h_) - hi)+1,ti] <- LSSA_LFI_validated(tmp, pair = pair, n_iter = n_iter_, intercept = intercept)
       }
     }
-    cat("Percent complete: ", round(ti/length(t_), 2)*100, "%")
+    message("Percent complete: ", round(ti/length(t_), 2)*100, "%")
   }
 
 

@@ -1,11 +1,11 @@
 Package: arkhaia
 Title: Archaeological and Historical Analysis
-Version: 0.5
+Version: 0.5.5
 Date: 2026-04-11
 Authors@R: 
     person(c("Stephen", "A."), "Collins-Elliott", , "sce@utk.edu", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-5642-6903"))
-Description: Collection of tools for quantitative analysis related to archaeological and historical data.
+Description: Tools for quantitative analysis related to archaeological and historical problems for irreguarly-spaced time indexed observations, toward evaluating temporal patterns of changing similarity among past contexts. Data may either be occurence of event over time as a temporal point process (TPP), e.g., deposition or use event of an artifact, measurements, e.g., prices, or count data. Methods include least squares spectral analysis by lowest frequency iteration (LSSA-LFI) for model fitting, Anderson-Cramer-von Mises distance for TPP, threshold detection for TPP, bias-corrected Cramer's V for homogeneity, and simulation from a truncated Poisson distribution for random right-censoring of count data.
 License: GPL (>= 3)
 Imports: Rcpp (>= 1.1.0), Rdpack, stats
 RdMacros: Rdpack
@@ -13,5 +13,8 @@ Encoding: UTF-8
 LinkingTo: Rcpp, RcppArmadillo
 RoxygenNote: 7.3.2
 Suggests: 
+    knitr,
+    rmarkdown,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
+VignetteBuilder: knitr

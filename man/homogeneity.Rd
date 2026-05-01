@@ -20,13 +20,16 @@ homogeneity(x, related = NULL, unrelated = NULL, direction = "UW")
 }
 \value{
 A list of results:
- * \code{U} : The effect sizes between unrelated pairs of contexts.
- * \code{W} : The effect sizes between related pairs of contexts.
- * \code{Q} : The quantile indicating the proportion of related contexts more homogenous than unrelated contexts (if direction is \code{"UW"}); less homogenous if direction is set to \code{"UW"}.
- * \code{D} : The distribution of differences, \eqn{D_{ij} = U_j - W_i}, if direction is set to \code{"UW"}. The proportion of \eqn{D > 0} is equivalent to the mean of \code{Q}.
+\itemize{
+ \item \code{n} - A vector of the number of related and unrelated pairs of contexts, respectively \eqn{n_W} and \eqn{n_U}.
+ \item \code{U} - The effect sizes between unrelated pairs of contexts.
+ \item \code{W} - The effect sizes between related pairs of contexts.
+ \item \code{Q} - The quantile indicating the proportion of related contexts more homogenous than unrelated contexts (if direction is \code{"UW"}); less homogenous if direction is set to \code{"UW"}.
+ \item \code{D} - The distribution of differences, \eqn{D_{ij} = U_j - W_i}, if direction is set to \code{"UW"}. The proportion of \eqn{D > 0} is equivalent to the mean of \code{Q}.
+}
 }
 \description{
-Given a contingency table of counts, with contexts along the columns and types along rows, as well as identified pairs of contexts ass
+Given a contingency table of cross-tabulated counts, with contexts along the columns and types along rows, this function estimates the distribution of effect sizes between pairs of "related" assemblages (determined \emph{a priori}), as compared against a distribtion of "unrelated" assemblages (if not specified, are supplied as all pairs which are not included in the "related" set). Hence, the practical significance of the level of homogeneity between related deposits is evaluated against that of unrelated deposits.
 }
 \examples{
 x1 <- c(2, 0, 10, 11, 5)

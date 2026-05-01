@@ -13,3 +13,33 @@ LSSA_resid_arma <- function(dat, freq, intercept) {
     .Call('_arkhaia_LSSA_resid_arma', PACKAGE = 'arkhaia', dat, freq, intercept)
 }
 
+#' @useDynLib arkhaia
+#' @importFrom Rcpp sourceCpp
+lambda_col_arma <- function(dat, lambda_grid, omit_zero) {
+    .Call('_arkhaia_lambda_col_arma', PACKAGE = 'arkhaia', dat, lambda_grid, omit_zero)
+}
+
+#' @useDynLib arkhaia
+#' @importFrom Rcpp sourceCpp
+trunc_pois_mat_arma <- function(dat, lambda_grid, omit_zero) {
+    .Call('_arkhaia_trunc_pois_mat_arma', PACKAGE = 'arkhaia', dat, lambda_grid, omit_zero)
+}
+
+#' @useDynLib arkhaia
+#' @importFrom Rcpp sourceCpp
+CR_arma <- function(X, lambda) {
+    .Call('_arkhaia_CR_arma', PACKAGE = 'arkhaia', X, lambda)
+}
+
+#' @useDynLib arkhaia
+#' @importFrom Rcpp sourceCpp
+VB_arma <- function(X, lambda) {
+    .Call('_arkhaia_VB_arma', PACKAGE = 'arkhaia', X, lambda)
+}
+
+#' @useDynLib arkhaia
+#' @importFrom Rcpp sourceCpp
+MC_pois_arma <- function(X, lambda, lambda_grid, omit_zero, M) {
+    .Call('_arkhaia_MC_pois_arma', PACKAGE = 'arkhaia', X, lambda, lambda_grid, omit_zero, M)
+}
+

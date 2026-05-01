@@ -1,9 +1,9 @@
 #' Cressie-Read Power-Divergence Statistic
 #'
-#' For a matrix of cross-tabulated counts of observations, computes the Cressie-Read power-divergence statistic according to the selection of a parameter \eqn{\lambda} \insertCite{cressie_multinomial_1984,read_goodness--fit_1988}{arkhaia}.
+#' For a matrix of cross-tabulated counts of observations, computes the Cressie-Read power-divergence statistic according to the selection of a parameter \eqn{\lambda} \insertCite{cressie_multinomial_1984,read_goodnessfit_1988}{arkhaia}.
 #' 
 #' @param x A matrix of cross-tabulated counts.
-#' @param lambda The model parameter of the Cressie-Read power-divergence statistic. Default is the recommended value of 2/3.
+#' @param lambda The parameter of the Cressie-Read power-divergence statistic. Default is the recommended value of 2/3. To use Pearson's method, set \code{lambda = 1}.
 #' @examples 
 #' x1 <- c(2, 0, 10, 11, 5)
 #' x2 <- c(1, 1, 17, 23, 3)
@@ -28,8 +28,7 @@ CR <- function(x, lambda = 2/3) {
 #' @rdname CR
 #' @export
 CR.matrix <- function(x, lambda = 2/3) {
-  x_e <- outer(rowSums(x), colSums(x)) / sum(x)
-  out <- (2/(lambda * (lambda + 1))) * sum(x * ((x / x_e)^(lambda) - 1))
+  out <- CR_arma(x, lambda)
   return(out)
 }
 
@@ -62,12 +61,10 @@ CR.table <- function(x, lambda = 2/3) {
 
 #' Bias-Corrected Cramer's V
 #'
-#' For a matrix of cross-tabulated counts of observations, estimates Cramer's V using Bergsma's bias correction \insertCite{bergsma_bias-correction_2013}{arkhaia}.
+#' For a matrix of cross-tabulated counts of observations, estimates Cramer's V using Bergsma's bias correction \insertCite{bergsma_bias-correction_2013}{arkhaia}, using the Cressie-Read power divergence statistic (see \code{\link[arkhaia]{CR}}).
 #' 
 #' @param x A matrix or data frame of cross-tabulated counts.
-#' @param method Method for estimating chi squared. Default is \code{CR}, the Cressie-Read method (see \code{\link[arkhaia]{CR}})). Other options include \code{Pearson}, which uses R's base \code{\link[stats]{chisq.test}}) function, and \code{G}, which computes the likelihood-ratio \eqn{G} statistic, which is the case for the Cressie-Read statistic as \eqn{\lambda} approaches 0.
-#' @param lambda Only applied to the method \code{CR}. Default is the recommended value of 2/3.
-#' @param simulate Only applied ot the method \code{Pearson}.  Whether to simulate \eqn{p} values in the \code{\link[stats]{chisq.test}}) function. Default is \code{TRUE}.
+#' @param lambda Parameter of the Cressie-Read power-divergence statistic. Default is the recommended value of 2/3.
 #' @examples 
 #' x1 <- c(2, 0, 10, 11, 5)
 #' x2 <- c(1, 1, 17, 23, 3)
@@ -85,62 +82,48 @@ CR.table <- function(x, lambda = 2/3) {
 #' 
 #' @importFrom Rdpack reprompt
 #' @export
-VB <- function(x, method = "CR", lambda = 2/3, simulate = TRUE) {
+VB <- function(x, lambda = 2/3) {
     UseMethod("VB")
 }
 
 #' @rdname VB
 #' @export
-VB.matrix <- function(x, method = "CR", lambda = 2/3, simulate = TRUE) {
-  if (method == "CR") {
-    chi2 <- CR(x, lambda)
-  } else if (method == "Pearson") {
-    chi2 <- stats::chisq.test(x, simulate.p.value = simulate)$statistic
-  } else if (method == "G") {
-    x_e <- outer(rowSums(x), colSums(x)) / sum(x)
-    chi2 <- 2 * sum(x * log(x / x_e))
-  } else {
-    stop('method must be CR, Pearson, or G')
-  }
-  phi2 <- chi2 / sum(x)
-  phi2_plus <- max(c(phi2 - (nrow(x) - 1) * (ncol(x) - 1) / (sum(x) - 1), 0))
-  out <- sqrt(phi2_plus/(min(c(nrow(x), ncol(x))) - 1  )) 
+VB.matrix <- function(x, lambda = 2/3) {
+  out <- VB_arma(x, lambda)
   return(out)
 }
 
 #' @rdname VB
 #' @export
-VB.data.frame <- function(x, method = "CR", lambda = 2/3, simulate = TRUE) {
+VB.data.frame <- function(x, lambda = 2/3) {
   x <- as.matrix(x)
-  out <- VB.matrix(x, method = method, lambda = lambda, simulate = simulate)
+  out <- VB.matrix(x, lambda = lambda)
   return(out)
 }
 
 #' @rdname VB
 #' @export
-VB.xtabs <- function(x, method = "CR", lambda = 2/3, simulate = TRUE) {
+VB.xtabs <- function(x, lambda = 2/3) {
   x <- as.matrix(x)
-  out <- VB.matrix(x, method = method, lambda = lambda, simulate = simulate)
+  out <- VB.matrix(x, lambda = lambda)
   return(out)
 }
 
 #' @rdname VB
 #' @export
-VB.table <- function(x, method = "CR", lambda = 2/3, simulate = TRUE) {
+VB.table <- function(x, lambda = 2/3) {
   x <- as.matrix(x)
-  out <- VB.matrix(x, method = method, lambda = lambda, simulate = simulate)
+  out <- VB.matrix(x, lambda = lambda)
   return(out)
 }
 
 
 #' Bias-Corrected Cramer's V Pairwise between Columns
 #'
-#' For a matrix or data frame of cross-tabulated counts of observations, estimates Cramer's V using Bergsma's bias correction \insertCite{bergsma_bias-correction_2013}{arkhaia} by subsetting the table by pairs of columns. See \code{\link[arkhaia]{VB}}
+#' For a matrix or data frame of cross-tabulated counts of observations, estimates Cramer's V using Bergsma's bias correction \insertCite{bergsma_bias-correction_2013}{arkhaia} by subsetting the table by pairs of columns (see \code{\link[arkhaia]{VB}}). In subsetting, zero row/columns are automatically removed from the subset matrix.
 #' 
 #' @param x A matrix or data frame of cross-tabulated counts.
-#' @param method Method for estimating chi squared. Default is \code{CR}, the Cressie-Read method (see \code{\link[arkhaia]{CR}})). Other options include \code{Pearson}, which uses R's base \code{\link[stats]{chisq.test}}) function, and \code{G}, which computes the likelihood-ratio \eqn{G} statistic, which is the case for the Cressie-Read statistic as \eqn{\lambda} approaches 0.
-#' @param lambda Only applied to the method \code{CR}. Default is the recommended value of 2/3.
-#' @param simulate Only applied ot the method \code{Pearson}.  Whether to simulate \eqn{p} values in the \code{\link[stats]{chisq.test}}) function. Default is \code{TRUE}.
+#' @param lambda Parameter of the Cressie-Read power-divergence statistic. Default is the recommended value of 2/3.
 #' @examples 
 #' x1 <- c(2, 0, 10, 11, 5)
 #' x2 <- c(1, 1, 17, 23, 3)
@@ -158,13 +141,13 @@ VB.table <- function(x, method = "CR", lambda = 2/3, simulate = TRUE) {
 #' 
 #' @importFrom Rdpack reprompt
 #' @export
-VB_pair <- function(x, method = "CR", lambda = 2/3, simulate = TRUE) {
+VB_pair <- function(x, lambda = 2/3) {
     UseMethod("VB_pair")
 }
 
 #' @rdname VB_pair
 #' @export
-VB_pair.matrix <- function(x, method = "CR", lambda = 2/3, simulate = TRUE) {
+VB_pair.matrix <- function(x, lambda = 2/3) {
 
   M_V <- matrix(NA, ncol(x), ncol(x))
 
@@ -174,7 +157,7 @@ VB_pair.matrix <- function(x, method = "CR", lambda = 2/3, simulate = TRUE) {
       Y <- x[,c(i,j)]
       Y <- t(Y[rowSums(Y) > 0  ,  ])
 
-      V <- VB(Y, method = method, lambda = lambda, simulate = simulate)
+      V <- VB(Y, lambda = lambda)
       M_V[i,j] <- V
     }
   }
@@ -190,25 +173,25 @@ VB_pair.matrix <- function(x, method = "CR", lambda = 2/3, simulate = TRUE) {
 
 #' @rdname VB_pair
 #' @export
-VB_pair.data.frame <- function(x, method = "CR", lambda = 2/3, simulate = TRUE) {
+VB_pair.data.frame <- function(x, lambda = 2/3) {
   x <- as.matrix(x)
-  out <- VB_pair(x, method = method, lambda = lambda, simulate = simulate)
+  out <- VB_pair(x, lambda = lambda)
   return(out)
 }
 
 #' @rdname VB_pair
 #' @export
-VB_pair.xtabs <- function(x, method = "CR", lambda = 2/3, simulate = TRUE) {
+VB_pair.xtabs <- function(x, lambda = 2/3) {
   x <- as.matrix(x)
-  out <- VB_pair.matrix(x, method = method, lambda = lambda, simulate = simulate)
+  out <- VB_pair(x, lambda = lambda)
   return(out)
 }
 
 #' @rdname VB_pair
 #' @export
-VB_pair.table <- function(x, method = "CR", lambda = 2/3, simulate = TRUE) {
+VB_pair.table <- function(x, lambda = 2/3) {
   x <- as.matrix(x)
-  out <- VB_pair.matrix(x, method = method, lambda = lambda, simulate = simulate)
+  out <- VB_pair(x, lambda = lambda)
   return(out)
 }
 
@@ -220,9 +203,7 @@ VB_pair.table <- function(x, method = "CR", lambda = 2/3, simulate = TRUE) {
 #' To evaluate the stability of estimates of effect sizes between archaeological contexts in light of the inclusion or exclusion of a given type, this routine computes bias-corrected Cramer's V \code{\link[arkhaia]{VB}}) omitting a type on each iteration.
 #' 
 #' @param x A contingency table as a matrix or data frame expressing counts, with contexts along columns and types along rows.
-#' @param method Method for estimating chi squared. Default is \code{CR}, the Cressie-Read method (see \code{\link[arkhaia]{CR}})). Other options include \code{Pearson}, which uses R's base \code{\link[stats]{chisq.test}}) function, and \code{G}, which computes the likelihood-ratio \eqn{G} statistic, which is the case for the Cressie-Read statistic as \eqn{\lambda} approaches 0.
-#' @param lambda Only applied to the method \code{CR}. Default is the recommended value of 2/3.
-#' @param simulate Only applied ot the method \code{Pearson}.  Whether to simulate \eqn{p} values in the \code{\link[stats]{chisq.test}}) function. Default is \code{TRUE}.
+#' @param lambda Parameter of the Cressie-Read power-divergence statistic. Default is the recommended value of 2/3.
 #' @examples 
 #' x1 <- c(2, 0, 10, 11, 5)
 #' x2 <- c(1, 1, 17, 23, 3)
@@ -238,13 +219,13 @@ VB_pair.table <- function(x, method = "CR", lambda = 2/3, simulate = TRUE) {
 #' @returns A three-dimensional array of the pairwise context-by-context effect sizes given the ommission of a type, for all types given in the input data frame.
 #' 
 #' @export
-VB_LOO_type <- function(x, method = "CR", lambda = 2/3, simulate = TRUE) {
+VB_LOO_type <- function(x, lambda = 2/3) {
     UseMethod("VB_LOO_type")
 }
 
 #' @rdname VB_LOO_type
 #' @export
-VB_LOO_type.matrix <- function(x, method = "CR", lambda = 2/3, simulate = TRUE) {
+VB_LOO_type.matrix <- function(x, lambda = 2/3) {
   if (is.null(colnames(x)) | is.null(rownames(x))) {
     stop("Rows and and columns must be named.")
   }
@@ -285,25 +266,25 @@ VB_LOO_type.matrix <- function(x, method = "CR", lambda = 2/3, simulate = TRUE) 
 
 #' @rdname VB_LOO_type
 #' @export
-VB_LOO_type.data.frame <- function(x, method = "CR", lambda = 2/3, simulate = TRUE) {
+VB_LOO_type.data.frame <- function(x, lambda = 2/3) {
   x <- as.matrix(x)
-  out <- VB_LOO_type.matrix(x, method = method, lambda = lambda, simulate = simulate)
+  out <- VB_LOO_type.matrix(x, lambda = lambda)
   return(out)
 }
 
 #' @rdname VB_LOO_type
 #' @export
-VB_LOO_type.xtabs <- function(x, method = "CR", lambda = 2/3, simulate = TRUE) {
+VB_LOO_type.xtabs <- function(x, lambda = 2/3) {
   x <- as.matrix(x)
-  out <- VB_LOO_type.matrix(x, method = method, lambda = lambda, simulate = simulate)
+  out <- VB_LOO_type.matrix(x, lambda = lambda)
   return(out)
 }
 
 #' @rdname VB_LOO_type
 #' @export
-VB_LOO_type.table <- function(x, method = "CR", lambda = 2/3, simulate = TRUE) {
+VB_LOO_type.table <- function(x, lambda = 2/3) {
   x <- as.matrix(x)
-  out <- VB_LOO_type.matrix(x, method = method, lambda = lambda, simulate = simulate)
+  out <- VB_LOO_type.matrix(x, lambda = lambda)
   return(out)
 }
 
@@ -388,8 +369,8 @@ log_OR_pair.table <- function(x) {
 #' @param x A matrix or data frame with contexts along columns and types along rows.
 #' @examples 
 #' x1 <- c(2, 0, 0, 11, 5, 0, 2, 0, 4)
-#' x2 <- c(1, 1, 0, 23, 3, 3, 0, 0, 0)
-#' x3 <- c(1, 0, 0, 0, 10, 0, 4, 0, 1)
+#' x2 <- c(1, 1, 0, 23, 3, 3, 1, 1, 1)
+#' x3 <- c(1, 0, 0, 0, 10, 0, 4, 0, 0)
 #' 
 #' x <- data.frame(S1 = x1, S2 = x2, S3 = x3)
 #' rownames(x) <- LETTERS[1:nrow(x)]
@@ -515,7 +496,7 @@ pa_matrix.xtabs <- function(x) {
 
 #' Homogeneity of Related Assemblages via Effect Size
 #'
-#' Given a contingency table of counts, with contexts along the columns and types along rows, as well as identified pairs of contexts ass 
+#' Given a contingency table of cross-tabulated counts, with contexts along the columns and types along rows, this function estimates the distribution of effect sizes between pairs of "related" assemblages (determined \emph{a priori}), as compared against a distribtion of "unrelated" assemblages (if not specified, are supplied as all pairs which are not included in the "related" set). Hence, the practical significance of the level of homogeneity between related deposits is evaluated against that of unrelated deposits.
 #' 
 #' @param x An effect_sizes object as returned by \code{\link[arkhaia]{VB_pair}}.
 #' @param related The related pairs of contexts as a two-column matrix or data frame (contexts between which one anticipates a meaningful relationship). Names must match \code{colnames(x)}.
@@ -544,10 +525,13 @@ pa_matrix.xtabs <- function(x) {
 #' 
 #' 
 #' @returns A list of results:
-#'  * \code{U} : The effect sizes between unrelated pairs of contexts.
-#'  * \code{W} : The effect sizes between related pairs of contexts.
-#'  * \code{Q} : The quantile indicating the proportion of related contexts more homogenous than unrelated contexts (if direction is \code{"UW"}); less homogenous if direction is set to \code{"UW"}.
-#'  * \code{D} : The distribution of differences, \eqn{D_{ij} = U_j - W_i}, if direction is set to \code{"UW"}. The proportion of \eqn{D > 0} is equivalent to the mean of \code{Q}.
+#' \itemize{
+#'  \item \code{n} - A vector of the number of related and unrelated pairs of contexts, respectively \eqn{n_W} and \eqn{n_U}.
+#'  \item \code{U} - The effect sizes between unrelated pairs of contexts.
+#'  \item \code{W} - The effect sizes between related pairs of contexts.
+#'  \item \code{Q} - The quantile indicating the proportion of related contexts more homogenous than unrelated contexts (if direction is \code{"UW"}); less homogenous if direction is set to \code{"UW"}.
+#'  \item \code{D} - The distribution of differences, \eqn{D_{ij} = U_j - W_i}, if direction is set to \code{"UW"}. The proportion of \eqn{D > 0} is equivalent to the mean of \code{Q}.
+#' }
 #' 
 #' @export
 homogeneity <- function(x, related = NULL, unrelated = NULL, direction = "UW") {
@@ -641,7 +625,10 @@ homogeneity.effect_sizes <- function(x, related = NULL, unrelated = NULL, direct
 
   }
 
-  res <- list(U = U, W = W, Q = Q, D = delta)
+  n <- c(length(related), length(unrelated))
+  names(n) <- c("n_W", "n_U")
+
+  res <- list(n = n, U = U, W = W, Q = Q, D = delta)
   class(res) <- c("homogeneity", "list")
   return(res)
 }
@@ -651,15 +638,13 @@ homogeneity.effect_sizes <- function(x, related = NULL, unrelated = NULL, direct
 
 #' Leave-One-Out Routine for Homogeneity of Related Assemblages
 #'
-#' To evaluate the stability of estimates of effect sizes between archaeological contexts in light of the inclusion or exclusion of types and contexts, this routine computes the homogeneity of related assemblages iteratively in two ways, first by leaving out a type on each iteration and second by leaving out a context on each iteration (see \code{\link[arkhaia]{homogeneity}} and \code{\link[arkhaia]{VB}}). 
+#' To evaluate the stability of estimates of effect sizes between archaeological contexts in light of the inclusion or exclusion of types and contexts, this routine computes the homogeneity of related assemblages iteratively in two ways, first by leaving out a type on each iteration and second by leaving out a context on each iteration. For details on the arguments, see also \code{\link[arkhaia]{homogeneity}} and \code{\link[arkhaia]{VB}}). 
 #' 
 #' @param x A data frame or matrix representing a contingency table of counts, with contexts along the columns and types along rows.
 #' @param related The related pairs of contexts as a two-column matrix or data frame (contexts between which one anticipates a meaningful relationship). Names must match \code{colnames(x)}.
 #' @param unrelated The unrelated pairs of contexts as a two-column matrix or data frame (contexts between which one does not anticipate a meaningful relationship). Names must match \code{colnames(x)}.
 #' @param direction Whether the related or unrelated effect size should come first. Default is \code{"UW"}; alternative is \code{"WU"}.
-#' @param method Method for estimating chi squared. Default is \code{CR}, the Cressie-Read method (see \code{\link[arkhaia]{CR}})). Other options include \code{Pearson}, which uses R's base \code{\link[stats]{chisq.test}}) function, and \code{G}, which computes the likelihood-ratio \eqn{G} statistic, which is the case for the Cressie-Read statistic as \eqn{\lambda} approaches 0.
-#' @param lambda Only applied to the method \code{CR}. Default is the recommended value of 2/3.
-#' @param simulate Only applied ot the method \code{Pearson}.  Whether to simulate \eqn{p} values in the \code{\link[stats]{chisq.test}}) function. Default is \code{TRUE}.
+#' @param lambda Parameter of the Cressie-Read power-divergence statistic. Default is the recommended value of 2/3.
 #' 
 #' @examples 
 #' x1 <- c(2, 0, 10, 11, 5)
@@ -680,20 +665,22 @@ homogeneity.effect_sizes <- function(x, related = NULL, unrelated = NULL, direct
 #' homogeneity_LOO(x, related = W_contexts, unrelated = U_contexts) 
 #' 
 #' @returns A list containing:
-#'   * \code{EQ} : The mean quantile expressing the degree of homogeneity among related contexts as computed by the \code{\link[arkhaia]{homogeneity}} function.
-#'   * \code{EQ_T_mean} : The mean quantile upon iterating over the omission of each type (of the LOO samples). 
-#'   * \code{EQ_T_var} : The variance of the LOO type samples.
-#'   * \code{EQ_C_mean} : The mean quantile upon iterating over the omission of each context.
-#'   * \code{EQ_C_var} : The variance of the LOO context samples.
+#' \itemize{
+#'  \item EQ - The mean quantile expressing the degree of homogeneity among related contexts.
+#'  \item EQ_T_mean - The mean quantile upon iterating over the omission of each type (of the LOO samples).
+#'  \item EQ_T_var - The variance of the LOO type samples.
+#'  \item EQ_C_mean - The mean quantile upon iterating over the omission of each context.
+#'  \item EQ_C_var - The variance of the LOO context samples.
+#' }
 #' 
 #' @export
-homogeneity_LOO <- function(x, related = NULL, unrelated = NULL, direction = "UW", method = "CR", lambda = 2/3, simulate = TRUE) {
+homogeneity_LOO <- function(x, related = NULL, unrelated = NULL, direction = "UW", lambda = 2/3) {
     UseMethod("homogeneity_LOO")
 }
 
 #' @rdname homogeneity_LOO
 #' @export
-homogeneity_LOO.matrix <- function(x, related = NULL, unrelated = NULL, direction = "UW", method = "CR", lambda = 2/3, simulate = TRUE) {
+homogeneity_LOO.matrix <- function(x, related = NULL, unrelated = NULL, direction = "UW", lambda = 2/3) {
   # if (!("Count" %in% colnames(x) & ("Context" %in% colnames(x) & "Type" %in% colnames(x))) ) {
   #   x <- data.frame(Context = x[,1],  Type = x[,2], Count = x[,3])
   #   message("Context identified as column 1, Type as column 2, and Count as column 3.")
@@ -704,21 +691,34 @@ homogeneity_LOO.matrix <- function(x, related = NULL, unrelated = NULL, directio
     stop("Rows and and columns must be named.")
   }
 
+  if (is.null(unrelated)) {
+    relpairs <- paste0(related[,1], related[,2])
+    unrelated <- matrix(NA, nrow = 0, ncol = 2)
+    all <- unique(c(related[,1], related[,2]))
+    for (i in 1:(length(all)-1)) {
+      for (j in (i+1):length(all)) {
+        if (!(paste0(all[i],all[j]) %in% relpairs)) {
+          unrelated <- rbind(unrelated, c(all[i], all[j]))
+        }
+      }
+    }
+  }
+
   context_names <- colnames(x)
   type_names <- rownames(x)
 
-  V_B <- VB_pair(x, method = method, lambda = lambda, simulate = simulate)
+  V_B <- VB_pair(x, lambda = lambda)
   eff <- homogeneity(V_B, related = related, unrelated = unrelated, direction = direction)
   EQ <- mean(eff$D > 0)
 
   # LOO - type
-  V_B_jt_3d <- VB_LOO_type(x, method = method, lambda = lambda, simulate = simulate)
+  V_B_jt_3d <- VB_LOO_type(x, lambda = lambda)
   EQ_jt0 <- numeric(length(type_names))
   EQ_jt0[] <- NA
   for (k in 1:(dim(V_B_jt_3d)[3])) {
     Z <- V_B_jt_3d[,,k]
     class(Z) <- "effect_sizes"
-    eff_jt00 <- homogeneity(Z, related, unrelated)
+    eff_jt00 <- homogeneity(Z, related = related, unrelated = unrelated)
     EQ_jt0[k] <- mean(eff_jt00$D > 0)
   }
 
@@ -748,25 +748,37 @@ homogeneity_LOO.matrix <- function(x, related = NULL, unrelated = NULL, directio
 
 #' @rdname homogeneity_LOO
 #' @export
-homogeneity_LOO.data.frame <- function(x, related = NULL, unrelated = NULL, direction = "UW", method = "CR", lambda = 2/3, simulate = TRUE) {
+homogeneity_LOO.data.frame <- function(x, related = NULL, unrelated = NULL, direction = "UW", lambda = 2/3) {
   x <- as.matrix(x)
-  out <- homogeneity_LOO.matrix(x, related = related, unrelated = unrelated, direction = direction, method = method, lambda = lambda, simulate = TRUE)
+  out <- homogeneity_LOO.matrix(x, related = related, unrelated = unrelated, direction = direction, lambda = lambda)
   return(out)
 }
 
 #' @rdname homogeneity_LOO
 #' @export
-homogeneity_LOO.table <- function(x, related = NULL, unrelated = NULL, direction = "UW", method = "CR", lambda = 2/3, simulate = TRUE) {
+homogeneity_LOO.table <- function(x, related = NULL, unrelated = NULL, direction = "UW", lambda = 2/3) {
   x <- as.matrix(x)
-  out <- homogeneity_LOO.matrix(x, related = related, unrelated = unrelated, direction = direction, method = method, lambda = lambda, simulate = TRUE)
+  out <- homogeneity_LOO.matrix(x, related = related, unrelated = unrelated, direction = direction, lambda = lambda)
   return(out)
 }
 
 #' @rdname homogeneity_LOO
 #' @export
-homogeneity_LOO.xtabs <- function(x, related = NULL, unrelated = NULL, direction = "UW", method = "CR", lambda = 2/3, simulate = TRUE) {
+homogeneity_LOO.xtabs <- function(x, related = NULL, unrelated = NULL, direction = "UW", lambda = 2/3) {
   x <- as.matrix(x)
-  out <- homogeneity_LOO.matrix(x, related = related, unrelated = unrelated, direction = direction, method = method, lambda = lambda, simulate = TRUE)
+  out <- homogeneity_LOO.matrix(x, related = related, unrelated = unrelated, direction = direction, lambda = lambda)
   return(out)
 }
+
+
+
+
+#' @export 
+print.homogeneity <- function(x, ...) {
+    cat("\n Homogeneity between Related Contexts:\n",
+    "    Number of related pairs:", x$n[1], "\n", 
+    "    Number of unrelated pairs:", x$n[2], "\n", 
+    "    Mean quantile:", round(mean(x$Q),2), "\n\n")
+}
+
 

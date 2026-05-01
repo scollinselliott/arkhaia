@@ -8,24 +8,20 @@
 \alias{VB_LOO_type.table}
 \title{Leave-One-Out Type Routine for Pairwise Effect Sizes of Archaeological Contexts}
 \usage{
-VB_LOO_type(x, method = "CR", lambda = 2/3, simulate = TRUE)
+VB_LOO_type(x, lambda = 2/3)
 
-\method{VB_LOO_type}{matrix}(x, method = "CR", lambda = 2/3, simulate = TRUE)
+\method{VB_LOO_type}{matrix}(x, lambda = 2/3)
 
-\method{VB_LOO_type}{data.frame}(x, method = "CR", lambda = 2/3, simulate = TRUE)
+\method{VB_LOO_type}{data.frame}(x, lambda = 2/3)
 
-\method{VB_LOO_type}{xtabs}(x, method = "CR", lambda = 2/3, simulate = TRUE)
+\method{VB_LOO_type}{xtabs}(x, lambda = 2/3)
 
-\method{VB_LOO_type}{table}(x, method = "CR", lambda = 2/3, simulate = TRUE)
+\method{VB_LOO_type}{table}(x, lambda = 2/3)
 }
 \arguments{
 \item{x}{A contingency table as a matrix or data frame expressing counts, with contexts along columns and types along rows.}
 
-\item{method}{Method for estimating chi squared. Default is \code{CR}, the Cressie-Read method (see \code{\link[arkhaia]{CR}})). Other options include \code{Pearson}, which uses R's base \code{\link[stats]{chisq.test}}) function, and \code{G}, which computes the likelihood-ratio \eqn{G} statistic, which is the case for the Cressie-Read statistic as \eqn{\lambda} approaches 0.}
-
-\item{lambda}{Only applied to the method \code{CR}. Default is the recommended value of 2/3.}
-
-\item{simulate}{Only applied ot the method \code{Pearson}.  Whether to simulate \eqn{p} values in the \code{\link[stats]{chisq.test}}) function. Default is \code{TRUE}.}
+\item{lambda}{Parameter of the Cressie-Read power-divergence statistic. Default is the recommended value of 2/3.}
 }
 \value{
 A three-dimensional array of the pairwise context-by-context effect sizes given the ommission of a type, for all types given in the input data frame.

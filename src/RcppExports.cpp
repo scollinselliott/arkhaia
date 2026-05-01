@@ -37,10 +37,80 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// lambda_col_arma
+arma::vec lambda_col_arma(const arma::mat& dat, arma::vec& lambda_grid, int omit_zero);
+RcppExport SEXP _arkhaia_lambda_col_arma(SEXP datSEXP, SEXP lambda_gridSEXP, SEXP omit_zeroSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type dat(datSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type lambda_grid(lambda_gridSEXP);
+    Rcpp::traits::input_parameter< int >::type omit_zero(omit_zeroSEXP);
+    rcpp_result_gen = Rcpp::wrap(lambda_col_arma(dat, lambda_grid, omit_zero));
+    return rcpp_result_gen;
+END_RCPP
+}
+// trunc_pois_mat_arma
+arma::mat trunc_pois_mat_arma(const arma::mat& dat, arma::vec& lambda_grid, int omit_zero);
+RcppExport SEXP _arkhaia_trunc_pois_mat_arma(SEXP datSEXP, SEXP lambda_gridSEXP, SEXP omit_zeroSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type dat(datSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type lambda_grid(lambda_gridSEXP);
+    Rcpp::traits::input_parameter< int >::type omit_zero(omit_zeroSEXP);
+    rcpp_result_gen = Rcpp::wrap(trunc_pois_mat_arma(dat, lambda_grid, omit_zero));
+    return rcpp_result_gen;
+END_RCPP
+}
+// CR_arma
+double CR_arma(const arma::mat& X, double lambda);
+RcppExport SEXP _arkhaia_CR_arma(SEXP XSEXP, SEXP lambdaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    rcpp_result_gen = Rcpp::wrap(CR_arma(X, lambda));
+    return rcpp_result_gen;
+END_RCPP
+}
+// VB_arma
+double VB_arma(const arma::mat& X, double lambda);
+RcppExport SEXP _arkhaia_VB_arma(SEXP XSEXP, SEXP lambdaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    rcpp_result_gen = Rcpp::wrap(VB_arma(X, lambda));
+    return rcpp_result_gen;
+END_RCPP
+}
+// MC_pois_arma
+Rcpp::NumericVector MC_pois_arma(const arma::mat& X, double lambda, arma::vec& lambda_grid, int omit_zero, int M);
+RcppExport SEXP _arkhaia_MC_pois_arma(SEXP XSEXP, SEXP lambdaSEXP, SEXP lambda_gridSEXP, SEXP omit_zeroSEXP, SEXP MSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type lambda_grid(lambda_gridSEXP);
+    Rcpp::traits::input_parameter< int >::type omit_zero(omit_zeroSEXP);
+    Rcpp::traits::input_parameter< int >::type M(MSEXP);
+    rcpp_result_gen = Rcpp::wrap(MC_pois_arma(X, lambda, lambda_grid, omit_zero, M));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_arkhaia_LSSA_arma", (DL_FUNC) &_arkhaia_LSSA_arma, 3},
     {"_arkhaia_LSSA_resid_arma", (DL_FUNC) &_arkhaia_LSSA_resid_arma, 3},
+    {"_arkhaia_lambda_col_arma", (DL_FUNC) &_arkhaia_lambda_col_arma, 3},
+    {"_arkhaia_trunc_pois_mat_arma", (DL_FUNC) &_arkhaia_trunc_pois_mat_arma, 3},
+    {"_arkhaia_CR_arma", (DL_FUNC) &_arkhaia_CR_arma, 2},
+    {"_arkhaia_VB_arma", (DL_FUNC) &_arkhaia_VB_arma, 2},
+    {"_arkhaia_MC_pois_arma", (DL_FUNC) &_arkhaia_MC_pois_arma, 5},
     {NULL, NULL, 0}
 };
 

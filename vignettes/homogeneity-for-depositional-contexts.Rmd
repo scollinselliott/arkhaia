@@ -1,0 +1,119 @@
+---
+title: "Measures of Homogeneity for Depositional Contexts"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Measures of Homogeneity for Depositional Contexts}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(arkhaia)
+```
+
+# Introduction
+
+This vignette illustrates functionality for measuring homogeneity between depositional contexts on the basis of artifact assemblages, either as counts of types or the presence absence of types. For more details, see the paper "Evaluating the Relationship between Surface, Subsurface, and Stratigraphic Assemblages" (under review).
+
+Say one has two pairs of assemblages, each comprising a surface and subsurface context, of counts of artifacts of type A, B, C, D, and E:
+
+```{r}
+x1 <- c(2, 0, 10, 11, 5)
+x2 <- c(1, 1, 17, 23, 3)
+x3 <- c(0, 0, 2, 81, 11)
+x4 <- c(3, 18, 9, 0, 23)
+x <- matrix(c(x1, x2, x3, x4), ncol = 4)
+colnames(x) <- c("surface1", "subsurface1", "surface2", "subsurface2")
+rownames(x) <- LETTERS[1:5]
+
+x
+```
+
+One would like to know if the surface assemblages reflect their respective subsurface assemblages. This problem can be approached by asking if the pairs of assemblages have a homogenous distribution, which is typically approaches using chi-squared testing. `arkaia` goes beyond null-hypothesis statistical test by grounding inference in practical, archaeological terms, to assess whether such homogeneity is greater for the pairs of related contexts (the surface-subsurface pair) than any unrelated pair. Such determination can be made using either counts of types or the presence/absence of types (as count data may not be available).
+
+For this example, it is already apparent that the distribution of counts for surface1/subsurface1 are a lot more similar than surface2/subsurface2; this will be reflected in their measures of homogeneity.
+
+# Measures of Homogeneity
+
+## Count Data
+
+For count data, $\chi^2$ can be estimated using the Cressie-Read power-divergence statistic for each surface-subsurface pair:
+```{r}
+CR(x[,1:2])
+CR(x[,3:4])
+```
+Then, to obtain a measure of effect size, the bias-corrected estimation of Cramér's $V$, denoted $V_B$, allows for cross-comparability of the degree of homogeneity:
+```{r}
+VB(x[,1:2])
+VB(x[,3:4])
+```
+The `VB()` function by default uses `CR()` with a parameter of `lambda = 2/3` to estimate $\chi^2$; if one wants to use Pearson's method, one sets `lambda = 1` in the input:
+```{r}
+# Pearson's chi-squared
+VB(x[,1:2], lambda = 1)
+VB(x[,3:4], lambda = 1)
+```
+It is tedious to re-run effect sizes between selected columns, and so the `VB_pair()` function returns estimates of $V_B$ pairwise between all columns:
+```{r}
+x_effect_sizes <- VB_pair(x)
+x_effect_sizes
+```
+To assess whether the effect sizes between pairs of related contexts are lower (i.e., more homogenous) than those between pairs of unrelated contexts (e.g, between surface1 and surface2, or subsurface1 and surface2), the function `homogeneity()` is used. The `related` pairs must be specified, in either a matrix or data frame. The `unrelated` pairs may be similarly specified, or, not entered into the function, are automatically determined as all pairs which are _not_ contained in the `related` dataset.
+
+Note that the `homogeneity()` function takes the results of the pairwise function `VB_pair()`, not the original matrix `x` (effect sizes can be estimated via other means, as will be shown below for presence/absence data):
+```{r}
+# related pairs
+W_contexts <- matrix(c("surface1", "surface2", "subsurface1", "subsurface2"), ncol = 2)
+W_contexts
+
+# homogeneity
+x_homogeneity <- homogeneity(x_effect_sizes, related = W_contexts)
+
+x_homogeneity
+```
+The results of `homogeneity()` comprise a `list` object containing:
+
+* `n`: a vector containing the number of related and unrelated pairs of contexts
+* `U`: the effect sizes between unrelated pairs of contexts
+* `W`: the effect sizes between related pairs of contexts
+* `Q`: for each related pair, the quantile indicating the proportion of unrelated pairs which are less homogenous. Higher values of `Q` indicate that the pair is more homogenous in comparison.
+* `D`: the distribution of differences among all `U` and `W`. The proportion of `D` greater than zero is equivalent to the mean of all quantile estimates `Q`.
+
+The results of this example show that the surface1/subsurface1 pairing has the most homogeneous distribution compared to unrelated pairs, whereas the surface2/subsurface2 pairing is less homogeneous than even unrelated pairs of contexts. By taking the mean quantile (or proportion of differences $D$ greater than zero), one can see that the matter of representativeness of surface/subsurface pairings is evenly split, with the related surface/subsurface pairs in their totality being no more or less homogenous than those of unrelated pairs of contexts.
+
+## Presence/Absence Data
+
+In many situations one may not have counts, but only information on the presence/absence of an artifact type. In such a case, one can draft a $2 \times 2$ contingency table for two contexts, giving the count of how many types are present in both, missing in one or the other, or missing in both:
+
+|    | Present | Absent |
+|:--:|:--:|:--:|
+| Present | (present in both) | (present in 1 but not 2) |
+| Absent | (present in 2 but not 1) | (absent from both) |
+
+Homogeneity in such a situation can be evaluated using the conventional log odds ratio, or also by giving the trace of the $2 \times 2$ presence/absence contingency table. The log odds ratio will be affected by the degree to which types are both present or both absent (i.e., comparing contexts with themselves will yield different log odds ratios, if they happen to be missing more or less types -- see the diagonal of the pairwise log odds ratio matrix below). The trace coefficient will not abe affected by this tendency. `arkhaia` has functionality for evaluating both log odds ratios and the trace, pairwise, for a contingency table:
+```{r}
+x_logOR <- log_OR_pair(x)
+x_logOR
+
+x_trace <- trace_pair(x)
+x_trace
+```
+The `log_OR_pair()` function adds 0.5 to all cells to avoid zero entries (see documentation). 
+
+For presence/absence data, it can be emphasized that a higher effect size indicates greater homogeneity (the opposite of Cramér's $V$ for count data). Hence, the `homogeneity()` has a `direction` argument, such that the quantiles and differences are reversed:
+```{r}
+# homogeneity
+x_homogeneity_logOR <- homogeneity(x_logOR, related = W_contexts, direction = "WU")
+x_homogeneity_logOR
+
+x_homogeneity_trace <- homogeneity(x_trace, related = W_contexts, direction = "WU")
+x_homogeneity_trace
+```
+The results of measuring homogeneity on the basis of presence/absence data can be at odds with those based in count data: consider deposits which may have greater diversity of types and more sporadic finds, but in exceedingly low counts, such as with residual material; by treating the presence of a type as a binary variate, there is no room for quantifying the magnitude of the presence of that type. Evaluating both count and presence/absence statistics will bear out such a distinction, which may not be immediately clear in the case of larger datasets.
