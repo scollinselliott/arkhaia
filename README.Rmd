@@ -56,4 +56,4 @@ Random right-censoring of archaeological count data. Assemblages of artifacts th
 
 Least squares spectral analysis (LSSA), with an implementation of fitting by lowest frequency iteratively (LSSA-LFI), to fit sparse time-indexed observations and then evaluate whether there exists linear dependence in their data-generating process via model comparison. The paper applying this method to Babylonian price data is under review: @collins-elliott_revisiting_nodate, "Revisiting"
 
-# References
+## References

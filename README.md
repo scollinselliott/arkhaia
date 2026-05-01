@@ -75,7 +75,7 @@ dependence in their data-generating process via model comparison. The
 paper applying this method to Babylonian price data is under review:
 Collins-Elliott (Under Review), “Revisiting”
 
-# References
+## References
 
 <div id="refs" class="references csl-bib-body hanging-indent"
 entry-spacing="0">
