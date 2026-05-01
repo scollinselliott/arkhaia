@@ -91,9 +91,9 @@ LSSA_LFI.matrix <- function(x, n_iter = 1, intercept = TRUE, AIC = FALSE) {
   dat0 <- as.matrix(dat0)
 
   if (intercept == TRUE) {
-    aic[1] <- 2 * (3 + 1) + log(epsilon2/nrow(x)) * nrow(x)
+    aic[1] <- 2 * (3 + 2) + log(epsilon2/nrow(x)) * nrow(x)
   } else {
-    aic[1] <- 2 * (2 + 1) + log(epsilon2/nrow(x)) * nrow(x)
+    aic[1] <- 2 * (2 + 2) + log(epsilon2/nrow(x)) * nrow(x)
   }
 
   if (n_iter > 1) {
@@ -115,9 +115,9 @@ LSSA_LFI.matrix <- function(x, n_iter = 1, intercept = TRUE, AIC = FALSE) {
       prev_freq <- freq_
 
       if (intercept == TRUE) {
-          aic[j] <- 2 * (3 * j + 1) + log(epsilon2/nrow(x)) * nrow(x)
+          aic[j] <- 2 * (3 * j + 2) + log(epsilon2/nrow(x)) * nrow(x)
       } else {
-          aic[j] <- 2 * (3 * j) + log(epsilon2/nrow(x)) * nrow(x)
+          aic[j] <- 2 * (3 * j + 1) + log(epsilon2/nrow(x)) * nrow(x)
       }
       
     }
