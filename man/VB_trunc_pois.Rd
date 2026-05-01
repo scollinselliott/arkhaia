@@ -70,7 +70,7 @@ x1 <- c(1,2,2,5,7,0,0)
 x2 <- c(9,2,5,15,7,90,0)
 x <- matrix(c(x1,x2), ncol = 2)
 
-VB_trunc_pois(x, n_iter = 10^3)
-VB_trunc_pois(x, omit_zero = FALSE, n_iter = 10^3)
+VB_trunc_pois(x, n_iter = 10^2)
+VB_trunc_pois(x, omit_zero = FALSE, n_iter = 10^2)
 
 }

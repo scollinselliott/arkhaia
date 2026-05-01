@@ -49,7 +49,7 @@ LSSA.data.frame <- function(x, freqs = seq(0.001, 0.5, by = 0.0005), intercept =
 
 #' Least Squares Spectral Analysis via Lowest Frequency Iteration (LSSA-LFI)
 #'
-#' Peforms a simple least squares fitting to time indexed data of the form y = SIGMA B cos(2 pi f t) + C sin(2 pi f t) + D, using an input of frequencies; the lowest frequency peak (not the highest power frequency) is chosen for regression, up to a chosen number of iterations. Intercept may be ommitted. The lowest frequency is equivalent to the longest period.
+#' Peforms a simple least squares fitting to time indexed data of the form  \eqn{x(t) = \beta_{0} + \sum_{i =1}^n \beta_{1i} \cos (2 \pi f t) + \beta_{2i} \sin(2 \pi f t)}, using an input of frequencies; the lowest frequency peak (not the highest power frequency) is chosen for regression, up to a chosen number of iterations. Intercept may be ommitted. The lowest frequency is equivalent to the longest period.
 #' 
 #' @param x A data frame of two columns, with the first column containing time indices and the second containing values.
 #' @param n_iter The number of iterations to run. Default is 1.

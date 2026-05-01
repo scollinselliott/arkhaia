@@ -52,7 +52,7 @@ Random right-censoring of archaeological count data. Assemblages of artifacts th
 * Estimating the rate of a Poisson distribution based on a contingency table of minimum counts.
 * Resampling routines to generate contingency tables accoriding to a truncated Poisson distribution, representing counts "in use" as opposed to those deposied.
 
-### Least Squares Sepctral Analysis 
+### Least Squares Spectral Analysis 
 
 Least squares spectral analysis (LSSA), with an implementation of fitting by lowest frequency iteratively (LSSA-LFI), to fit sparse time-indexed observations and then evaluate whether there exists linear dependence in their data-generating process via model comparison. The paper applying this method to Babylonian price data is under review: @collins-elliott_revisiting_nodate, "Revisiting..."
 
