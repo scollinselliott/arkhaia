@@ -1,6 +1,6 @@
 Package: arkhaia
 Title: Archaeological and Historical Analysis
-Version: 0.5.5
+Version: 0.5.7
 Date: 2026-04-11
 Authors@R: 
     person(c("Stephen", "A."), "Collins-Elliott", , "sce@utk.edu", role = c("aut", "cre"),
