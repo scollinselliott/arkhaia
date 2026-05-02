@@ -106,7 +106,8 @@ Data,” Under Review.
 <div id="ref-collins-elliott_revisiting_nodate" class="csl-entry">
 
 ———. Under Review. “Revisiting Babylonian Prices: Long-Run and
-Variable-Length Equilibria, Ca. 385-61 BCE,” Under Review.
+Variable-Length Equilibria, <span class="nocase">ca.</span> 385-61 BCE,”
+Under Review.
 
 </div>
 
