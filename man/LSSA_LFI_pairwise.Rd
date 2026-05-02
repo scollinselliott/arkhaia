@@ -20,5 +20,5 @@ LSSA_LFI_pairwise(x, n_iter = 1, intercept = TRUE)
 An upper-triangular matrix, containing the probability of linear dependence between series.
 }
 \description{
-Evaluate pairwise linear dependence between observations using a LSSA-LFI valdiated model selection (see \code{\link[arkhaia]{LSSA_LFI_validated}})).
+Evaluate pairwise linear dependence between observations using a LSSA-LFI valdiated model selection (see \code{\link[arkhaia]{LSSA_LFI_validated}}).
 }

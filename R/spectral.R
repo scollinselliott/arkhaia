@@ -345,7 +345,7 @@ LSSA_LFI_model.data.frame <- function(x, t_ = NULL, n_iter = 1, intercept = TRUE
 
 #' Validated Linear Dependence via LSSA-LFI
 #'
-#' Probability of linear dependence between two groups of time series observations using a LSSA-LFI model selection (see \code{\link[arkhaia]{LSSA_LFI_candidates}})), given a list of at least three time series. Confounding variate is selected from the remaining time series in the list.
+#' Probability of linear dependence between two groups of time series observations using a LSSA-LFI model selection (see \code{\link[arkhaia]{LSSA_LFI_candidates}}), given a list of at least three time series. Confounding variate is selected from the remaining time series in the list.
 #' 
 #' @param x A list of data frames.
 #' @param pair The pair of series to evaluate in the list \code{x}, either names or indices.
@@ -396,7 +396,7 @@ LSSA_LFI_validated.list <- function(x, pair = NULL, n_iter = 1, intercept = TRUE
 
 #' Pairwise Selection of Linearlly Dependent LSSA-LFI Models
 #'
-#' Evaluate pairwise linear dependence between observations using a LSSA-LFI valdiated model selection (see \code{\link[arkhaia]{LSSA_LFI_validated}})). 
+#' Evaluate pairwise linear dependence between observations using a LSSA-LFI valdiated model selection (see \code{\link[arkhaia]{LSSA_LFI_validated}}). 
 #' 
 #' @param x A list of data frames.
 #' @param n_iter The number of iterations to run. Default is 1.
@@ -498,7 +498,8 @@ LSSA_LFI_epoch <- function(x, pair = NULL, n_iter = 1, intercept = TRUE, t_range
   }
 
 
-
+  rownames(out) <- t_
+  colnames(out) <- h_
   return(out)
 
 }

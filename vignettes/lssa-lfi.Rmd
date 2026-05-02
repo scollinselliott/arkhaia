@@ -1,0 +1,193 @@
+---
+title: "Least Squares Spectral Analysis via Lowest Frequency Iteration"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Least Squares Spectral Analysis via Lowest Frequency Iteration}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(arkhaia)
+```
+
+
+## Introduction
+
+This vignette provides an example of model fitting using least squares spectral analysis via lowest frequency iteration (LSSA-LFI). This approach fits haromonic series iteratively to time-index data, which have an unknown frequency or frequencies, along the same lines as the Vanicek method [CITE VANICEK], but differs in that the frequency which elicits that highest peak in the periodogram is not selected, but rather lowest frequency which elicits a peak.
+
+The goal is determine if two time-indexed observations are the result of the same data-generating process, in that they are both linearly dependent upon another process. For more details, see the paper, "Revisiting Babylonian Prices: Long-Run and Variable Length Equilibria, ca. 400-80 BCE" (currently under review). 
+
+We start by generating three sets of observations over time, of differing sizes. We will create observations from a random walk model, $z_t = z_{t-1} + a + \epsilon_t$, where $\epsilon_t$ is distributed $\mathcal{N}(0,1)$, of a total size of 100 observations, at uniformly random intervals of time. Then, we create two series which are dependent upon $z_t$, as $x_{1t} = s_1 z_t + \epsilon_t$ and $x_{2t} = s_2 z_t + \epsilon_t$. Finally, the third set will be generated independently, $x_{3t} = x_{3-t-1} + \epsilon_t$. From these three datasets, $X_1$, $X_2$, and $X_3$, observations will be subsampled of random size. These example data will then all be standardized, and so the choice of $s_1, s_2$ is obviated. 
+
+```{r}
+set.seed(9)
+
+Z <- cumsum(rnorm(100))
+X1 <- Z + rnorm(100)
+X2 <- Z + rnorm(100)
+X3 <- cumsum(rnorm(100))
+
+t_ <- sort(runif(100,0,100))
+
+X1 <- data.frame(t = t_, y = X1)
+X2 <- data.frame(t = t_, y = X2)
+X3 <- data.frame(t = t_, y = X3)
+
+n1 <- sample(4:100, 1)
+n2 <- sample(4:100, 1)
+n3 <- sample(4:100, 1)
+  
+idx1 <- sort(sample(1:100, n1, replace = FALSE))
+idx2 <- sort(sample(1:100, n2, replace = FALSE))
+idx3 <- sort(sample(1:100, n3, replace = FALSE))
+
+X1 <- X1[idx1, ]
+X2 <- X2[idx2, ]
+X3 <- X3[idx3, ]
+
+X1$y <- (X1$y - mean(X1$y)) / sd(X1$y)
+X2$y <- (X2$y - mean(X2$y)) / sd(X2$y)
+X3$y <- (X3$y - mean(X3$y)) / sd(X3$y)
+```
+
+A plot of three processes:
+```{r, eval = TRUE, fig.width = 6, fig.height = 4, fig.align = "center"}
+plot(X1, type = "l", xlim = c(0,100))
+lines(X2, col = "red")
+lines(X3, col = "blue")
+legend("topright", legend = 1:3, lty = 1, col = c("black", "red", "blue"))
+```
+
+These will be represented as continuous functions of time, $y_1(t)$, $y_2(t)$, and $y_3(t)$. Notwithstanding the observations are missing at different times, for different series, we should want to detect that $y_1(t)$ and $y_2(t)$, are dependent upon some other process, but not $y_3(t)$.
+
+## Least Squares Spectral Analysis with Lowest Frequency Iteration
+
+Least squares spectral analysis (LSSA) works by fitting the following trigonometric series:
+$$
+y(t) = \beta_0 + \sum_{i = 1}^k \left[ \beta_{1i} \sin \omega_i t + \beta_{2i} \cos \omega_i t  \right].
+$$
+Where the frequency $f_i = \omega_i / 2 \pi$ is unknown, the method developed by @vanicek_approximate_1969 computes the fit for a grid of potential frequencies, which can be show in a periodogram in which the power of each frequency expresses its goodness-of-fit. This is accomplished with the `LSSA()` function, which takes a data frame where time indices are in the first column and values are in the second column:
+
+```{r, fig.width = 5, fig.height = 4, fig.align = "center"}
+X1_lssa <- LSSA(X2, freqs = seq(0.005, 1.0, by = 0.005))
+plot(power ~ freq, X1_lssa, type = "l")
+```
+
+Typically, the frequency with the highest peak would be chosen, as it would result in the best model fit, and then one could regress another set of terms on the residuals, and choose the highest frequency, and so on. 
+
+Selecting the lowest frequency that elicits a peak however ensures that the dynamics of the longest period are being captured in the model first. Then, progressing to selecting higher and higher frequencies, more and more temportal detail being added by successive iterations. The `LSSA_LFI()` function performs this routine for a specified number of iterations (`n_iter`), returning the coefficients, frequencies, residual sum of squares (RSS), and Akaike Information Criterion (AIC). As the data are already standardized with a mean of 0, the argument `intercept = FALSE` is used to avoid a constant term being fit:
+
+```{r}
+mod1 <- LSSA_LFI(X2, n_iter = 1, intercept = FALSE)
+mod1
+```
+
+To generate the results of the model, the `LSSA_FI_model()` function is used, again for a specified number of iterations. Here, we can show the model fits of 1, 5, 10, 20, and 30 iterations (30 iterations = 90 parameters in total, with 2 amplitudes and a frequency in each iteration; or, equivalently, an amplitude, shift, and frequency on each iteration).
+
+```{r, eval = TRUE, fig.width = 6, fig.height = 4, fig.align = "center"}
+mod1 <- LSSA_LFI_model(X2, t_ = seq(0,100, by = 1), n_iter = 1, intercept = FALSE)
+mod5 <- LSSA_LFI_model(X2, t_ = seq(0,100, by = 1), n_iter = 5, intercept = FALSE)
+mod10 <- LSSA_LFI_model(X2, t_ = seq(0,100, by = 1), n_iter = 10, intercept = FALSE)
+mod20 <- LSSA_LFI_model(X2, t_ = seq(0,100, by = 1), n_iter = 20, intercept = FALSE)
+mod30 <- LSSA_LFI_model(X2, t_ = seq(0,100, by = 1), n_iter = 30, intercept = FALSE)
+
+plot(X2, xlim = c(0,100), ylim = c(-2.5,2.5), pch = 16, main = "y2(t)")
+lines(y ~ t, data = mod1, type = "l", col = "azure3")
+lines(y ~ t, data = mod5, col = "darkgrey")
+lines(y ~ t, data = mod10, col = "grey")
+lines(y ~ t, data = mod20, col = "azure4")
+lines(y ~ t, data = mod30, col = "black")
+legend("topright", legend = c(1,5,10,20,30), lty = 1, col = c("azure3", "azure4", "grey", "darkgrey", "black"))
+```
+
+## Model Selection
+
+In order to assess an appropriate number of parameters, AIC is used. Given a least squares method is used, its computation is
+$$
+\text{AIC} = 2 (3k + 2) + n \log(\hat{\sigma}^2)
+$$
+since there are three parameters in every iteration of the trigonometric series.
+
+Choosing the model which yields the lowest AIC can be done with the `LSSA_LFI()` function, inputing the number of iterations to run. If the data do not support fitting a model of a given number of parameters (i.e., trying to fit a 100-term model to a dataset with 30 observations), an `NA` value will be returned. Here, a model of just 2 iterations yields the lowest AIC score. Again, for $y_2(t)$:
+
+```{r, eval = TRUE, fig.width = 6, fig.height = 4, fig.align = "center"}
+mod1 <- LSSA_LFI(X2, n_iter = 100, intercept = FALSE)
+which.min(mod1$aic)
+
+mod2 <- LSSA_LFI_model(X2, t_ = seq(0,100, by = 1), n_iter = 2, intercept = FALSE)
+
+plot(X2, xlim = c(0,100), ylim = c(-2.5,2.5), pch = 16, main = "y2(t)")
+lines(y ~ t, data = mod2, type = "l", col = "black")
+```
+
+We can compare the model for $y_1(t)$, which has more observations attested:
+
+```{r, eval = TRUE, fig.width = 6, fig.height = 4, fig.align = "center"}
+mod1 <- LSSA_LFI(X1, n_iter = 100, intercept = FALSE)
+which.min(mod1$aic)
+
+mod2 <- LSSA_LFI_model(X1, t_ = seq(0,100, by = 1), n_iter = 2, intercept = FALSE)
+
+plot(X1, xlim = c(0,100), ylim = c(-2.5,2.5), pch = 16, main = "y1(t)")
+lines(y ~ t, data = mod2, type = "l", col = "black")
+```
+
+## Evaluating Linear Dependence
+
+The goal then is to check if a model which pools the observations of $y_1(t)$ and $y_2(t)$ together fits better when described by one set of parameters, rather than two sets. If the datasets are independent, then their parameters will be free to vary from one another. 
+
+This task is performed with the `LSSA_LFI_candidates()` function, which takes a list of data frames, a number of iterations, and whether to include an intercept. While the number of terms for each dataset were 2, it is possible that a moderl with more terms fits the pooled data better, and so it will be set to 100 to evaluate all options up to that iteration. The intercept will again be set to `FALSE`. It also includes a `sets` argument, in which one specifies a `list` of partitions of the data to evaluate. If no partition is given, by default the function evaluates two situations: one in which the all datasets are independent, and one in which all are dependent. For just two datasets, this consists of two situations. But, as the number of datasets increase, the number of possible partitions incease exponentially as they are dependent upon Bell's number (e.g., for six datasets, the total number of partitions comes to 203).
+
+```{r}
+X <- list(X1, X2)
+mod_cand <- LSSA_LFI_candidates(X, n_iter = 100, intercept = FALSE)
+```
+
+For `sets = NULL`, the `LSSA_LFI_candidates()` function returns a list of two vectors of AIC; the dependent model is in the first list, the independent in the second. To find the model situation (dependence or independence) which has returned the lowest AIC, the `model_select()` function is used:
+
+```{r, eval = TRUE, fig.width = 8, fig.height = 5, fig.align = "center"}
+model_select(mod_cand)
+```
+
+The result of `[1]` indicates that there exists a linear dependence for the two series (which is known in this example _a priori_). Looking at the case of two independent datasets, the result is that they are independent (result `[2]`):
+
+```{r}
+X <- list(X1, X3)
+mod_cand <- LSSA_LFI_candidates(X, n_iter = 100, intercept = FALSE)
+model_select(mod_cand)
+```
+
+Of course, erroneous results can be returned: for more information on the statistical distribution of error rates, contingent upon sample size, see the appendix to the paper, "Revisiting Babylonian Prices."
+
+One can evaluate all paritions comprehensively (for three datasets, it would amount to six partitions), but this will be time-consuming as the numbers of datasets increase. Moreover, the situation is a ripe one for Simpson's paradox (or reversal), in which the results change on the basis of the addition or removal of datasets.
+
+## Confounders, Validation, and Pairwise Evaluation
+
+In order to avoid excessive runtimes when one has several datasets, as well as to mitigate the effects of Simpson's paradox, the function `LSSA_LFI_validated()` provides validation of the relationship between two datasets, treating all other datates as a confounder. As the relationship (either dependence or independence) between the two datasets to be evaluated should hold no matter what confounder is introduced, the output is a probability, given all confounders as outcomes. For just three datasets, this probability will comprise outcomes only of `0` or `1`, as there is only 1 confounder being introduced. The argument `pair` indicates which relationship to evaluate; all other datasets in the `list` are treated as the confoudners.
+
+```{r}
+X <- list("y1" = X1, "y2" = X2, "y3" = X3)
+mod_val <- LSSA_LFI_validated(X, pair = c("y1", "y2"), n_iter = 100, intercept = FALSE)
+mod_val
+```
+
+The probability of linear dependence between $y_1(t)$ and $y_2(t)$ comes to 1.0 given just $y_3(t)$ as a confounder. 
+
+It would be tedious to have to enter in all pairs of datasets, and so the function `LSSA_LFI_pairwise()` function returns an upper-triangular matrix of all probabilities of linear dependence between all datasets in the input `list`. To reduce computational time for this example, we will use just 10 iterations:
+
+```{r}
+X <- list("y1" = X1, "y2" = X2, "y3" = X3)
+mod_pair <- LSSA_LFI_pairwise(X, n_iter = 10, intercept = FALSE)
+mod_pair
+```
+
+This matrix shows that there exists almost surely linear dependence betwee $y_1(t)$ and $y_2(t)$, and that there is almost surely indpendence between $y_1(t)$ and $y_3(t)$ and $y_2(t)$ and $y_3(t)$. 
+

@@ -22,5 +22,5 @@ LSSA_LFI_validated(x, pair = NULL, n_iter = 1, intercept = TRUE)
 The probability of linear dependence between two time series, in which 1 indicates linear dependence almost surely and 0 indicates independence.
 }
 \description{
-Probability of linear dependence between two groups of time series observations using a LSSA-LFI model selection (see \code{\link[arkhaia]{LSSA_LFI_candidates}})), given a list of at least three time series. Confounding variate is selected from the remaining time series in the list.
+Probability of linear dependence between two groups of time series observations using a LSSA-LFI model selection (see \code{\link[arkhaia]{LSSA_LFI_candidates}}), given a list of at least three time series. Confounding variate is selected from the remaining time series in the list.
 }
