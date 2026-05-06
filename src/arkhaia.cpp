@@ -116,7 +116,7 @@ arma::vec LSSA_resid_arma(const arma::mat & dat, double freq, int intercept) {
 //' @useDynLib arkhaia
 //' @importFrom Rcpp sourceCpp
 // [[Rcpp::export]]
-Rcpp::List LSSA_LFI_arma(const arma::mat & x, int n_iter, int intercept) {
+arma::mat LSSA_LFI_arma(const arma::mat & x, int n_iter, int intercept) {
 
     int nr = x.n_rows;
     if (n_iter > nr) {
@@ -233,10 +233,18 @@ Rcpp::List LSSA_LFI_arma(const arma::mat & x, int n_iter, int intercept) {
         }
     }
 
-    Rcpp::List out = Rcpp::List::create(Rcpp::Named("coefs") = coefs, Rcpp::Named("freqs") = freqs, Rcpp::Named("rss") = rss, Rcpp::Named("aic") = aic);
-    
-    if (end == 1) {
+    // Rcpp::List out = Rcpp::List::create(Rcpp::Named("coefs") = coefs, Rcpp::Named("freqs") = freqs, Rcpp::Named("rss") = rss, Rcpp::Named("aic") = aic);
 
+    int n_out;
+    if (end == 1) {
+        n_out = limit;
+    } else {
+        n_out = n_iter;
+    }
+    
+    arma::mat out (n_out, 6);
+
+    if (end == 1) {
         arma::mat coefs0 (limit, 3);
         arma::vec freqs0 (limit);
         arma::vec rss0 (limit);
@@ -247,9 +255,23 @@ Rcpp::List LSSA_LFI_arma(const arma::mat & x, int n_iter, int intercept) {
             rss0[i] = rss[i];
             aic0[i] = aic[i];
         }
-        
-        out = Rcpp::List::create(Rcpp::Named("coefs") = coefs0, Rcpp::Named("freqs") = freqs0, Rcpp::Named("rss") = rss0, Rcpp::Named("aic") = aic0);
+        out.col(0) = coefs0.col(0);
+        out.col(1) = coefs0.col(1);
+        out.col(2) = coefs0.col(2);
+        out.col(3) = freqs0;
+        out.col(4) = rss0;
+        out.col(5) = aic0;
+    } else  {
+        out.col(0) = coefs.col(0);
+        out.col(1) = coefs.col(1);
+        out.col(2) = coefs.col(2);
+        out.col(3) = freqs;
+        out.col(4) = rss;
+        out.col(5) = aic;
     }
+        
+    // out = Rcpp::List::create(Rcpp::Named("coefs") = coefs0, Rcpp::Named("freqs") = freqs0, Rcpp::Named("rss") = rss0, Rcpp::Named("aic") = aic0);
+
     return out;
 }
 
@@ -259,9 +281,9 @@ Rcpp::List LSSA_LFI_arma(const arma::mat & x, int n_iter, int intercept) {
 //' @importFrom Rcpp sourceCpp
 // [[Rcpp::export]]
 arma::mat LSSA_LFI_model_arma(const arma::mat & x, arma::vec t_, int n_iter, int intercept) {
-    Rcpp::List L = LSSA_LFI_arma(x, n_iter, intercept);
-    arma::mat coefs = L["coefs"];
-    arma::vec freqs = L["freqs"];
+    arma::mat L = LSSA_LFI_arma(x, n_iter, intercept);
+    arma::mat coefs = L.cols(0,2);
+    arma::vec freqs = L.col(3);
     int n = t_.n_elem;
     arma::mat out (n, 2);
     arma::vec y (n);
@@ -291,53 +313,91 @@ arma::mat LSSA_LFI_model_arma(const arma::mat & x, arma::vec t_, int n_iter, int
 //' @useDynLib arkhaia
 //' @importFrom Rcpp sourceCpp
 // [[Rcpp::export]]
-int LSSA_LFI_candidates_arma(Rcpp::List x, Rcpp::List sets, int n_iter, int intercept) {
+arma::mat partition_list_to_matrix_arma(Rcpp::List x) {
     int n = x.size();
+    arma::vec ns (n);
+    for (int i = 0; i < n; i++) {
+        Rcpp::List xi = x[i];
+        int nxi = xi.size();
+        ns[i] = nxi;
+    }
+    int ncol = arma::max(ns);
+    arma::mat out ( n , ncol );
+    for (int i = 0; i < n; i++) {
+        Rcpp::List r = x[i];
+        int nj = ns[i];
+        for (int j = 0; j < nj; j++) {
+            arma::vec rj = r[j];
+            int nk = rj.n_elem;
+            for (int k = 0; k < nk; k++) {
+                int m = rj[k];
+                out(i , m - 1) = j;
+            }
+        }
+    }
+    return out;
+}
+
+
+
+
+
+
+
+//' @useDynLib arkhaia
+//' @importFrom Rcpp sourceCpp
+// [[Rcpp::export]]
+int LSSA_LFI_candidates_arma(Rcpp::List x, arma::mat & sets, int n_iter, int intercept) {
+
+    // datasets
+    int n = x.size();
+    arma::vec x_nrows(n);
     int n_obs = 0;
     for (int i = 0; i < n; i++) {
         arma::mat M = x[i];
+        x_nrows[i] = M.n_rows;
         n_obs = n_obs + M.n_rows;
     }
 
-    int np = sets.size();
+    // proceed by partitions
+    int np = sets.n_rows;
+    int nc = sets.n_cols;
+
     arma::vec aic_min (np);
 
     for (int P = 0; P < np; P++) {
-        Rcpp::List A = sets[P];
-        int nA = A.size();
+        arma::rowvec A = sets.row(P);
+        int nA = arma::max(A) + 1;
 
         arma::vec epsilon (n_iter); 
-
         int n_iter_max = n_iter;
 
         for (int Q = 0; Q < nA; Q++) {
-            arma::vec B = A[Q];
 
-            int nB = B.n_elem;
-
+        // nx nrow of combined data
             int nx = 0;
-            for (int i = 0; i < nB; i++) {
-                int idx = B[i] - 1;
-                arma::mat S = x[idx];
-                int nS = S.n_rows;
-                nx = nx + nS;
+            for (int Q2 = 0; Q2 < nc; Q2++) {
+                if (A[Q2] == Q) {
+                    nx = nx + x_nrows[Q2];
+                }
             }
             arma::mat Y (nx,2);
             int k = 0;
-            for (int i = 0; i < nB; i++) {
-                int idx = B[i] - 1;
-                arma::mat S = x[idx];
-                int nS = S.n_rows;  
-                for (int j = 0; j < nS; j++) {
-                    Y(k, 0) = S(j, 0);
-                    Y(k, 1) = S(j, 1);
-                    k = k + 1;
+            for (int Q2 = 0; Q2 < nc; Q2++) {
+                if (A[Q2] == Q) {
+                    arma::mat S = x[Q2];
+                    int nS = S.n_rows;  
+                    for (int j = 0; j < nS; j++) {
+                        Y(k, 0) = S(j, 0);
+                        Y(k, 1) = S(j, 1);
+                        k = k + 1;
+                    }
                 }
             }
 
-            Rcpp::List W = LSSA_LFI_arma(Y, n_iter, intercept);
+            arma::mat W = LSSA_LFI_arma(Y, n_iter, intercept);
             
-            arma::vec rss = W["rss"];
+            arma::vec rss = W.col(4);
             int n_rss = rss.n_elem;
             for (int i = 0; i < n_rss; i++) {
                 epsilon[i] = epsilon[i] + rss[i];
@@ -353,7 +413,6 @@ int LSSA_LFI_candidates_arma(Rcpp::List x, Rcpp::List sets, int n_iter, int inte
             epsilon2[i] = epsilon[i];
         }
 
-
         arma::vec n_iter_out = arma::linspace(1, n_iter_max, n_iter_max);
         arma::vec aic = 2 * nA * (n_iter_out * 3 + 1 + intercept) + n_obs * log(epsilon2 / n_obs);
         
@@ -365,6 +424,23 @@ int LSSA_LFI_candidates_arma(Rcpp::List x, Rcpp::List sets, int n_iter, int inte
 
     return out;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -74,11 +74,13 @@ LSSA_LFI.matrix <- function(x, n_iter = 1, intercept = TRUE, AIC = FALSE) {
   } else {
     intrcpt = 0
   }
-  out <- LSSA_LFI_arma(x, n_iter, intrcpt)
+  out0 <- LSSA_LFI_arma(x, n_iter, intrcpt)
+
+  out <- list(coefs = out0[,1:3], freqs = out0[,4], rss = out0[,5], aic = out0[,6])
 
   if (AIC == TRUE) {
     idx <- which.min(out$aic)
-    out <- list(coefs = out$coefs[1:idx], freqs = out$freqs[1:idx], rss = out$rss[1:idx], aic = out$aic[1:idx])
+    out <- list(coefs = out0[1:idx,1:3], freqs = out0[1:idx, 4], rss = out0[1:idx, 5], aic = out0[1:idx, 6])
   }
   class(out) <- c("LSSA_LFI", "list")
 
@@ -92,11 +94,6 @@ LSSA_LFI.data.frame <- function(x, n_iter = 1, intercept = TRUE, AIC = FALSE) {
   out <- LSSA_LFI.matrix(x, n_iter, intercept, AIC) 
   return(out)
 }
-
-
-
-
-
 
 
 
@@ -128,13 +125,11 @@ LSSA_LFI_candidates.list <- function(x, sets = NULL, n_iter = 1, intercept = TRU
 
   # if sets is null; first set is pooled, second separate
   if ( is.null(sets) ) {
-    sets <- list()
-    sets[[1]] <- list(1:n) 
-    set2 <- list()
-    for (i in 1:n) {
-      set2[[i]] <- i
-    }
-    sets[[2]] <- set2
+    pld <- rep(0, length(x))
+    tog <- 0:(length(x)-1)
+    sets0 <- matrix(c(pld, tog), nrow = 2, byrow = TRUE)
+  } else {
+    sets0 <- partition_list_to_matrix_arma(sets)
   }
 
   if (intercept == TRUE) {
@@ -144,7 +139,7 @@ LSSA_LFI_candidates.list <- function(x, sets = NULL, n_iter = 1, intercept = TRU
   }
 
   # add 1 for R indexing
-  out <- LSSA_LFI_candidates_arma(y, sets, n_iter, intrcpt) + 1
+  out <- LSSA_LFI_candidates_arma(y, sets0, n_iter, intrcpt) + 1
   
   return(out)
 }
@@ -290,19 +285,31 @@ LSSA_LFI_validated.list <- function(x, pair = NULL, n_iter = 1, intercept = TRUE
   if (typeof(pair) == "character") {
     pair <- which(names(x) %in% pair)
   }
-  nx <- 1:length(x)
+  n <- length(x)
+  nx <- 1:n
   conf <- nx[-pair]
   res <- numeric(length(conf))
 
-  partition <- list(list(c(1,2,3)),
-                    list(c(1,2), c(3)),
-                    list(c(1,3), c(2)),
-                    list(c(2,3), c(1)),
-                    list(c(1),c(2), c(3)))
+  y <- list()
+  for (i in 1:n) {
+    y[[i]] <- as.matrix(x[[i]])
+  }
+
+  if (intercept == TRUE) {
+    intrcpt <- 1
+  } else {
+    intrcpt <- 0
+  }
+
+  partition <-  matrix(c(0,0,0,
+                         0,0,1,
+                         0,1,0,
+                         0,1,1,
+                         0,1,2), ncol = 3, byrow = TRUE)
 
   for (i in 1:length(conf)) {
     idx <- c(pair, conf[i])
-    mod <- LSSA_LFI_candidates(x[idx], sets = partition, n_iter = n_iter, intercept = intercept )
+    mod <- LSSA_LFI_candidates_arma(y[idx], sets = partition, n_iter = n_iter, intercept = intrcpt ) + 1 # add 1 for R indexing
     if (mod %in% c(1,2)) {
       res[i] <- 1
     } else {

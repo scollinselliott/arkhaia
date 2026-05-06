@@ -172,7 +172,7 @@ In order to avoid excessive runtimes when one has several datasets, as well as t
 
 ```{r}
 X <- list("y1" = X1, "y2" = X2, "y3" = X3)
-mod_val <- LSSA_LFI_validated(X, pair = c("y1", "y2"), n_iter = 100, intercept = FALSE)
+mod_val <- LSSA_LFI_validated(X, pair = c(1, 2), n_iter = 100, intercept = FALSE)
 mod_val
 ```
 

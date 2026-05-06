@@ -27,6 +27,12 @@ LSSA_LFI_model_arma <- function(x, t_, n_iter, intercept) {
 
 #' @useDynLib arkhaia
 #' @importFrom Rcpp sourceCpp
+partition_list_to_matrix_arma <- function(x) {
+    .Call('_arkhaia_partition_list_to_matrix_arma', PACKAGE = 'arkhaia', x)
+}
+
+#' @useDynLib arkhaia
+#' @importFrom Rcpp sourceCpp
 LSSA_LFI_candidates_arma <- function(x, sets, n_iter, intercept) {
     .Call('_arkhaia_LSSA_LFI_candidates_arma', PACKAGE = 'arkhaia', x, sets, n_iter, intercept)
 }
