@@ -24,8 +24,8 @@ Sanderson 2014; Eddelbuettel and Balamuta 2018).
 
 ## Installation
 
-To obtain the development version of the package, `devtools` can be used
-to install `arkhaia` from GitHub:
+To obtain the current development version of the package, `devtools` can
+be used to install `arkhaia` from GitHub:
 
 ``` r
 library(devtools)

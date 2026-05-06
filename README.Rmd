@@ -27,7 +27,7 @@ The package relies on `Rcpp` and `RcppArmadillo` [@eddelbuettel_rcpparmadillo_20
 
 ## Installation
 
-To obtain the development version of the package, `devtools` can be used to install `arkhaia` from GitHub:
+To obtain the current development version of the package, `devtools` can be used to install `arkhaia` from GitHub:
 
 ``` r
 library(devtools)

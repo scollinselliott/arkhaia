@@ -109,7 +109,7 @@ LSSA_LFI.data.frame <- function(x, n_iter = 1, intercept = TRUE, AIC = FALSE) {
 #' @param sets Candidate sets to evaluate; must be a \code{list} of \code{lists} containing the indices of the sets in \code{x}. If left \code{NULL}, two sets are evaluated: all series pooled together [1] and all series kept separate [2].
 #' @param n_iter The number of iterations to run for the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is 1.
 #' @param intercept Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.
-#' @returns The index of the set yielding the lowest AIC. If \code{sets} is \code{NULL}, the output of \code{[1]} indicates linear dependence; if \code{[2]}, linear independence.
+#' @returns The index of the set yielding the lowest AIC. If \code{sets} is \code{NULL}, the output of \code{[1]} indicates linear dependence; if the output is \code{[2]}, linear independence.
 #' 
 #' @export
 LSSA_LFI_candidates <- function(x, sets = NULL, n_iter = 1, intercept = TRUE) {
@@ -187,7 +187,6 @@ trim_epoch.data.frame <- function(x, epoch = NULL) {
   x <- as.matrix(x)
   trim_epoch.matrix(x, epoch)
 }
-
 
 
 

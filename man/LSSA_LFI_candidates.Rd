@@ -19,7 +19,7 @@ LSSA_LFI_candidates(x, sets = NULL, n_iter = 1, intercept = TRUE)
 \item{intercept}{Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.}
 }
 \value{
-The index of the set yielding the lowest AIC. If \code{sets} is \code{NULL}, the output of \code{[1]} indicates linear dependence; if \code{[2]}, linear independence.
+The index of the set yielding the lowest AIC. If \code{sets} is \code{NULL}, the output of \code{[1]} indicates linear dependence; if the output is \code{[2]}, linear independence.
 }
 \description{
 For a set of time series (namely partitions of set of series) contained in a \code{list}, will compute the Akaike Information Criterion (AIC) for each candidate set.
