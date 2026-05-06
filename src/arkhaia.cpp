@@ -112,6 +112,262 @@ arma::vec LSSA_resid_arma(const arma::mat & dat, double freq, int intercept) {
 
 
 
+
+//' @useDynLib arkhaia
+//' @importFrom Rcpp sourceCpp
+// [[Rcpp::export]]
+Rcpp::List LSSA_LFI_arma(const arma::mat & x, int n_iter, int intercept) {
+
+    int nr = x.n_rows;
+    if (n_iter > nr) {
+        n_iter = nr;
+    }
+
+    arma::mat coefs (n_iter, 3);
+    arma::vec freqs (n_iter);
+    arma::vec rss (n_iter);
+    arma::vec aic (n_iter);
+
+    arma::vec freq_input (999);
+    for (int i = 0; i < 999; i++) {
+        freq_input[i] = (1/1000) + 0.0005 * (i+1);
+    }
+
+    arma::mat first = LSSA_arma(x, freq_input, intercept);
+    arma::vec power = first.col(0);
+    int n_pow = power.n_elem;
+    arma::vec diff (n_pow -1);
+    for (int i = 0; i < (n_pow -1); i++) {
+        diff[i] = power[i+1] - power[i];
+    }
+
+    int idx = 999;
+    for (int i = 1; i < n_pow; i++) {
+        if (diff[i-1] < 0) {
+            if (i-1 < idx) {
+                idx = i - 1;
+            }
+        }
+    }
+
+    double freq1 = freq_input[idx];
+    double epsilon2 = first(idx,1); 
+
+    freqs[0] = freq1;
+    rss[0] = epsilon2;
+    coefs(0,0) = first(idx,2);
+    coefs(0,1) = first(idx,3);
+    coefs(0,2) = first(idx,4);
+
+    arma::vec resid = LSSA_resid_arma(x, freq1, intercept);
+
+    int prev_freq_idx = idx;
+    arma::mat x0 (nr , 2);
+    x0.col(0) = x.col(0);
+    x0.col(1) = resid;
+
+    if (intercept == 1) {
+        aic[0] = 2 * (3 + 2) + log(epsilon2 / nr) * nr;
+    } else {
+        aic[0] = 2 * (2 + 2) + log(epsilon2 / nr) * nr;
+    }
+
+    int end = 0;
+    int limit = 0;
+
+    if (n_iter > 1){
+        for (int j = 1; j < n_iter; j++) {
+
+            first = LSSA_arma(x0, freq_input, 0);
+            power = first.col(0);
+            n_pow = power.n_elem;
+            for (int i = 1; i < n_pow; i++) {
+                diff[i - 1] = power[i] - power[i - 1];
+            }
+            if (prev_freq_idx == (n_pow-1)) {
+                end = 1;
+            } else {
+                end = 1;
+                for (int i = prev_freq_idx; i < (n_pow-1); i++) {
+                    if (diff[i] < 0) {
+                        end = 0;
+                    }
+                }
+            }
+
+            if (end == 1) {
+                limit = j;
+                break;
+            }
+
+            idx = 999;
+            for (int i = 1; i < n_pow; i++) {
+                if (diff[i-1] < 0) {
+                    if (i-1 < idx) {
+                        if (i-1 > prev_freq_idx) {
+                            idx = i - 1;
+                        } 
+                    }
+                }
+            }
+
+            freq1 = freq_input[idx];
+            epsilon2 = first(idx,1); 
+
+            freqs[j] = freq1;
+            rss[j] = epsilon2;
+            coefs(j,0) = first(idx,2);
+            coefs(j,1) = first(idx,3);
+            coefs(j,2) = first(idx,4);
+
+            resid = LSSA_resid_arma(x0, freq1, intercept);
+
+            prev_freq_idx = idx;
+            x0.col(1) = resid;
+
+            if (intercept == 1) {
+                aic[j] = 2 * (3 * (j+1) + 2) + log(epsilon2 / nr) * nr;
+            } else {
+                aic[j] = 2 * (3 * (j+1) + 1) + log(epsilon2 / nr) * nr;
+            }
+        }
+    }
+
+    Rcpp::List out = Rcpp::List::create(Rcpp::Named("coefs") = coefs, Rcpp::Named("freqs") = freqs, Rcpp::Named("rss") = rss, Rcpp::Named("aic") = aic);
+    
+    if (end == 1) {
+
+        arma::mat coefs0 (limit, 3);
+        arma::vec freqs0 (limit);
+        arma::vec rss0 (limit);
+        arma::vec aic0 (limit);
+        for (int i = 0; i < limit; i++) {
+            coefs0.row(i) = coefs.row(i);
+            freqs0[i] = freqs[i];
+            rss0[i] = rss[i];
+            aic0[i] = aic[i];
+        }
+        
+        out = Rcpp::List::create(Rcpp::Named("coefs") = coefs0, Rcpp::Named("freqs") = freqs0, Rcpp::Named("rss") = rss0, Rcpp::Named("aic") = aic0);
+    }
+    return out;
+}
+
+
+
+//' @useDynLib arkhaia
+//' @importFrom Rcpp sourceCpp
+// [[Rcpp::export]]
+arma::mat LSSA_LFI_model_arma(const arma::mat & x, arma::vec t_, int n_iter, int intercept) {
+    Rcpp::List L = LSSA_LFI_arma(x, n_iter, intercept);
+    arma::mat coefs = L["coefs"];
+    arma::vec freqs = L["freqs"];
+    int n = t_.n_elem;
+    arma::mat out (n, 2);
+    arma::vec y (n);
+
+    arma::vec theta = t_ * 2 * M_PI * freqs[0];
+    if (intercept == 1) {
+        y = coefs(0,0) * cos(theta) + coefs(0,1) * sin(theta) + coefs(0,2);
+    } else {
+        y = coefs(0,0) * cos(theta) + coefs(0,1) * sin(theta);
+    }
+
+    if (n_iter > 1) {
+        for (int i = 1; i < n_iter; i++) { 
+            theta = t_ * 2 * M_PI * freqs[i];
+            y = y + coefs(i,0) * cos(theta) + coefs(i,1) * sin(theta);
+        }
+    }
+    
+    out.col(0) = t_;
+    out.col(1) = y;
+
+    return(out);
+}
+
+
+
+//' @useDynLib arkhaia
+//' @importFrom Rcpp sourceCpp
+// [[Rcpp::export]]
+int LSSA_LFI_candidates_arma(Rcpp::List x, Rcpp::List sets, int n_iter, int intercept) {
+    int n = x.size();
+    int n_obs = 0;
+    for (int i = 0; i < n; i++) {
+        arma::mat M = x[i];
+        n_obs = n_obs + M.n_rows;
+    }
+
+    int np = sets.size();
+    arma::vec aic_min (np);
+
+    for (int P = 0; P < np; P++) {
+        Rcpp::List A = sets[P];
+        int nA = A.size();
+
+        arma::vec epsilon (n_iter); 
+
+        int n_iter_max = n_iter;
+
+        for (int Q = 0; Q < nA; Q++) {
+            arma::vec B = A[Q];
+
+            int nB = B.n_elem;
+
+            int nx = 0;
+            for (int i = 0; i < nB; i++) {
+                int idx = B[i] - 1;
+                arma::mat S = x[idx];
+                int nS = S.n_rows;
+                nx = nx + nS;
+            }
+            arma::mat Y (nx,2);
+            int k = 0;
+            for (int i = 0; i < nB; i++) {
+                int idx = B[i] - 1;
+                arma::mat S = x[idx];
+                int nS = S.n_rows;  
+                for (int j = 0; j < nS; j++) {
+                    Y(k, 0) = S(j, 0);
+                    Y(k, 1) = S(j, 1);
+                    k = k + 1;
+                }
+            }
+
+            Rcpp::List W = LSSA_LFI_arma(Y, n_iter, intercept);
+            
+            arma::vec rss = W["rss"];
+            int n_rss = rss.n_elem;
+            for (int i = 0; i < n_rss; i++) {
+                epsilon[i] = epsilon[i] + rss[i];
+            }
+
+            if (n_rss < n_iter_max) {
+                n_iter_max = n_rss;
+            }
+        }
+
+        arma::vec epsilon2 (n_iter_max);
+        for (int i = 0; i < n_iter_max; i++) {
+            epsilon2[i] = epsilon[i];
+        }
+
+
+        arma::vec n_iter_out = arma::linspace(1, n_iter_max, n_iter_max);
+        arma::vec aic = 2 * nA * (n_iter_out * 3 + 1 + intercept) + n_obs * log(epsilon2 / n_obs);
+        
+        aic_min[P] =  arma::min(aic);
+
+    }
+
+    int out = arma::index_min(aic_min);
+
+    return out;
+}
+
+
+
 //' @useDynLib arkhaia
 //' @importFrom Rcpp sourceCpp
 // [[Rcpp::export]]

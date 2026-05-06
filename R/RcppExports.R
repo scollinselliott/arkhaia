@@ -15,6 +15,24 @@ LSSA_resid_arma <- function(dat, freq, intercept) {
 
 #' @useDynLib arkhaia
 #' @importFrom Rcpp sourceCpp
+LSSA_LFI_arma <- function(x, n_iter, intercept) {
+    .Call('_arkhaia_LSSA_LFI_arma', PACKAGE = 'arkhaia', x, n_iter, intercept)
+}
+
+#' @useDynLib arkhaia
+#' @importFrom Rcpp sourceCpp
+LSSA_LFI_model_arma <- function(x, t_, n_iter, intercept) {
+    .Call('_arkhaia_LSSA_LFI_model_arma', PACKAGE = 'arkhaia', x, t_, n_iter, intercept)
+}
+
+#' @useDynLib arkhaia
+#' @importFrom Rcpp sourceCpp
+LSSA_LFI_candidates_arma <- function(x, sets, n_iter, intercept) {
+    .Call('_arkhaia_LSSA_LFI_candidates_arma', PACKAGE = 'arkhaia', x, sets, n_iter, intercept)
+}
+
+#' @useDynLib arkhaia
+#' @importFrom Rcpp sourceCpp
 lambda_col_arma <- function(dat, lambda_grid, omit_zero) {
     .Call('_arkhaia_lambda_col_arma', PACKAGE = 'arkhaia', dat, lambda_grid, omit_zero)
 }

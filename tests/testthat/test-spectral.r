@@ -17,7 +17,6 @@ Y3 <- list(dat1, dat2, dat3)
 test_that("LSSA functions: S3 class check", {
   expect_s3_class(LSSA(dat1), "data.frame")
   expect_s3_class(LSSA_LFI(dat1,), "LSSA_LFI")
-  expect_s3_class(LSSA_LFI_candidates(Y1), "LSSA_LFI_AIC")
   expect_s3_class(LSSA_LFI_model(dat1), "data.frame")
 })
 
@@ -30,10 +29,8 @@ test_that("LSSA detects frequency", {
 test_that("Correct candidate model selected", {
   res1 <- LSSA_LFI_candidates(Y1, n_iter = 50)
   res2 <- LSSA_LFI_candidates(Y2, n_iter = 50)
-  mod1 <- model_select(res1)
-  mod2 <- model_select(res2)
-  expect_equal(mod1, 1)
-  expect_equal(mod2, 2)
+  expect_equal(res1, 1)
+  expect_equal(res2, 2)
 })
 
 test_that("trim_epoch works", {

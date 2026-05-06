@@ -37,6 +37,47 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// LSSA_LFI_arma
+Rcpp::List LSSA_LFI_arma(const arma::mat& x, int n_iter, int intercept);
+RcppExport SEXP _arkhaia_LSSA_LFI_arma(SEXP xSEXP, SEXP n_iterSEXP, SEXP interceptSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< int >::type n_iter(n_iterSEXP);
+    Rcpp::traits::input_parameter< int >::type intercept(interceptSEXP);
+    rcpp_result_gen = Rcpp::wrap(LSSA_LFI_arma(x, n_iter, intercept));
+    return rcpp_result_gen;
+END_RCPP
+}
+// LSSA_LFI_model_arma
+arma::mat LSSA_LFI_model_arma(const arma::mat& x, arma::vec t_, int n_iter, int intercept);
+RcppExport SEXP _arkhaia_LSSA_LFI_model_arma(SEXP xSEXP, SEXP t_SEXP, SEXP n_iterSEXP, SEXP interceptSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type t_(t_SEXP);
+    Rcpp::traits::input_parameter< int >::type n_iter(n_iterSEXP);
+    Rcpp::traits::input_parameter< int >::type intercept(interceptSEXP);
+    rcpp_result_gen = Rcpp::wrap(LSSA_LFI_model_arma(x, t_, n_iter, intercept));
+    return rcpp_result_gen;
+END_RCPP
+}
+// LSSA_LFI_candidates_arma
+int LSSA_LFI_candidates_arma(Rcpp::List x, Rcpp::List sets, int n_iter, int intercept);
+RcppExport SEXP _arkhaia_LSSA_LFI_candidates_arma(SEXP xSEXP, SEXP setsSEXP, SEXP n_iterSEXP, SEXP interceptSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::List >::type x(xSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type sets(setsSEXP);
+    Rcpp::traits::input_parameter< int >::type n_iter(n_iterSEXP);
+    Rcpp::traits::input_parameter< int >::type intercept(interceptSEXP);
+    rcpp_result_gen = Rcpp::wrap(LSSA_LFI_candidates_arma(x, sets, n_iter, intercept));
+    return rcpp_result_gen;
+END_RCPP
+}
 // lambda_col_arma
 arma::vec lambda_col_arma(const arma::mat& dat, arma::vec& lambda_grid, int omit_zero);
 RcppExport SEXP _arkhaia_lambda_col_arma(SEXP datSEXP, SEXP lambda_gridSEXP, SEXP omit_zeroSEXP) {
@@ -106,6 +147,9 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_arkhaia_LSSA_arma", (DL_FUNC) &_arkhaia_LSSA_arma, 3},
     {"_arkhaia_LSSA_resid_arma", (DL_FUNC) &_arkhaia_LSSA_resid_arma, 3},
+    {"_arkhaia_LSSA_LFI_arma", (DL_FUNC) &_arkhaia_LSSA_LFI_arma, 3},
+    {"_arkhaia_LSSA_LFI_model_arma", (DL_FUNC) &_arkhaia_LSSA_LFI_model_arma, 4},
+    {"_arkhaia_LSSA_LFI_candidates_arma", (DL_FUNC) &_arkhaia_LSSA_LFI_candidates_arma, 4},
     {"_arkhaia_lambda_col_arma", (DL_FUNC) &_arkhaia_lambda_col_arma, 3},
     {"_arkhaia_trunc_pois_mat_arma", (DL_FUNC) &_arkhaia_trunc_pois_mat_arma, 3},
     {"_arkhaia_CR_arma", (DL_FUNC) &_arkhaia_CR_arma, 2},

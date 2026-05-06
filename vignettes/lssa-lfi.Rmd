@@ -119,13 +119,13 @@ since there are three parameters in every iteration of the trigonometric series.
 Choosing the model which yields the lowest AIC can be done with the `LSSA_LFI()` function, inputing the number of iterations to run. If the data do not support fitting a model of a given number of parameters (i.e., trying to fit a 100-term model to a dataset with 30 observations), an `NA` value will be returned. Here, a model of just 2 iterations yields the lowest AIC score. Again, for $y_2(t)$:
 
 ```{r, eval = TRUE, fig.width = 6, fig.height = 4, fig.align = "center"}
-mod1 <- LSSA_LFI(X2, n_iter = 100, intercept = FALSE)
-which.min(mod1$aic)
+mod2 <- LSSA_LFI(X2, n_iter = 100, intercept = FALSE)
+which.min(mod2$aic)
 
-mod2 <- LSSA_LFI_model(X2, t_ = seq(0,100, by = 1), n_iter = 2, intercept = FALSE)
+mod2_fit <- LSSA_LFI_model(X2, t_ = seq(0,100, by = 1), n_iter = 2, intercept = FALSE)
 
 plot(X2, xlim = c(0,100), ylim = c(-2.5,2.5), pch = 16, main = "y2(t)")
-lines(y ~ t, data = mod2, type = "l", col = "black")
+lines(y ~ t, data = mod2_fit, type = "l", col = "black")
 ```
 
 We can compare the model for $y_1(t)$, which has more observations attested:
@@ -134,10 +134,10 @@ We can compare the model for $y_1(t)$, which has more observations attested:
 mod1 <- LSSA_LFI(X1, n_iter = 100, intercept = FALSE)
 which.min(mod1$aic)
 
-mod2 <- LSSA_LFI_model(X1, t_ = seq(0,100, by = 1), n_iter = 2, intercept = FALSE)
+mod1_fit <- LSSA_LFI_model(X1, t_ = seq(0,100, by = 1), n_iter = 2, intercept = FALSE)
 
 plot(X1, xlim = c(0,100), ylim = c(-2.5,2.5), pch = 16, main = "y1(t)")
-lines(y ~ t, data = mod2, type = "l", col = "black")
+lines(y ~ t, data = mod1_fit, type = "l", col = "black")
 ```
 
 ## Evaluating Linear Dependence
@@ -146,15 +146,12 @@ The goal then is to check if a model which pools the observations of $y_1(t)$ an
 
 This task is performed with the `LSSA_LFI_candidates()` function, which takes a list of data frames, a number of iterations, and whether to include an intercept. While the number of terms for each dataset were 2, it is possible that a moderl with more terms fits the pooled data better, and so it will be set to 100 to evaluate all options up to that iteration. The intercept will again be set to `FALSE`. It also includes a `sets` argument, in which one specifies a `list` of partitions of the data to evaluate. If no partition is given, by default the function evaluates two situations: one in which the all datasets are independent, and one in which all are dependent. For just two datasets, this consists of two situations. But, as the number of datasets increase, the number of possible partitions incease exponentially as they are dependent upon Bell's number (e.g., for six datasets, the total number of partitions comes to 203).
 
+For `sets = NULL`, the `LSSA_LFI_candidates()` function returns one of two potential outcomes. The first is `[1]`, which is the set of all datasets pooled together, indicating that linear dependence is a better fit. The second is `[2]`, indicating that independence is a better fit.
+
 ```{r}
 X <- list(X1, X2)
 mod_cand <- LSSA_LFI_candidates(X, n_iter = 100, intercept = FALSE)
-```
-
-For `sets = NULL`, the `LSSA_LFI_candidates()` function returns a list of two vectors of AIC; the dependent model is in the first list, the independent in the second. To find the model situation (dependence or independence) which has returned the lowest AIC, the `model_select()` function is used:
-
-```{r, eval = TRUE, fig.width = 8, fig.height = 5, fig.align = "center"}
-model_select(mod_cand)
+mod_cand
 ```
 
 The result of `[1]` indicates that there exists a linear dependence for the two series (which is known in this example _a priori_). Looking at the case of two independent datasets, the result is that they are independent (result `[2]`):
@@ -162,7 +159,7 @@ The result of `[1]` indicates that there exists a linear dependence for the two 
 ```{r}
 X <- list(X1, X3)
 mod_cand <- LSSA_LFI_candidates(X, n_iter = 100, intercept = FALSE)
-model_select(mod_cand)
+mod_cand
 ```
 
 Of course, erroneous results can be returned: for more information on the statistical distribution of error rates, contingent upon sample size, see the appendix to the paper, "Revisiting Babylonian Prices."

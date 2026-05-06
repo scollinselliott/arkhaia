@@ -28,9 +28,9 @@ LSSA.matrix <- function(x, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRU
   P <- LSSA_arma(x, freqs, intrcpt)
 
   if (type == "frequency") {
-    out <- data.frame(freq = freqs, power = P[,1], rss = P[,2], coef_cos = P[,3], coef_sin = P[,4], coef_const = P[,3])
+    out <- data.frame(freq = freqs, power = P[,1], rss = P[,2], coef_cos = P[,3], coef_sin = P[,4], coef_const = P[,5])
   } else if (type == "period") {
-    out <- data.frame(period = 1/freqs, power = P[,1], rss = P[,2], coef_cos = P[,3], coef_sin = P[,4], coef_const = P[,3])
+    out <- data.frame(period = 1/freqs, power = P[,1], rss = P[,2], coef_cos = P[,3], coef_sin = P[,4], coef_const = P[,5])
   }
   return(out)
 }
@@ -69,65 +69,16 @@ LSSA_LFI <- function(x, n_iter = 1, intercept = TRUE, AIC = FALSE) {
 #' @rdname LSSA_LFI
 #' @export
 LSSA_LFI.matrix <- function(x, n_iter = 1, intercept = TRUE, AIC = FALSE) {
-  coefs <- list()
-  freqs <- numeric(n_iter)
-  rss <- numeric(n_iter)
-  aic <- numeric(n_iter)
-
-  first <- LSSA(x, type = "period", intercept = intercept)
-  idx <- which(diff(first$power) < 0)[1]
-  freq1 <- 1/first[idx,1]
-  epsilon2 <- first[idx,3]
-
-  freqs[1] <- freq1
-  rss[1] <- epsilon2
-  coefs[[1]] <- first[idx, 4:6]
-  
-  x <- as.matrix(x)
-  resid <- LSSA_resid_arma(x, freq1, intercept = intercept)
-
-  prev_freq <- freq1
-  dat0 <- data.frame(x[,1], resid)
-  dat0 <- as.matrix(dat0)
-
   if (intercept == TRUE) {
-    aic[1] <- 2 * (3 + 2) + log(epsilon2/nrow(x)) * nrow(x)
+    intrcpt = 1
   } else {
-    aic[1] <- 2 * (2 + 2) + log(epsilon2/nrow(x)) * nrow(x)
+    intrcpt = 0
   }
+  out <- LSSA_LFI_arma(x, n_iter, intrcpt)
 
-  if (n_iter > 1) {
-    for (j in 2:n_iter) {
-      dat2 <- LSSA(dat0, intercept = FALSE, type = "period")
-      dat2a <- dat2[dat2$period < 1/ prev_freq,]
-      idx <- which(diff(dat2a$power) < 0)[1]
-      freq_ <- 1/dat2a[idx,1]
-      epsilon2 <- dat2a[idx,3]
-      
-      rss[j] <- epsilon2
-      coefs[[j]] <- dat2a[idx, 4:5]
-      freqs[j] <- freq_
-
-      resid <- LSSA_resid_arma(dat0, freq_, intercept = FALSE)
-      dat0 <- data.frame(x[,1], resid)
-      dat0 <- as.matrix(dat0)
-
-      prev_freq <- freq_
-
-      if (intercept == TRUE) {
-          aic[j] <- 2 * (3 * j + 2) + log(epsilon2/nrow(x)) * nrow(x)
-      } else {
-          aic[j] <- 2 * (3 * j + 1) + log(epsilon2/nrow(x)) * nrow(x)
-      }
-      
-    }
-  }
-
-  if (AIC == FALSE) {
-    out <- list(coefs = coefs, freqs = freqs, rss = rss, aic = aic)
-  } else {
-    idx <- which.min(aic)
-    out <- list(coefs = coefs[1:idx], freqs = freqs[1:idx], rss = rss[1:idx], aic = aic[1:idx])
+  if (AIC == TRUE) {
+    idx <- which.min(out$aic)
+    out <- list(coefs = out$coefs[1:idx], freqs = out$freqs[1:idx], rss = out$rss[1:idx], aic = out$aic[1:idx])
   }
   class(out) <- c("LSSA_LFI", "list")
 
@@ -158,7 +109,7 @@ LSSA_LFI.data.frame <- function(x, n_iter = 1, intercept = TRUE, AIC = FALSE) {
 #' @param sets Candidate sets to evaluate; must be a \code{list} of \code{lists} containing the indices of the sets in \code{x}. If left \code{NULL}, two sets are evaluated: all series pooled together [1] and all series kept separate [2].
 #' @param n_iter The number of iterations to run for the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is 1.
 #' @param intercept Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.
-#' @returns A \code{list} containing the AIC for each candidate set, for each iteration.
+#' @returns The index of the set yielding the lowest AIC. If \code{sets} is \code{NULL}, the output of \code{[1]} indicates linear dependence; if \code{[2]}, linear independence.
 #' 
 #' @export
 LSSA_LFI_candidates <- function(x, sets = NULL, n_iter = 1, intercept = TRUE) {
@@ -168,16 +119,12 @@ LSSA_LFI_candidates <- function(x, sets = NULL, n_iter = 1, intercept = TRUE) {
 #' @rdname LSSA_LFI_candidates
 #' @export
 LSSA_LFI_candidates.list <- function(x, sets = NULL, n_iter = 1, intercept = TRUE) {
-  out <- list()
-
   n <- length(x)
-  all <- data.frame(t_ = c(), y = c())
 
+  y <- list()
   for (i in 1:n) {
-    all <- rbind(all, x[[i]])
+    y[[i]] <- as.matrix(x[[i]])
   }
-
-  n_obs <- nrow(all)
 
   # if sets is null; first set is pooled, second separate
   if ( is.null(sets) ) {
@@ -190,34 +137,15 @@ LSSA_LFI_candidates.list <- function(x, sets = NULL, n_iter = 1, intercept = TRU
     sets[[2]] <- set2
   }
 
-  # loop throught the partitions
-  for (P in 1:length(sets)) {
-
-    # number of partitions (sets of terms)
-    n_m <- length(sets[[P]])
-
-    epsilon <- numeric(n_iter)
-    # loop through each set in the partition
-    for (j in 1:length(sets[[P]])) {
-
-      # construct the pooled observations for each set
-      X <- c()
-      for (jj in 1:length(sets[[P]][[j]])) {
-        idx <- sets[[P]][[j]][[jj]]
-        X <- rbind(X, x[[ idx ]])
-      }
-
-      W <- LSSA_LFI(X, n_iter = n_iter, intercept = intercept, AIC = FALSE)
-
-      epsilon <- epsilon + W$rss
-    }
-
-    AIC_ <- 2 * n_m * (1:n_iter * 3 + 1) + n_obs * log(epsilon / n_obs)
-    out[[P]] <- AIC_
+  if (intercept == TRUE) {
+    intrcpt <- 1
+  } else {
+    intrcpt <- 0
   }
-  
-  class(out) <- c("LSSA_LFI_AIC", "list")
 
+  # add 1 for R indexing
+  out <- LSSA_LFI_candidates_arma(y, sets, n_iter, intrcpt) + 1
+  
   return(out)
 }
 
@@ -264,29 +192,29 @@ trim_epoch.data.frame <- function(x, epoch = NULL) {
 
 
 
-#' Model Selection of LSSA-LFI Candidates
-#'
-#' For an \code{LSSA_LFI_AIC} object see \code{\link[arkhaia]{LSSA_LFI_candidates}}), returns the index of the candidate model. If \code{sets} is \code{NULL} in the \code{LSSA_LFI_candidates} function, an index of [1] refers to the model of a pooled (joint) grouping, [2] refers to the model of discrete, separate groupings. 
-#' 
-#' @param x An \code{LSSA_LFI_AIC} object. 
-#' @returns The index of the grouping which contains the lowest AIC score.
-#' 
-#' @export
-model_select <- function(x) {
-    UseMethod("model_select")
-}
+# #' Model Selection of LSSA-LFI Candidates
+# #'
+# #' For an \code{LSSA_LFI_AIC} object see \code{\link[arkhaia]{LSSA_LFI_candidates}}), returns the index of the candidate model. If \code{sets} is \code{NULL} in the \code{LSSA_LFI_candidates} function, an index of [1] refers to the model of a pooled (joint) grouping, [2] refers to the model of discrete, separate groupings. 
+# #' 
+# #' @param x An \code{LSSA_LFI_AIC} object. 
+# #' @returns The index of the grouping which contains the lowest AIC score.
+# #' 
+# #' @export
+# model_select <- function(x) {
+#     UseMethod("model_select")
+# }
 
-#' @rdname model_select
-#' @export
-model_select.LSSA_LFI_AIC <- function(x) {
-  x_min <- numeric(length(x))
-  for (j in 1:length(x)) {
-    y <- x[[j]]
-    x_min[j] <- min(y, na.rm = TRUE)
-  }
-  out <- which.min(x_min)
-  return(out)
-}
+# #' @rdname model_select
+# #' @export
+# model_select.LSSA_LFI_AIC <- function(x) {
+#   x_min <- numeric(length(x))
+#   for (j in 1:length(x)) {
+#     y <- x[[j]]
+#     x_min[j] <- min(y, na.rm = TRUE)
+#   }
+#   out <- which.min(x_min)
+#   return(out)
+# }
 
 
 
@@ -310,27 +238,19 @@ LSSA_LFI_model <- function(x, t_ = NULL, n_iter = 1, intercept = TRUE, label = "
 #' @rdname LSSA_LFI_model
 #' @export
 LSSA_LFI_model.matrix <- function(x, t_ = NULL, n_iter = 1, intercept = TRUE, label = "model") {  
-  dat_LSSA <- LSSA_LFI(x[,1:2], n_iter = n_iter, intercept = intercept)
+  if (intercept == TRUE) {
+    intrcpt <- 1
+  } else {
+    intrcpt <- 0
+  }
 
   if (is.null(t_)) {
     t_ <- seq(min(x[,1]), max(x[,1]), by = 0.01)
   }
 
-  theta <- t_ * 2 * pi * dat_LSSA$freqs[1]
-  if (intercept == TRUE) {
-    Z <- dat_LSSA$coefs[[1]]$coef_cos * cos(theta) + dat_LSSA$coefs[[1]]$coef_sin * sin(theta) + dat_LSSA$coefs[[1]]$coef_const
-  } else if (intercept == FALSE) {
-    Z <- dat_LSSA$coefs[[1]]$coef_cos * cos(theta) + dat_LSSA$coefs[[1]]$coef_sin * sin(theta)
-  }
+  Y <- LSSA_LFI_model_arma(x[,1:2], t_, n_iter, intrcpt) 
 
-  if (n_iter > 1) {
-    for (i in 2:length(dat_LSSA$freqs)) {
-      theta <- t_ * 2 * pi * dat_LSSA$freqs[i]
-      Z <- Z + dat_LSSA$coefs[[i]]$coef_cos * cos(theta) + dat_LSSA$coefs[[i]]$coef_sin * sin(theta) 
-    }
-  }
-
-  out <- data.frame(t = t_, y = Z, label =  rep(label, length(t_)))
+  out <- data.frame(t = Y[,1], y = Y[,2], label =  rep(label, length(t_)))
   return(out)
 }
 
@@ -362,6 +282,9 @@ LSSA_LFI_validated <- function(x, pair = NULL, n_iter = 1, intercept = TRUE) {
 #' @rdname LSSA_LFI_validated
 #' @export
 LSSA_LFI_validated.list <- function(x, pair = NULL, n_iter = 1, intercept = TRUE) {
+  if (length(x) < 3) {
+    stop("Must have at least three time series in x.")
+  }
   if (is.null(pair)) {
     stop("Must supply the pair of data frames in x to be evaluated.")
   }
@@ -380,8 +303,7 @@ LSSA_LFI_validated.list <- function(x, pair = NULL, n_iter = 1, intercept = TRUE
 
   for (i in 1:length(conf)) {
     idx <- c(pair, conf[i])
-    lssa_i <- LSSA_LFI_candidates(x[idx], sets = partition, n_iter = n_iter, intercept = intercept )
-    mod <- model_select(lssa_i)
+    mod <- LSSA_LFI_candidates(x[idx], sets = partition, n_iter = n_iter, intercept = intercept )
     if (mod %in% c(1,2)) {
       res[i] <- 1
     } else {
@@ -476,22 +398,24 @@ LSSA_LFI_epoch <- function(x, pair = NULL, n_iter = 1, intercept = TRUE, t_range
 
   for (ti in 1:length(t_)) {
     for (hi in 1:length(h_)) {
-      tmp <- list()
-      do_lssa <- TRUE
-      n_obs_ <- c()
-      for (i in 1:length(x)) {
-        trimmed <- trim_epoch(x[[i]], epoch = c(t_[ti], t_[ti] + h_[hi]))
-        n_obs <- nrow(trimmed)
-        n_obs_ <- c(n_obs_, n_obs)
-        if (n_obs < 4) {
-          do_lssa <- FALSE
-        }
-        tmp[[names(x)[i]]] <- trimmed
-      } 
-      if (do_lssa == TRUE) {
-        n_iter_ <- min(c(n_obs_, n_iter))
+      if (t_[ti] + h_[hi] <= end) {
+        tmp <- list()
+        do_lssa <- TRUE
+        n_obs_ <- c()
+        for (i in 1:length(x)) {
+          trimmed <- trim_epoch(x[[i]], epoch = c(t_[ti], t_[ti] + h_[hi]))
+          n_obs <- nrow(trimmed)
+          n_obs_ <- c(n_obs_, n_obs)
+          if (n_obs < 4) {
+            do_lssa <- FALSE
+          }
+          tmp[[names(x)[i]]] <- trimmed
+        } 
+        if (do_lssa == TRUE) {
+          n_iter_ <- min(c(n_obs_, n_iter))
 
-        out[(length(h_) - hi)+1,ti] <- LSSA_LFI_validated(tmp, pair = pair, n_iter = n_iter_, intercept = intercept)
+          out[(length(h_) - hi)+1,ti] <- LSSA_LFI_validated(tmp, pair = pair, n_iter = n_iter_, intercept = intercept)
+        }
       }
     }
     message("Percent complete: ", round(ti/length(t_), 2)*100, "%")
