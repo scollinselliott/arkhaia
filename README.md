@@ -5,6 +5,8 @@
 
 <!-- badges: start -->
 
+[![CRAN
+status](https://www.r-pkg.org/badges/version/arkhaia)](https://CRAN.R-project.org/package=arkhaia)
 <!-- badges: end -->
 
 The R package `arkhaia` contains functions related to research on

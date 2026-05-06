@@ -17,6 +17,7 @@ knitr::opts_chunk$set(
 # arkhaia: Archaeological and Historical Analysis
 
 <!-- badges: start -->
+[![CRAN status](https://www.r-pkg.org/badges/version/arkhaia)](https://CRAN.R-project.org/package=arkhaia)
 <!-- badges: end -->
 
 The R package `arkhaia` contains functions related to research on economic relationships via archaeological or otherwise historical data. The main focus is on evaluation of changes in long-term "integrating" or "integrated" relationships over time between communities, primarily through the material evidence of artifact assemblages. The problem of how to detect similar patterns over time  in a given behavior is a broad one that requires specificity in order to address mathematically, and so this package provides the tools necessary for handling counts of artifacts, as well as measurement data (such as prices).
