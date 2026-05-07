@@ -117,11 +117,9 @@ LSSA_LFI_candidates <- function(x, sets = NULL, n_iter = 1, intercept = TRUE) {
 #' @export
 LSSA_LFI_candidates.list <- function(x, sets = NULL, n_iter = 1, intercept = TRUE) {
   n <- length(x)
-
-  y <- list()
-  for (i in 1:n) {
-    y[[i]] <- as.matrix(x[[i]])
-  }
+  y <- as.matrix(do.call(rbind, x))
+  x_rows <- unlist(lapply(x, nrow))
+  idx <- c(0, cumsum(x_rows)[1:(n-1)]) 
 
   # if sets is null; first set is pooled, second separate
   if ( is.null(sets) ) {
@@ -139,12 +137,10 @@ LSSA_LFI_candidates.list <- function(x, sets = NULL, n_iter = 1, intercept = TRU
   }
 
   # add 1 for R indexing
-  out <- LSSA_LFI_candidates_arma(y, sets0, n_iter, intrcpt) + 1
+  out <- LSSA_LFI_candidates_arma(y, idx, x_rows, sets0, n_iter, intrcpt) + 1
   
   return(out)
 }
-
-
 
 
 
@@ -290,11 +286,6 @@ LSSA_LFI_validated.list <- function(x, pair = NULL, n_iter = 1, intercept = TRUE
   conf <- nx[-pair]
   res <- numeric(length(conf))
 
-  y <- list()
-  for (i in 1:n) {
-    y[[i]] <- as.matrix(x[[i]])
-  }
-
   if (intercept == TRUE) {
     intrcpt <- 1
   } else {
@@ -307,9 +298,13 @@ LSSA_LFI_validated.list <- function(x, pair = NULL, n_iter = 1, intercept = TRUE
                          0,1,1,
                          0,1,2), ncol = 3, byrow = TRUE)
 
+  x_rows <- unlist(lapply(x, nrow))
+  idx <- c(0, cumsum(x_rows)[1:(n-1)]) 
+
   for (i in 1:length(conf)) {
-    idx <- c(pair, conf[i])
-    mod <- LSSA_LFI_candidates_arma(y[idx], sets = partition, n_iter = n_iter, intercept = intrcpt ) + 1 # add 1 for R indexing
+    ii <- c(pair, conf[i])
+    y <- as.matrix(do.call(rbind, x[ii]))
+    mod <- LSSA_LFI_candidates_arma(y, idx, x_rows, partition, n_iter, intrcpt) + 1 # add 1 for R indexing
     if (mod %in% c(1,2)) {
       res[i] <- 1
     } else {

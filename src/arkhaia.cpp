@@ -347,17 +347,19 @@ arma::mat partition_list_to_matrix_arma(Rcpp::List x) {
 //' @useDynLib arkhaia
 //' @importFrom Rcpp sourceCpp
 // [[Rcpp::export]]
-int LSSA_LFI_candidates_arma(Rcpp::List x, arma::mat & sets, int n_iter, int intercept) {
+int LSSA_LFI_candidates_arma(arma::mat & x, arma::vec & start_idx, arma::vec & x_rows, arma::mat & sets, int n_iter, int intercept) {
 
-    // datasets
-    int n = x.size();
-    arma::vec x_nrows(n);
-    int n_obs = 0;
-    for (int i = 0; i < n; i++) {
-        arma::mat M = x[i];
-        x_nrows[i] = M.n_rows;
-        n_obs = n_obs + M.n_rows;
-    }
+    // // datasets
+    // int n = x.size();
+    // arma::vec x_nrows(n);
+    // int n_obs = 0;
+    // for (int i = 0; i < n; i++) {
+    //     arma::mat M = x[i];
+    //     x_nrows[i] = M.n_rows;
+    //     n_obs = n_obs + M.n_rows;
+    // }
+
+    int n_obs = x.n_rows;
 
     // proceed by partitions
     int np = sets.n_rows;
@@ -374,29 +376,35 @@ int LSSA_LFI_candidates_arma(Rcpp::List x, arma::mat & sets, int n_iter, int int
 
         for (int Q = 0; Q < nA; Q++) {
 
-        // nx nrow of combined data
+            // nx nrow of combined data
             int nx = 0;
             for (int Q2 = 0; Q2 < nc; Q2++) {
                 if (A[Q2] == Q) {
-                    nx = nx + x_nrows[Q2];
+                    nx = nx + x_rows[Q2];
                 }
             }
             arma::mat Y (nx,2);
             int k = 0;
+            arma::vec temp (nc);
             for (int Q2 = 0; Q2 < nc; Q2++) {
                 if (A[Q2] == Q) {
-                    arma::mat S = x[Q2];
-                    int nS = S.n_rows;  
-                    for (int j = 0; j < nS; j++) {
-                        Y(k, 0) = S(j, 0);
-                        Y(k, 1) = S(j, 1);
+                    
+                    // arma::mat S = x[Q2];
+                    // int nS = S.n_rows;  
+                    int h = start_idx[Q2];
+                    int nh = x_rows[Q2];
+
+                    for (int hi = h; hi < (h + nh); hi++) {
+                        Y(k, 0) = x(hi, 0);
+                        Y(k, 1) = x(hi, 1);
                         k = k + 1;
                     }
                 }
             }
 
+
             arma::mat W = LSSA_LFI_arma(Y, n_iter, intercept);
-            
+
             arma::vec rss = W.col(4);
             int n_rss = rss.n_elem;
             for (int i = 0; i < n_rss; i++) {
@@ -415,7 +423,7 @@ int LSSA_LFI_candidates_arma(Rcpp::List x, arma::mat & sets, int n_iter, int int
 
         arma::vec n_iter_out = arma::linspace(1, n_iter_max, n_iter_max);
         arma::vec aic = 2 * nA * (n_iter_out * 3 + 1 + intercept) + n_obs * log(epsilon2 / n_obs);
-        
+
         aic_min[P] =  arma::min(aic);
 
     }
@@ -424,23 +432,6 @@ int LSSA_LFI_candidates_arma(Rcpp::List x, arma::mat & sets, int n_iter, int int
 
     return out;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
