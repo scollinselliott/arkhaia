@@ -340,10 +340,6 @@ arma::mat partition_list_to_matrix_arma(Rcpp::List x) {
 
 
 
-
-
-
-
 //' @useDynLib arkhaia
 //' @importFrom Rcpp sourceCpp
 // [[Rcpp::export]]
