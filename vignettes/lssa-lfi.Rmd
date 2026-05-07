@@ -1,6 +1,7 @@
 ---
 title: "Least Squares Spectral Analysis via Lowest Frequency Iteration"
 output: rmarkdown::html_vignette
+bibliography: '`r system.file("REFERENCES.bib", package="arkhaia")`'
 vignette: >
   %\VignetteIndexEntry{Least Squares Spectral Analysis via Lowest Frequency Iteration}
   %\VignetteEngine{knitr::rmarkdown}
@@ -21,7 +22,7 @@ library(arkhaia)
 
 ## Introduction
 
-This vignette provides an example of model fitting using least squares spectral analysis via lowest frequency iteration (LSSA-LFI). This approach fits haromonic series iteratively to time-index data, which have an unknown frequency or frequencies, along the same lines as the Vanicek method [CITE VANICEK], but differs in that the frequency which elicits that highest peak in the periodogram is not selected, but rather lowest frequency which elicits a peak.
+This vignette provides an example of model fitting using least squares spectral analysis via lowest frequency iteration (LSSA-LFI). This approach fits haromonic series iteratively to time-index data, which have an unknown frequency or frequencies, along the same lines as the Vanicek method [@vanicek_approximate_1969] or the Lomb-Scargle [@lomb_least-squares_1976;@scargle_studies_1982]. But, it differs in the selection of the frequency used to the fit the model, in that the lowest frequency that elicits a peak, rather than the frequency with the highest power, is selected. 
 
 The goal is determine if two time-indexed observations are the result of the same data-generating process, in that they are both linearly dependent upon another process. For more details, see the paper, "Revisiting Babylonian Prices: Long-Run and Variable Length Equilibria, ca. 400-80 BCE" (currently under review). 
 

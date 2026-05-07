@@ -384,12 +384,8 @@ int LSSA_LFI_candidates_arma(arma::mat & x, arma::vec & start_idx, arma::vec & x
             arma::vec temp (nc);
             for (int Q2 = 0; Q2 < nc; Q2++) {
                 if (A[Q2] == Q) {
-                    
-                    // arma::mat S = x[Q2];
-                    // int nS = S.n_rows;  
                     int h = start_idx[Q2];
                     int nh = x_rows[Q2];
-
                     for (int hi = h; hi < (h + nh); hi++) {
                         Y(k, 0) = x(hi, 0);
                         Y(k, 1) = x(hi, 1);
@@ -397,7 +393,6 @@ int LSSA_LFI_candidates_arma(arma::mat & x, arma::vec & start_idx, arma::vec & x
                     }
                 }
             }
-
 
             arma::mat W = LSSA_LFI_arma(Y, n_iter, intercept);
 

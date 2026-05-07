@@ -182,6 +182,39 @@ trim_epoch.data.frame <- function(x, epoch = NULL) {
 
 
 
+
+#' Repartition (Group) Datasets
+#'
+#' Given a \code{list} of data frames (or matrices), labeled \code{x}, and another \code{list} which contains indices of \code{x} as vectors, labeled \code{set}, returns a new \code{list} which pools (row-binds) the data frames together  according to the grouprings in \code{set}.
+#' 
+#' @param x A \code{list} containing the time series, each of which should be a matrix or data frame with time index in the first column and value in the second.
+#' @param set A \code{list} of vectors containing the indices of the sets in \code{x}, according to which to pool the datasets into a new list. 
+#' @returns A \code{list} containing the data according to the partition structure described by \code{set}.
+#' 
+#' @export
+repartition <- function(x, set = NULL) {
+    UseMethod("repartition")
+}
+
+#' @rdname repartition
+#' @export
+repartition.list <- function(x, set = NULL) {
+  if (!is.list(set)) {
+    stop("Repartitioning set must be provided.")
+  }
+  out <- vector("list", length(set))
+  for (i in 1:length(set)) {
+    idx <- set[[i]]
+    sub <- x[idx]
+    y <- as.matrix(do.call(rbind, sub))
+    out[[i]] <- y
+  }
+  return(out)
+}
+
+
+
+
 # #' Model Selection of LSSA-LFI Candidates
 # #'
 # #' For an \code{LSSA_LFI_AIC} object see \code{\link[arkhaia]{LSSA_LFI_candidates}}), returns the index of the candidate model. If \code{sets} is \code{NULL} in the \code{LSSA_LFI_candidates} function, an index of [1] refers to the model of a pooled (joint) grouping, [2] refers to the model of discrete, separate groupings. 
@@ -298,12 +331,14 @@ LSSA_LFI_validated.list <- function(x, pair = NULL, n_iter = 1, intercept = TRUE
                          0,1,1,
                          0,1,2), ncol = 3, byrow = TRUE)
 
-  x_rows <- unlist(lapply(x, nrow))
-  idx <- c(0, cumsum(x_rows)[1:(n-1)]) 
+  x_rows0 <- unlist(lapply(x, nrow))
+  idx0 <- c(0, cumsum(x_rows0)[1:(n-1)]) 
+  y <- as.matrix(do.call(rbind, x))
 
   for (i in 1:length(conf)) {
     ii <- c(pair, conf[i])
-    y <- as.matrix(do.call(rbind, x[ii]))
+    x_rows <- x_rows0[ii]
+    idx <- idx0[ii]
     mod <- LSSA_LFI_candidates_arma(y, idx, x_rows, partition, n_iter, intrcpt) + 1 # add 1 for R indexing
     if (mod %in% c(1,2)) {
       res[i] <- 1
@@ -339,8 +374,8 @@ LSSA_LFI_pairwise.list <- function(x, n_iter = 1, intercept = TRUE) {
   mat <- matrix(NA, nrow = length(x), ncol = length(x))
   for (i in 1:(length(x)-1)) {
     for (j in (i+1):length(x)) {
-      pair_ <- c(i,j)
-      mat[i,j] <- LSSA_LFI_validated(x, pair = pair_, n_iter = n_iter, intercept = intercept)
+      pair <- c(i,j)
+      mat[i,j] <- LSSA_LFI_validated(x, pair, n_iter = n_iter, intercept = intercept)
     }
   }
   rownames(mat) <- names(x)

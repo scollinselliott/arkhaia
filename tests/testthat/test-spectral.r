@@ -51,7 +51,11 @@ test_that("Pairwise validated candidate model selection works", {
   expect_equal(res, expected)
 })
 
-
+test_that("repartition works", {
+  out <- repartition(Y3, list(c(1,2), 3))
+  expect_equal(nrow(out[[1]]), 100)
+  expect_equal(nrow(out[[2]]), 50)
+})
 
 
 
