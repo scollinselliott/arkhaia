@@ -100,7 +100,7 @@ LSSA_LFI.data.frame <- function(x, n_iter = 1, intercept = TRUE, AIC = FALSE) {
 
 #' Linear Dependence of LSSA-LFI Candidate Models via AIC
 #'
-#' For a set of time series (namely partitions of set of series) contained in a \code{list}, will compute the Akaike Information Criterion (AIC) for each candidate set.  
+#' For a set of time series (namely partitions of set of series) contained in a list, will compute the Akaike Information Criterion (AIC) for each candidate set.  
 #' 
 #' @param x A \code{list} containing the time series, each of which should be a matrix or data frame with time index in the first column and value in the second.
 #' @param sets Candidate sets to evaluate; must be a \code{list} of \code{lists} containing the indices of the sets in \code{x}. If left \code{NULL}, two sets are evaluated: all series pooled together [1] and all series kept separate [2].
@@ -185,7 +185,7 @@ trim_epoch.data.frame <- function(x, epoch = NULL) {
 
 #' Repartition (Group) Datasets
 #'
-#' Given a \code{list} of data frames (or matrices), labeled \code{x}, and another \code{list} which contains indices of \code{x} as vectors, labeled \code{set}, returns a new \code{list} which pools (row-binds) the data frames together  according to the grouprings in \code{set}.
+#' Given a list of data frames (or matrices), labeled \code{x}, and another list which contains indices of \code{x} as vectors, labeled \code{set}, returns a new list which pools (row-binds) the data frames together  according to the grouprings in \code{set}.
 #' 
 #' @param x A \code{list} containing the time series, each of which should be a matrix or data frame with time index in the first column and value in the second.
 #' @param set A \code{list} of vectors containing the indices of the sets in \code{x}, according to which to pool the datasets into a new list. 
@@ -288,7 +288,7 @@ LSSA_LFI_model.data.frame <- function(x, t_ = NULL, n_iter = 1, intercept = TRUE
 
 #' Validated Linear Dependence via LSSA-LFI
 #'
-#' Probability of linear dependence between two groups of time series observations using a LSSA-LFI model selection (see \code{\link[arkhaia]{LSSA_LFI_candidates}}), given a list of at least three time series. Confounding variate is selected from the remaining time series in the list.
+#' Probability of linear dependence between two groups of time series observations using a LSSA-LFI model selection (see \code{\link[arkhaia]{LSSA_LFI_candidates}}), on the basis of the inclusion of a third "attendant" variate. The third attendant variate is selected from the remaining time series in the list, hence the input list must include at least three times series.
 #' 
 #' @param x A list of data frames.
 #' @param pair The pair of series to evaluate in the list \code{x}, either names or indices.
@@ -316,8 +316,8 @@ LSSA_LFI_validated.list <- function(x, pair = NULL, n_iter = 1, intercept = TRUE
   }
   n <- length(x)
   nx <- 1:n
-  conf <- nx[-pair]
-  res <- numeric(length(conf))
+  attend <- nx[-pair]
+  res <- numeric(length(attend))
 
   if (intercept == TRUE) {
     intrcpt <- 1
@@ -331,15 +331,16 @@ LSSA_LFI_validated.list <- function(x, pair = NULL, n_iter = 1, intercept = TRUE
                          0,1,1,
                          0,1,2), ncol = 3, byrow = TRUE)
 
-  x_rows0 <- unlist(lapply(x, nrow))
-  idx0 <- c(0, cumsum(x_rows0)[1:(n-1)]) 
-  y <- as.matrix(do.call(rbind, x))
 
-  for (i in 1:length(conf)) {
-    ii <- c(pair, conf[i])
-    x_rows <- x_rows0[ii]
-    idx <- idx0[ii]
-    mod <- LSSA_LFI_candidates_arma(y, idx, x_rows, partition, n_iter, intrcpt) + 1 # add 1 for R indexing
+  for (i in 1:length(attend)) {
+    ii <- c(pair, attend[i])
+    y <- x[ii]
+
+    x_rows <- unlist(lapply(y, nrow))
+    idx <- c(0, cumsum(x_rows)[1:(n-1)]) 
+    y0 <- as.matrix(do.call(rbind, y))
+
+    mod <- LSSA_LFI_candidates_arma(y0, idx, x_rows, partition, n_iter, intrcpt) + 1 # add 1 for R indexing
     if (mod %in% c(1,2)) {
       res[i] <- 1
     } else {
@@ -385,10 +386,6 @@ LSSA_LFI_pairwise.list <- function(x, n_iter = 1, intercept = TRUE) {
 
 
 
-
-
-
-
 #' Period-Variable Pairwise Selection of Linearlly Dependent LSSA-LFI Models
 #'
 #' Evaluate pairwise linear dependence between two time series using a LSSA-LFI valdiated model selection (see \code{\link[arkhaia]{LSSA_LFI_validated}})), with variable length time period. 
@@ -413,6 +410,11 @@ LSSA_LFI_epoch <- function(x, n_iter = 1, intercept = TRUE) {
 LSSA_LFI_epoch <- function(x, pair = NULL, n_iter = 1, intercept = TRUE, t_range = NULL, h_range = NULL, t_grid = 1, h_grid = 1) {
   if (is.null(pair)) {
     stop("Must supply the pair of data frames in x to be evaluated.")
+  }
+  if (intercept == TRUE) {
+    intrcpt <- 1
+  } else {
+    intrcpt <- 0
   }
   all <- data.frame()
   for (i in 1:length(x)) {
@@ -450,7 +452,7 @@ LSSA_LFI_epoch <- function(x, pair = NULL, n_iter = 1, intercept = TRUE, t_range
         if (do_lssa == TRUE) {
           n_iter_ <- min(c(n_obs_, n_iter))
 
-          out[(length(h_) - hi)+1,ti] <- LSSA_LFI_validated(tmp, pair = pair, n_iter = n_iter_, intercept = intercept)
+          out[(length(h_) - hi)+1,ti] <- LSSA_LFI_validated(tmp, pair, n_iter_, intrcpt)
         }
       }
     }

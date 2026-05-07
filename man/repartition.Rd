@@ -18,5 +18,5 @@ repartition(x, set = NULL)
 A \code{list} containing the data according to the partition structure described by \code{set}.
 }
 \description{
-Given a \code{list} of data frames (or matrices), labeled \code{x}, and another \code{list} which contains indices of \code{x} as vectors, labeled \code{set}, returns a new \code{list} which pools (row-binds) the data frames together  according to the grouprings in \code{set}.
+Given a list of data frames (or matrices), labeled \code{x}, and another list which contains indices of \code{x} as vectors, labeled \code{set}, returns a new list which pools (row-binds) the data frames together  according to the grouprings in \code{set}.
 }

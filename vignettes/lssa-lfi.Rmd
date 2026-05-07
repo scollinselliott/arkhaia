@@ -165,11 +165,11 @@ mod_cand
 
 Of course, erroneous results can be returned: for more information on the statistical distribution of error rates, contingent upon sample size, see the appendix to the paper, "Revisiting Babylonian Prices."
 
-One can evaluate all paritions comprehensively (for three datasets, it would amount to six partitions), but this will be time-consuming as the numbers of datasets increase. Moreover, the situation is a ripe one for Simpson's paradox (or reversal), in which the results change on the basis of the addition or removal of datasets.
+One can evaluate all paritions comprehensively (for three datasets, it would amount to six partitions), but this will be time-consuming as the numbers of datasets increase. Moreover, the situation is liable to the possibility of Simpson's reversal, in which the results change on the basis of the addition, removal, or regrouping of datasets.
 
-## Confounders, Validation, and Pairwise Evaluation
+## Validation and Pairwise Validation via Attendant Series
 
-In order to avoid excessive runtimes when one has several datasets, as well as to mitigate the effects of Simpson's paradox, the function `LSSA_LFI_validated()` provides validation of the relationship between two datasets, treating all other datates as a confounder. As the relationship (either dependence or independence) between the two datasets to be evaluated should hold no matter what confounder is introduced, the output is a probability, given all confounders as outcomes. For just three datasets, this probability will comprise outcomes only of `0` or `1`, as there is only 1 confounder being introduced. The argument `pair` indicates which relationship to evaluate; all other datasets in the `list` are treated as the confoudners.
+In order to mitigate the risk of a reversal, the function `LSSA_LFI_validated()` provides validation of the relationship between two datasets by including a third "attendant" series. As the relationship between the two datasets to be evaluated  (either dependence or independence) should hold no matter what additional dataset is introduced, this found runs a routine where the consistency of the model selection process is evaluated. The input requires a specific `pair` of indices, whose linear relationship are of interest. Then, any remaining series in the input list are included, one per iteration, as a third attedant series. If the resulting model selection includes the pair within a linearly dependent group, then, a value of `1` is returned for that iteration; if not, a value of `0` is returned. The resulting mean outcomes are proportional to the probability that there is linear dependence almost surely, given the data at hand.
 
 ```{r}
 X <- list("y1" = X1, "y2" = X2, "y3" = X3)
@@ -177,7 +177,7 @@ mod_val <- LSSA_LFI_validated(X, pair = c(1, 2), n_iter = 100, intercept = FALSE
 mod_val
 ```
 
-The probability of linear dependence between $y_1(t)$ and $y_2(t)$ comes to 1.0 given just $y_3(t)$ as a confounder. 
+The probability of linear dependence between $y_1(t)$ and $y_2(t)$ comes to 1.0 given just $y_3(t)$ as a third attendant series.. 
 
 It would be tedious to have to enter in all pairs of datasets, and so the function `LSSA_LFI_pairwise()` function returns an upper-triangular matrix of all probabilities of linear dependence between all datasets in the input `list`. To reduce computational time for this example, we will use just 10 iterations:
 
