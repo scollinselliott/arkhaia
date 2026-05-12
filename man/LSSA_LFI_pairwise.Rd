@@ -3,7 +3,7 @@
 \name{LSSA_LFI_pairwise}
 \alias{LSSA_LFI_pairwise}
 \alias{LSSA_LFI_pairwise.list}
-\title{Pairwise Selection of Linearlly Dependent LSSA-LFI Models}
+\title{Pairwise Selection of Linearly Dependent LSSA-LFI Models}
 \usage{
 LSSA_LFI_pairwise(x, n_iter = 1, intercept = TRUE)
 

@@ -3,7 +3,7 @@
 \name{LSSA_LFI_epoch}
 \alias{LSSA_LFI_epoch}
 \alias{LSSA_LFI_epoch.list}
-\title{Period-Variable Pairwise Selection of Linearlly Dependent LSSA-LFI Models}
+\title{Period-Variable Pairwise Selection of Linearly Dependent LSSA-LFI Models}
 \usage{
 LSSA_LFI_epoch(
   x,

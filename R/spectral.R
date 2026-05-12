@@ -56,10 +56,12 @@ LSSA.data.frame <- function(x, freqs = seq(0.001, 0.5, by = 0.0005), intercept =
 #' @param intercept Whether to include the intercept. Default is \code{TRUE}.
 #' @param AIC If \code{TRUE}, only the result that has yeilded the lowest AIC is given \insertCite{akaike_information_1973}{arkhaia}. Default is \code{FALSE}.
 #' @returns A list containing:
-#'   * A list of the coefficients for each iteration (the intercept is included in the first iteration).
-#'   * A vector of the frequencies.
-#'   * The residual sum of squares (RSS) after each iteration (decreasing).
-#'   * The AIC upon each iteration. (If the paraemter AIC is \code{TRUE}, this will stop at the lowest AIC value produced by the frequencies tested).
+#' \itemize{
+#'  \item A list of the coefficients for each iteration (the intercept is included in the first iteration).
+#'  \item A vector of the frequencies.
+#'  \item The residual sum of squares (RSS) after each iteration (decreasing).
+#'  \item The AIC upon each iteration. (If the parameter AIC is \code{TRUE}, this will stop at the lowest AIC value produced by the frequencies tested).
+#' }
 #' 
 #' @references
 #'   \insertAllCited{}
@@ -362,7 +364,7 @@ LSSA_LFI_validated.list <- function(x, pair = NULL, n_iter = 1, intercept = TRUE
 
 
 
-#' Pairwise Selection of Linearlly Dependent LSSA-LFI Models
+#' Pairwise Selection of Linearly Dependent LSSA-LFI Models
 #'
 #' Evaluate pairwise linear dependence between observations using a LSSA-LFI valdiated model selection (see \code{\link[arkhaia]{LSSA_LFI_validated}}). 
 #' 
@@ -395,7 +397,7 @@ LSSA_LFI_pairwise.list <- function(x, n_iter = 1, intercept = TRUE) {
 
 
 
-#' Period-Variable Pairwise Selection of Linearlly Dependent LSSA-LFI Models
+#' Period-Variable Pairwise Selection of Linearly Dependent LSSA-LFI Models
 #'
 #' Evaluate pairwise linear dependence between two time series using a LSSA-LFI valdiated model selection (see \code{\link[arkhaia]{LSSA_LFI_validated}})), with variable length time period. 
 #' 
@@ -477,3 +479,52 @@ LSSA_LFI_epoch.list <- function(x, pair = NULL, n_iter = 1, intercept = TRUE, t_
 
 
 
+
+
+#' Partitioned LSSA-LFI Model Terms and AIC
+#'
+#' For multiple time series contained in a list, this function will compute the Akaike Information Criterion (AIC) as the number of terms (\code{n_iter}) is increased. This function can be performed after \code{\link[arkhaia]{LSSA_LFI_candidates}} and \code{\link[arkhaia]{repartition}} to determine the appropriate number of terms.
+#' 
+#' @param x A \code{list} containing the time series, each of which should be a matrix or data frame with time index in the first column and value in the second.
+#' @param n_iter The number of iterations to run for the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is 1.
+#' @param intercept Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.
+#' @param AIC If \code{TRUE}, only the result that has yeilded the lowest AIC is given \insertCite{akaike_information_1973}{arkhaia}. Default is \code{FALSE}.
+#' 
+#' @returns A data frame giving the number of iterations and the AIC for each. 
+#'  
+#' @references
+#'   \insertAllCited{}
+#'
+#' @importFrom Rdpack reprompt
+#' @export
+LSSA_LFI_multi <- function(x, n_iter = 1, intercept = TRUE, AIC = FALSE) {
+    UseMethod("LSSA_LFI_multi")
+}
+
+#' @rdname LSSA_LFI_multi
+#' @export
+LSSA_LFI_multi.list <- function(x, n_iter = 1, intercept = TRUE, AIC = FALSE) {
+  n <- length(x)
+  y <- as.matrix(do.call(rbind, x))
+  x_rows <- unlist(lapply(x, nrow))
+  idx <- c(0, cumsum(x_rows)[1:(n-1)]) 
+
+  if (intercept == TRUE) {
+    intrcpt <- 1
+  } else {
+    intrcpt <- 0
+  }
+
+  # add 1 for R indexing
+  out <- LSSA_LFI_multi_arma(y, idx, x_rows, n_iter, intrcpt)
+
+  out <- as.data.frame(out)
+  colnames(out) <- c("n_iter", "AIC")
+
+  if (AIC == TRUE) {
+    m <- which.min(out$AIC)
+    out <- out[m,]
+  }
+
+  return(out)
+}
