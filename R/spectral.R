@@ -335,9 +335,10 @@ LSSA_LFI_validated.list <- function(x, pair = NULL, n_iter = 1, intercept = TRUE
   for (i in 1:length(attend)) {
     ii <- c(pair, attend[i])
     y <- x[ii]
+    ny <- length(y)
 
     x_rows <- unlist(lapply(y, nrow))
-    idx <- c(0, cumsum(x_rows)[1:(n-1)]) 
+    idx <- c(0, cumsum(x_rows)[1:(ny-1)]) 
     y0 <- as.matrix(do.call(rbind, y))
 
     mod <- LSSA_LFI_candidates_arma(y0, idx, x_rows, partition, n_iter, intrcpt) + 1 # add 1 for R indexing
@@ -401,13 +402,13 @@ LSSA_LFI_pairwise.list <- function(x, n_iter = 1, intercept = TRUE) {
 #' @returns A matrix giving the probability of linear dependence, predicated upon time \eqn{t} and window length \eqn{h}.
 #'
 #' @export
-LSSA_LFI_epoch <- function(x, n_iter = 1, intercept = TRUE) {
+LSSA_LFI_epoch <- function(x, pair = NULL, n_iter = 1, intercept = TRUE, t_range = NULL, h_range = NULL, t_grid = 1, h_grid = 1) {
     UseMethod("LSSA_LFI_epoch")
 }
 
 #' @rdname LSSA_LFI_epoch
 #' @export
-LSSA_LFI_epoch <- function(x, pair = NULL, n_iter = 1, intercept = TRUE, t_range = NULL, h_range = NULL, t_grid = 1, h_grid = 1) {
+LSSA_LFI_epoch.list <- function(x, pair = NULL, n_iter = 1, intercept = TRUE, t_range = NULL, h_range = NULL, t_grid = 1, h_grid = 1) {
   if (is.null(pair)) {
     stop("Must supply the pair of data frames in x to be evaluated.")
   }
@@ -420,15 +421,15 @@ LSSA_LFI_epoch <- function(x, pair = NULL, n_iter = 1, intercept = TRUE, t_range
   for (i in 1:length(x)) {
     all <- rbind(all, x[[i]])
   }
-  start <- min(all$t)
-  end <- max(all$t)
+  start_ <- min(all$t)
+  end_ <- max(all$t)
   if (is.null(t_range)) {
-    t_ <- seq(start, end, by = t_grid)
+    t_ <- seq(start_, end_, by = t_grid)
   } else {
     t_ <- seq(t_range[1], t_range[2], by = t_grid)
   }
   if (is.null(h_range)) {
-    h_ <- seq(h_grid, (end - start) + h_grid, by = h_grid)
+    h_ <- seq(h_grid, (end_ - start_) + h_grid, by = h_grid)
   } else {
     h_ <- seq(h_range[1], h_range[2], by = h_grid)
   }
@@ -436,7 +437,7 @@ LSSA_LFI_epoch <- function(x, pair = NULL, n_iter = 1, intercept = TRUE, t_range
 
   for (ti in 1:length(t_)) {
     for (hi in 1:length(h_)) {
-      if (t_[ti] + h_[hi] <= end) {
+      if (t_[ti] + h_[hi] <= end_) {
         tmp <- list()
         do_lssa <- TRUE
         n_obs_ <- c()
@@ -447,7 +448,8 @@ LSSA_LFI_epoch <- function(x, pair = NULL, n_iter = 1, intercept = TRUE, t_range
           if (n_obs < 4) {
             do_lssa <- FALSE
           }
-          tmp[[names(x)[i]]] <- trimmed
+          # tmp[[names(x)[i]]] <- trimmed
+          tmp[[i]] <- trimmed
         } 
         if (do_lssa == TRUE) {
           n_iter_ <- min(c(n_obs_, n_iter))
@@ -458,7 +460,6 @@ LSSA_LFI_epoch <- function(x, pair = NULL, n_iter = 1, intercept = TRUE, t_range
     }
     message("Percent complete: ", round(ti/length(t_), 2)*100, "%")
   }
-
 
   rownames(out) <- t_
   colnames(out) <- h_

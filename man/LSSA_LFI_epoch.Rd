@@ -2,6 +2,7 @@
 % Please edit documentation in R/spectral.R
 \name{LSSA_LFI_epoch}
 \alias{LSSA_LFI_epoch}
+\alias{LSSA_LFI_epoch.list}
 \title{Period-Variable Pairwise Selection of Linearlly Dependent LSSA-LFI Models}
 \usage{
 LSSA_LFI_epoch(
@@ -15,7 +16,7 @@ LSSA_LFI_epoch(
   h_grid = 1
 )
 
-LSSA_LFI_epoch(
+\method{LSSA_LFI_epoch}{list}(
   x,
   pair = NULL,
   n_iter = 1,

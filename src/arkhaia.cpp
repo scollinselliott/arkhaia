@@ -167,9 +167,9 @@ arma::mat LSSA_LFI_arma(const arma::mat & x, int n_iter, int intercept) {
     x0.col(1) = resid;
 
     if (intercept == 1) {
-        aic[0] = 2 * (3 + 2) + log(epsilon2 / nr) * nr;
+        aic[0] = 2 * (3 + 2) + log(epsilon2 / nr) * nr + nr + 2 * log(2 * M_PI);
     } else {
-        aic[0] = 2 * (2 + 2) + log(epsilon2 / nr) * nr;
+        aic[0] = 2 * (2 + 2) + log(epsilon2 / nr) * nr + nr + 2 * log(2 * M_PI);
     }
 
     int end = 0;
@@ -226,9 +226,9 @@ arma::mat LSSA_LFI_arma(const arma::mat & x, int n_iter, int intercept) {
             x0.col(1) = resid;
 
             if (intercept == 1) {
-                aic[j] = 2 * (3 * (j+1) + 2) + log(epsilon2 / nr) * nr;
+                aic[j] = 2 * (3 * (j+1) + 2) + log(epsilon2 / nr) * nr + nr + nr * log(2 * M_PI);
             } else {
-                aic[j] = 2 * (3 * (j+1) + 1) + log(epsilon2 / nr) * nr;
+                aic[j] = 2 * (3 * (j+1) + 1) + log(epsilon2 / nr) * nr + nr + nr * log(2 * M_PI);
             }
         }
     }
@@ -381,12 +381,11 @@ int LSSA_LFI_candidates_arma(arma::mat & x, arma::vec & start_idx, arma::vec & x
             }
             arma::mat Y (nx,2);
             int k = 0;
-            arma::vec temp (nc);
             for (int Q2 = 0; Q2 < nc; Q2++) {
                 if (A[Q2] == Q) {
                     int h = start_idx[Q2];
                     int nh = x_rows[Q2];
-                    for (int hi = h; hi < (h + nh); hi++) {
+                    for (int hi = h; hi < (h + nh - 1); hi++) {
                         Y(k, 0) = x(hi, 0);
                         Y(k, 1) = x(hi, 1);
                         k = k + 1;
@@ -413,7 +412,7 @@ int LSSA_LFI_candidates_arma(arma::mat & x, arma::vec & start_idx, arma::vec & x
         }
 
         arma::vec n_iter_out = arma::linspace(1, n_iter_max, n_iter_max);
-        arma::vec aic = 2 * nA * (n_iter_out * 3 + 1 + intercept) + n_obs * log(epsilon2 / n_obs);
+        arma::vec aic = 2 * nA * (n_iter_out * 3 + 1 + intercept) + n_obs * log(epsilon2 / n_obs) + n_obs + n_obs * log(2 * M_PI);
 
         aic_min[P] =  arma::min(aic);
 
