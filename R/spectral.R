@@ -54,13 +54,17 @@ LSSA.data.frame <- function(x, freqs = seq(0.001, 0.5, by = 0.0005), intercept =
 #' @param x A data frame of two columns, with the first column containing time indices and the second containing values.
 #' @param n_iter The number of iterations to run. Default is 1.
 #' @param intercept Whether to include the intercept. Default is \code{TRUE}.
-#' @param AIC If \code{TRUE}, only the result that has yeilded the lowest AIC (Aikake Information Criterion) is given. Default is \code{FALSE}.
+#' @param AIC If \code{TRUE}, only the result that has yeilded the lowest AIC is given \insertCite{akaike_new_1974}{arkhaia}. Default is \code{FALSE}.
 #' @returns A list containing:
 #'   * A list of the coefficients for each iteration (the intercept is included in the first iteration).
 #'   * A vector of the frequencies.
 #'   * The residual sum of squares (RSS) after each iteration (decreasing).
 #'   * The AIC upon each iteration. (If the paraemter AIC is \code{TRUE}, this will stop at the lowest AIC value produced by the frequencies tested).
 #' 
+#' @references
+#'   \insertAllCited{}
+#'
+#' @importFrom Rdpack reprompt
 #' @export
 LSSA_LFI <- function(x, n_iter = 1, intercept = TRUE, AIC = FALSE) {
     UseMethod("LSSA_LFI")
@@ -100,14 +104,18 @@ LSSA_LFI.data.frame <- function(x, n_iter = 1, intercept = TRUE, AIC = FALSE) {
 
 #' Linear Dependence of LSSA-LFI Candidate Models via AIC
 #'
-#' For a set of time series (namely partitions of set of series) contained in a list, will compute the Akaike Information Criterion (AIC) for each candidate set.  
+#' For a set of time series (namely partitions of set of series) contained in a list, will compute the Akaike Information Criterion (AIC) for each candidate set \insertCite{akaike_new_1974}{arkhaia}.  
 #' 
 #' @param x A \code{list} containing the time series, each of which should be a matrix or data frame with time index in the first column and value in the second.
 #' @param sets Candidate sets to evaluate; must be a \code{list} of \code{lists} containing the indices of the sets in \code{x}. If left \code{NULL}, two sets are evaluated: all series pooled together [1] and all series kept separate [2].
 #' @param n_iter The number of iterations to run for the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is 1.
 #' @param intercept Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.
 #' @returns The index of the set yielding the lowest AIC. If \code{sets} is \code{NULL}, the output of \code{[1]} indicates linear dependence; if the output is \code{[2]}, linear independence.
-#' 
+#'  
+#' @references
+#'   \insertAllCited{}
+#'
+#' @importFrom Rdpack reprompt
 #' @export
 LSSA_LFI_candidates <- function(x, sets = NULL, n_iter = 1, intercept = TRUE) {
     UseMethod("LSSA_LFI_candidates")

@@ -19,7 +19,7 @@ LSSA_LFI(x, n_iter = 1, intercept = TRUE, AIC = FALSE)
 
 \item{intercept}{Whether to include the intercept. Default is \code{TRUE}.}
 
-\item{AIC}{If \code{TRUE}, only the result that has yeilded the lowest AIC (Aikake Information Criterion) is given. Default is \code{FALSE}.}
+\item{AIC}{If \code{TRUE}, only the result that has yeilded the lowest AIC is given \insertCite{akaike_new_1974}{arkhaia}. Default is \code{FALSE}.}
 }
 \value{
 A list containing:
@@ -30,4 +30,7 @@ A list containing:
 }
 \description{
 Peforms a simple least squares fitting to time indexed data of the form  \eqn{x(t) = \beta_{0} + \sum_{i =1}^n \beta_{1i} \cos (2 \pi f t) + \beta_{2i} \sin(2 \pi f t)}, using an input of frequencies; the lowest frequency peak (not the highest power frequency) is chosen for regression, up to a chosen number of iterations. Intercept may be ommitted. The lowest frequency is equivalent to the longest period.
+}
+\references{
+\insertAllCited{}
 }

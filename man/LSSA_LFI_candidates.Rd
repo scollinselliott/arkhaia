@@ -22,5 +22,8 @@ LSSA_LFI_candidates(x, sets = NULL, n_iter = 1, intercept = TRUE)
 The index of the set yielding the lowest AIC. If \code{sets} is \code{NULL}, the output of \code{[1]} indicates linear dependence; if the output is \code{[2]}, linear independence.
 }
 \description{
-For a set of time series (namely partitions of set of series) contained in a list, will compute the Akaike Information Criterion (AIC) for each candidate set.
+For a set of time series (namely partitions of set of series) contained in a list, will compute the Akaike Information Criterion (AIC) for each candidate set \insertCite{akaike_new_1974}{arkhaia}.
+}
+\references{
+\insertAllCited{}
 }
