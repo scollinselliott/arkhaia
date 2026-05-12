@@ -19,7 +19,7 @@ LSSA_LFI(x, n_iter = 1, intercept = TRUE, AIC = FALSE)
 
 \item{intercept}{Whether to include the intercept. Default is \code{TRUE}.}
 
-\item{AIC}{If \code{TRUE}, only the result that has yeilded the lowest AIC is given \insertCite{akaike_new_1974}{arkhaia}. Default is \code{FALSE}.}
+\item{AIC}{If \code{TRUE}, only the result that has yeilded the lowest AIC is given \insertCite{akaike_information_1973}{arkhaia}. Default is \code{FALSE}.}
 }
 \value{
 A list containing:
