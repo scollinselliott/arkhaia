@@ -167,9 +167,9 @@ arma::mat LSSA_LFI_arma(const arma::mat & x, int n_iter, int intercept) {
     x0.col(1) = resid;
 
     if (intercept == 1) {
-        aic[0] = 2 * (3 + 2) + log(epsilon2 / nr) * nr + nr + 2 * log(2 * M_PI);
+        aic[0] = 2 * (3 + 2) + log(epsilon2 / nr) * nr + nr + nr * log(2 * M_PI);
     } else {
-        aic[0] = 2 * (2 + 2) + log(epsilon2 / nr) * nr + nr + 2 * log(2 * M_PI);
+        aic[0] = 2 * (2 + 2) + log(epsilon2 / nr) * nr + nr + nr * log(2 * M_PI);
     }
 
     int end = 0;
