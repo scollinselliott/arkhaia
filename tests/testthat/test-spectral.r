@@ -57,6 +57,94 @@ test_that("repartition works", {
   expect_equal(nrow(out[[2]]), 50)
 })
 
+test_that("LSSA_LFI_model fits results below 1e-12 threshold", {
+  k <- 10
+  out <- LSSA_LFI(dat1, n_iter = k, intercept = TRUE)
+  freqs <- out$freqs
+  coefs <- out$coefs
 
+  y <- coefs[1,3]
+  rss_R <- numeric(k)
+  for (i in 1:k) {
+    theta <- dat1[,1] * 2 * pi * freqs[i]
+    y <- y + coefs[i,1] * cos(theta) + coefs[i,2] * sin(theta) 
+    rss_R[i] <- sum((y - dat1[,2])^2)
+  }
 
+  mod <- LSSA_LFI_model(dat1, t_ = dat1[,1], n_iter = k, intercept = TRUE)
+
+  expect_true(all(abs(y - mod$y) < 1e-12))
+})
+
+test_that("AIC values correct in LSSA_LFI_multi - zero intercept", {
+  k <- 1:10
+  aic_out <- numeric(length(k))
+  aic_out_2 <- numeric(length(k))
+
+  for (i in 1:length(k)) {
+    out <- LSSA_LFI_multi(Y3, n_iter = k[i], intercept = FALSE, AIC = FALSE)
+    out_2 <- LSSA_LFI_multi(Y1, n_iter = k[i], intercept = FALSE, AIC = FALSE)
+
+    mod1 <- LSSA_LFI_model(dat1, t_ = dat1[,1], intercept = FALSE, n_iter = k[i])
+    mod2 <- LSSA_LFI_model(dat2, t_ = dat2[,1], intercept = FALSE, n_iter = k[i])
+    mod3 <- LSSA_LFI_model(dat3, t_ = dat3[,1], intercept = FALSE, n_iter = k[i])
+    rss1 <- sum((dat1[,2] - mod1[,2])^2)
+    rss2 <- sum((dat2[,2] - mod2[,2])^2)
+    rss3 <- sum((dat3[,2] - mod3[,2])^2)
+    n <- nrow(dat1) + nrow(dat2) + nrow(dat3)
+    n_2 <- nrow(dat1) + nrow(dat2)
+
+    aic <-   2 * 3 * (k[i] * 3 + 1) + n * log((rss1 + rss2 + rss3)/n) + n + n * log(2 * pi)
+    aic_2 <- 2 * 2 * (k[i] * 3 + 1) + n_2 * log((rss1 + rss2)/n_2) + n_2 + n_2 * log(2 * pi)
+
+    aic_out[i] <- out$aic[k[i]] - aic
+    aic_out_2[i] <- out_2$aic[k[i]] - aic_2
+  }
+
+  expect_true(all(abs(aic_out) < 1e-12))
+  expect_true(all(abs(aic_out_2) < 1e-12))
+})
+
+test_that("AIC values correct in LSSA_LFI_multi - including intercept", {
+  k <- 1:10
+  aic_out <- numeric(length(k))
+  aic_out_2 <- numeric(length(k))
+
+  for (i in 1:length(k)) {
+    out <- LSSA_LFI_multi(Y3, n_iter = k[i], intercept = TRUE, AIC = FALSE)
+    out_2 <- LSSA_LFI_multi(Y1, n_iter = k[i], intercept = TRUE, AIC = FALSE)
+
+    mod1 <- LSSA_LFI_model(dat1, t_ = dat1[,1], intercept = TRUE, n_iter = k[i])
+    mod2 <- LSSA_LFI_model(dat2, t_ = dat2[,1], intercept = TRUE, n_iter = k[i])
+    mod3 <- LSSA_LFI_model(dat3, t_ = dat3[,1], intercept = TRUE, n_iter = k[i])
+    rss1 <- sum((dat1[,2] - mod1[,2])^2)
+    rss2 <- sum((dat2[,2] - mod2[,2])^2)
+    rss3 <- sum((dat3[,2] - mod3[,2])^2)
+
+    n <- nrow(dat1) + nrow(dat2) + nrow(dat3)
+    n_2 <- nrow(dat1) + nrow(dat2)
+
+    aic <- 2 * 3 * (k[i] * 3 + 2) + n * log((rss1 + rss2 + rss3)/n) + n + n * log(2 * pi)
+    aic_2 <- 2 * 2 * (k[i] * 3 + 2) + n_2 * log((rss1 + rss2)/n_2) + n_2 + n_2 * log(2 * pi)
+
+    aic_out[i] <- out$aic[k[i]] - aic
+    aic_out_2[i] <- out_2$aic[k[i]] - aic_2
+  }
+
+  expect_true(all(abs(aic_out) < 1e-12))
+  expect_true(all(abs(aic_out_2) < 1e-12))
+})
+
+test_that("LSSA_LFI_comp chooses better fitting model than LSSA_LFI_multi", {
+
+  Y3_repar <- repartition(Y3, list(c(1,2), 3))
+  Y3_repar_multi <- LSSA_LFI_multi(Y3_repar, n_iter = 100, intercept = FALSE, AIC = TRUE)
+  aic1 <- Y3_repar_multi["aic"]
+
+  Y3_repar_multi <- LSSA_LFI_multi(Y3_repar, n_iter = 100, intercept = FALSE, AIC = TRUE)
+  out <- LSSA_LFI_comp(Y3_repar, intercept = FALSE) 
+  aic2 <- out$aic
+
+  expect_true(aic2 < aic1)
+})
 

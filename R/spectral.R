@@ -126,6 +126,9 @@ LSSA_LFI_candidates <- function(x, sets = NULL, n_iter = 1, intercept = TRUE) {
 #' @rdname LSSA_LFI_candidates
 #' @export
 LSSA_LFI_candidates.list <- function(x, sets = NULL, n_iter = 1, intercept = TRUE) {
+  if (length(x) < 2) {
+    stop("Input list must contain more than one time series.")
+  }
   n <- length(x)
   y <- as.matrix(do.call(rbind, x))
   x_rows <- unlist(lapply(x, nrow))
@@ -508,6 +511,9 @@ LSSA_LFI_multi.list <- function(x, n_iter = 1, intercept = TRUE, AIC = FALSE) {
   y <- as.matrix(do.call(rbind, x))
   x_rows <- unlist(lapply(x, nrow))
   idx <- c(0, cumsum(x_rows)[1:(n-1)]) 
+  if (length(x_rows) == 1) {
+    idx <- idx[1]
+  }
 
   if (intercept == TRUE) {
     intrcpt <- 1
@@ -515,16 +521,73 @@ LSSA_LFI_multi.list <- function(x, n_iter = 1, intercept = TRUE, AIC = FALSE) {
     intrcpt <- 0
   }
 
-  # add 1 for R indexing
   out <- LSSA_LFI_multi_arma(y, idx, x_rows, n_iter, intrcpt)
 
   out <- as.data.frame(out)
-  colnames(out) <- c("n_iter", "AIC")
+  colnames(out) <- c("n_iter", "rss", "aic")
 
   if (AIC == TRUE) {
-    m <- which.min(out$AIC)
-    out <- out[m,]
+    m <- which.min(out$aic)
+    out <- as.numeric(out[m,])
+    names(out) <- c("n_iter", "rss", "aic")
   }
 
   return(out)
 }
+
+
+
+
+#' Partitioned LSSA-LFI Model Terms and AIC: Composite Number of Parameters
+#'
+#' For multiple time series contained in a list, this function will compute the Akaike Information Criterion (AIC) for the best-fitting models particular to each series, including the case of an intercept-only model. This function can be performed after \code{\link[arkhaia]{LSSA_LFI_candidates}} and \code{\link[arkhaia]{repartition}} to determine the appropriate number of terms. For the situation where all time series must have the same number of terms, \code{\link[arkhaia]{LSSA_LFI_multi}} should be used, but this function should chosose a better fitting model, since it adjusts the number of parameters for each dataset.
+#' 
+#' @param x A \code{list} containing the time series, each of which should be a matrix or data frame with time index in the first column and value in the second.
+#' @param intercept Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.
+#' 
+#' @returns A list giving the number of parameters (\code{k}) and residual sum of squares (\code{rss}) for each dataset in \code{x}, along with the AIC for the paritioned model. 
+#' 
+#' @export
+LSSA_LFI_comp <- function(x, intercept = TRUE) {
+    UseMethod("LSSA_LFI_comp")
+}
+
+#' @rdname LSSA_LFI_comp
+#' @export
+LSSA_LFI_comp.list <- function(x, intercept = TRUE) {  
+  n <- length(x)
+  y <- as.matrix(do.call(rbind, x))
+  nx <- nrow(y)
+
+  if (intercept == TRUE) {
+    intrcpt <- 1
+  } else {
+    intrcpt <- 0
+  }
+
+  rss_i <- numeric(n)
+  K <- numeric(n)
+
+  for (i in 1:n) {
+    nxi <- nrow(x[[i]])
+    lssa_lfi_i <- LSSA_LFI(x[[i]], n_iter = nxi-1, intercept = intrcpt, AIC = TRUE)
+    k <- length(lssa_lfi_i$rss)
+    rss0 <- sum((x[[i]][,2] - mean(x[[i]][,2]))^2)
+    aic0 <- 2 * (1) + nxi * log(rss0 / nxi) + nxi + nxi * log(2 * pi)
+    if (aic0 < lssa_lfi_i$aic[k]) {
+      rss_i[i] <- rss0
+      K[i] <- 0
+    } else {
+      rss_i[i] <- lssa_lfi_i$rss[k]
+      K[i] <- k
+    }
+  }
+
+  aic <- 2 * (3 * (sum(K) + 1)) + nx * log(sum(rss_i) / nx) + nx + nx * log(2 * pi) 
+
+  out <- list(k = K, rss = rss_i, aic = aic)
+
+  return(out)
+}
+
+
