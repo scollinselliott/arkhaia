@@ -583,7 +583,7 @@ LSSA_LFI_comp.list <- function(x, intercept = TRUE) {
     }
   }
 
-  aic <- 2 * (3 * (sum(K) + 1)) + nx * log(sum(rss_i) / nx) + nx + nx * log(2 * pi) 
+  aic <- 2 * (3 *(sum(K)) + n) + nx * log(sum(rss_i) / nx) + nx + nx * log(2 * pi) 
 
   out <- list(k = K, rss = rss_i, aic = aic)
 
