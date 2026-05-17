@@ -304,7 +304,7 @@ LSSA_LFI_model.data.frame <- function(x, t_ = NULL, n_iter = 1, intercept = TRUE
 #' Probability of linear dependence between two groups of time series observations using a LSSA-LFI model selection (see \code{\link[arkhaia]{LSSA_LFI_candidates}}), on the basis of the inclusion of a third "attendant" variate. The third attendant variate is selected from the remaining time series in the list, hence the input list must include at least three times series.
 #' 
 #' @param x A list of data frames.
-#' @param pair The pair of series to evaluate in the list \code{x}, either names or indices.
+#' @param pair The pair of series to evaluate in the list \code{x}, given as indices.
 #' @param n_iter The number of iterations to run. Default is 1.
 #' @param intercept Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.
 
@@ -405,7 +405,7 @@ LSSA_LFI_pairwise.list <- function(x, n_iter = 1, intercept = TRUE) {
 #' Evaluate pairwise linear dependence between two time series using a LSSA-LFI valdiated model selection (see \code{\link[arkhaia]{LSSA_LFI_validated}})), with variable length time period. 
 #' 
 #' @param x A list of data frames.
-#' @param pair The pair of commodities to evaluate in the list \code{x}, either names or indices.
+#' @param pair The pair of commodities to evaluate in the list \code{x}, given as indices.
 #' @param n_iter The number of iterations to run. Default is 1.
 #' @param intercept Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.
 #' @param t_range The range of the time period. Default are the minimum and maximum dates spanned by the data in \code{x}.
@@ -474,8 +474,8 @@ LSSA_LFI_epoch.list <- function(x, pair = NULL, n_iter = 1, intercept = TRUE, t_
     message("Percent complete: ", round(ti/length(t_), 2)*100, "%")
   }
 
-  rownames(out) <- t_
-  colnames(out) <- h_
+  colnames(out) <- t_
+  rownames(out) <- rev(h_)
   return(out)
 
 }

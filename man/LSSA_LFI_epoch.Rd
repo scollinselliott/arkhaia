@@ -30,7 +30,7 @@ LSSA_LFI_epoch(
 \arguments{
 \item{x}{A list of data frames.}
 
-\item{pair}{The pair of commodities to evaluate in the list \code{x}, either names or indices.}
+\item{pair}{The pair of commodities to evaluate in the list \code{x}, given as indices.}
 
 \item{n_iter}{The number of iterations to run. Default is 1.}
 

@@ -12,7 +12,7 @@ LSSA_LFI_validated(x, pair = NULL, n_iter = 1, intercept = TRUE)
 \arguments{
 \item{x}{A list of data frames.}
 
-\item{pair}{The pair of series to evaluate in the list \code{x}, either names or indices.}
+\item{pair}{The pair of series to evaluate in the list \code{x}, given as indices.}
 
 \item{n_iter}{The number of iterations to run. Default is 1.}
 
