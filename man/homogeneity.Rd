@@ -20,7 +20,7 @@ homogeneity(x, related = NULL, unrelated = NULL, direction = "UW")
 }
 \value{
 A list of results:
-\itemize{
+\itemize{11
  \item \code{n} - A vector of the number of related and unrelated pairs of contexts, respectively \eqn{n_W} and \eqn{n_U}.
  \item \code{U} - The effect sizes between unrelated pairs of contexts.
  \item \code{W} - The effect sizes between related pairs of contexts.

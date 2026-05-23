@@ -525,7 +525,7 @@ pa_matrix.xtabs <- function(x) {
 #' 
 #' 
 #' @returns A list of results:
-#' \itemize{
+#' \itemize{11
 #'  \item \code{n} - A vector of the number of related and unrelated pairs of contexts, respectively \eqn{n_W} and \eqn{n_U}.
 #'  \item \code{U} - The effect sizes between unrelated pairs of contexts.
 #'  \item \code{W} - The effect sizes between related pairs of contexts.
@@ -625,7 +625,7 @@ homogeneity.effect_sizes <- function(x, related = NULL, unrelated = NULL, direct
 
   }
 
-  n <- c(length(related), length(unrelated))
+  n <- c(nrow(related), nrow(unrelated))
   names(n) <- c("n_W", "n_U")
 
   res <- list(n = n, U = U, W = W, Q = Q, D = delta)
