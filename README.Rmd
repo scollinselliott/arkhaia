@@ -48,10 +48,10 @@ Establishing a measure of practical signficance for the comparison of finds asse
 
 ### Random Right-Censored Count Data
 
-Random right-censoring of archaeological count data. Assemblages of artifacts that do _not_ belong to primary contexts (i.e., "random" secondary or tertiary contexts), comprise a minimum amount of finds that were "is use" in a given locality. From a contingency table of those minimum counts, it is possible to generate distributions of counts in use from which to evaluate This paper is currently under review: @collins-elliott_random_nodate, "Random..."
+Random right-censoring of archaeological count data. Assemblages of artifacts that do _not_ belong to primary contexts (i.e., "random" secondary or tertiary contexts), comprise a minimum amount of finds that were "in use" in a given locality. From a contingency table of those minimum counts, it is possible to generate distributions of counts in use from which to evaluate This paper is currently under review: @collins-elliott_random_nodate, "Random..."
 
 * Estimating the rate of a Poisson distribution based on a contingency table of minimum counts.
-* Resampling routines to generate contingency tables accoriding to a truncated Poisson distribution, representing counts "in use" as opposed to those deposied.
+* Resampling routines to generate contingency tables accoriding to a truncated Poisson distribution, representing counts "in use" as opposed to those deposited.
 
 ### Least Squares Spectral Analysis 
 

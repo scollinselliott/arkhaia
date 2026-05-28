@@ -57,7 +57,7 @@ reviewed and is under revision: Collins-Elliott (Under Review),
 Random right-censoring of archaeological count data. Assemblages of
 artifacts that do *not* belong to primary contexts (i.e., “random”
 secondary or tertiary contexts), comprise a minimum amount of finds that
-were “is use” in a given locality. From a contingency table of those
+were “in use” in a given locality. From a contingency table of those
 minimum counts, it is possible to generate distributions of counts in
 use from which to evaluate This paper is currently under review:
 Collins-Elliott (Under Review), “Random…”
@@ -66,7 +66,7 @@ Collins-Elliott (Under Review), “Random…”
   table of minimum counts.
 - Resampling routines to generate contingency tables accoriding to a
   truncated Poisson distribution, representing counts “in use” as
-  opposed to those deposied.
+  opposed to those deposited.
 
 ### Least Squares Spectral Analysis
 
