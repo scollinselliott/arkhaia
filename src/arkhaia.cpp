@@ -791,3 +791,194 @@ Rcpp::NumericVector MC_pois_arma(const arma::mat & X, double lambda, arma::vec &
 
 
 
+//' @useDynLib arkhaia
+//' @importFrom Rcpp sourceCpp
+// [[Rcpp::export]]
+arma::mat wass_R1_arma(arma::vec & X, arma::vec N, int scaled, double incr) {
+    int n_vec = N.n_elem; 
+
+    arma::mat out (n_vec, n_vec);
+
+    arma::vec idx_start (n_vec);
+    arma::vec idx_end (n_vec);
+
+    idx_start[0] = 0;
+    idx_end[0] = N[0] - 1;
+    for (int k = 1; k < n_vec; ++k) {
+        idx_start[k] = idx_end[k-1] + 1;
+        idx_end[k] = idx_start[k] + N[k] - 1;
+    }
+    
+    for (int ki = 0; ki < (n_vec - 1); ++ki) {
+       for (int kj = ki + 1; kj < n_vec; ++kj) {
+            int idx11 = idx_start[ki];
+            int idx12 = idx_end[ki];
+            int idx21 = idx_start[kj];
+            int idx22 = idx_end[kj];
+
+            arma::colvec X1 = X.subvec(idx11,idx12);
+            arma::colvec X2 = X.subvec(idx21,idx22);
+
+            double minX1 = arma::min(X1);
+            double minX2 = arma::min(X2);
+            double maxX1 = arma::max(X1);
+            double maxX2 = arma::max(X2);
+
+            double minX = minX1;
+            if (minX2 < minX1) {
+                minX = minX2;
+            }
+            double maxX = maxX2;
+            if (maxX2 > maxX1) {
+                maxX = maxX2;
+            }
+            double len0 = (maxX - minX) / incr;
+            Rcpp::NumericVector len0v (1);
+            len0v[0] = len0;
+            arma::vec len1v = Rcpp::round(len0v,0);
+            int len1 = len1v[0];
+
+            int n1 = X1.n_elem;
+            int n2 = X2.n_elem;
+
+            double nn1 = n1;
+            double nn2 = n2;
+
+            double t = minX;
+            double summa = 0;
+            for (int i = 0; i < len1; ++i) {
+                t = minX + i * incr;
+                int cnt1 = 0;
+                int cnt2 = 0; 
+                for (int j = 0; j < n1; ++j) {
+                    if (X1[j] <= t) {
+                        cnt1 = cnt1 + 1;
+                    }
+                }
+                for (int j = 0; j < n2; ++j) {
+                    if (X2[j] <= t) {
+                        cnt2 = cnt2 + 1;
+                    }
+                }
+                double f1 = cnt1 / nn1;
+                double f2 = cnt2 / nn2;
+                double f = f2 - f1;
+                if (f < 0) {
+                    f = f1 - f2;
+                }
+                summa = summa + f;
+            }
+            Rcpp::NumericVector sqrtnn (1);
+            sqrtnn[0] = (n1 * n2) / (nn1 + nn2);
+            Rcpp::NumericVector sqrtn = Rcpp::sqrt(sqrtnn);
+            double w = summa * incr * sqrtn[0];
+            if (scaled == 1) {
+                w = w / (maxX - minX);
+            } 
+            out(kj,ki) = w;
+        }
+    }
+
+    return out;
+
+}
+
+
+
+
+//' @useDynLib arkhaia
+//' @importFrom Rcpp sourceCpp
+// [[Rcpp::export]]
+arma::cube wass_R1_perm_arma(arma::vec & X, arma::vec N, int scaled, double incr, int n_perm) {
+    int n_vec = N.n_elem; 
+
+    arma::cube out (n_vec, n_vec, n_perm);
+
+    arma::vec idx_start (n_vec);
+    arma::vec idx_end (n_vec);
+
+    idx_start[0] = 0;
+    idx_end[0] = N[0] - 1;
+    for (int k = 1; k < n_vec; ++k) {
+        idx_start[k] = idx_end[k-1] + 1;
+        idx_end[k] = idx_start[k] + N[k] - 1;
+    }
+
+    for (int p = 0; p < n_perm ; ++p) {
+        arma::vec Y = arma::shuffle(X);
+        for (int ki = 0; ki < (n_vec - 1); ++ki) {
+            for (int kj = ki + 1; kj < n_vec; ++kj) {
+                int idx11 = idx_start[ki];
+                int idx12 = idx_end[ki];
+                int idx21 = idx_start[kj];
+                int idx22 = idx_end[kj];
+
+                arma::colvec X1 = Y.subvec(idx11,idx12);
+                arma::colvec X2 = Y.subvec(idx21,idx22);
+
+                double minX1 = arma::min(X1);
+                double minX2 = arma::min(X2);
+                double maxX1 = arma::max(X1);
+                double maxX2 = arma::max(X2);
+
+                double minX = minX1;
+                if (minX2 < minX1) {
+                    minX = minX2;
+                }
+                double maxX = maxX2;
+                if (maxX2 > maxX1) {
+                    maxX = maxX2;
+                }
+                double len0 = (maxX - minX) / incr;
+                Rcpp::NumericVector len0v (1);
+                len0v[0] = len0;
+                arma::vec len1v = Rcpp::round(len0v,0);
+                int len1 = len1v[0];
+
+                int n1 = X1.n_elem;
+                int n2 = X2.n_elem;
+
+                double nn1 = n1;
+                double nn2 = n2;
+
+                double t = minX;
+                double summa = 0;
+                for (int i = 0; i < len1; ++i) {
+                    t = minX + i * incr;
+                    int cnt1 = 0;
+                    int cnt2 = 0; 
+                    for (int j = 0; j < n1; ++j) {
+                        if (X1[j] <= t) {
+                            cnt1 = cnt1 + 1;
+                        }
+                    }
+                    for (int j = 0; j < n2; ++j) {
+                        if (X2[j] <= t) {
+                            cnt2 = cnt2 + 1;
+                        }
+                    }
+                    double f1 = cnt1 / nn1;
+                    double f2 = cnt2 / nn2;
+                    double f = f2 - f1;
+                    if (f < 0) {
+                        f = f1 - f2;
+                    }
+                    summa = summa + f;
+                }
+                Rcpp::NumericVector sqrtnn (1);
+                sqrtnn[0] = (n1 * n2) / (nn1 + nn2);
+                Rcpp::NumericVector sqrtn = Rcpp::sqrt(sqrtnn);
+                double w = summa * incr * sqrtn[0];
+                if (scaled == 1) {
+                    w = w / (maxX - minX);
+                } 
+                out(kj,ki,p) = w;
+            }
+        }
+    }
+
+    return out;
+}
+
+
+

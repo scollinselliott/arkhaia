@@ -73,3 +73,15 @@ MC_pois_arma <- function(X, lambda, lambda_grid, omit_zero, M) {
     .Call('_arkhaia_MC_pois_arma', PACKAGE = 'arkhaia', X, lambda, lambda_grid, omit_zero, M)
 }
 
+#' @useDynLib arkhaia
+#' @importFrom Rcpp sourceCpp
+wass_R1_arma <- function(X, N, scaled, incr) {
+    .Call('_arkhaia_wass_R1_arma', PACKAGE = 'arkhaia', X, N, scaled, incr)
+}
+
+#' @useDynLib arkhaia
+#' @importFrom Rcpp sourceCpp
+wass_R1_perm_arma <- function(X, N, scaled, incr, n_perm) {
+    .Call('_arkhaia_wass_R1_perm_arma', PACKAGE = 'arkhaia', X, N, scaled, incr, n_perm)
+}
+

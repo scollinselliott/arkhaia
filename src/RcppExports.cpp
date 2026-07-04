@@ -171,6 +171,35 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// wass_R1_arma
+arma::mat wass_R1_arma(arma::vec& X, arma::vec N, int scaled, double incr);
+RcppExport SEXP _arkhaia_wass_R1_arma(SEXP XSEXP, SEXP NSEXP, SEXP scaledSEXP, SEXP incrSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type N(NSEXP);
+    Rcpp::traits::input_parameter< int >::type scaled(scaledSEXP);
+    Rcpp::traits::input_parameter< double >::type incr(incrSEXP);
+    rcpp_result_gen = Rcpp::wrap(wass_R1_arma(X, N, scaled, incr));
+    return rcpp_result_gen;
+END_RCPP
+}
+// wass_R1_perm_arma
+arma::cube wass_R1_perm_arma(arma::vec& X, arma::vec N, int scaled, double incr, int n_perm);
+RcppExport SEXP _arkhaia_wass_R1_perm_arma(SEXP XSEXP, SEXP NSEXP, SEXP scaledSEXP, SEXP incrSEXP, SEXP n_permSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type N(NSEXP);
+    Rcpp::traits::input_parameter< int >::type scaled(scaledSEXP);
+    Rcpp::traits::input_parameter< double >::type incr(incrSEXP);
+    Rcpp::traits::input_parameter< int >::type n_perm(n_permSEXP);
+    rcpp_result_gen = Rcpp::wrap(wass_R1_perm_arma(X, N, scaled, incr, n_perm));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_arkhaia_LSSA_arma", (DL_FUNC) &_arkhaia_LSSA_arma, 3},
@@ -185,6 +214,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_arkhaia_CR_arma", (DL_FUNC) &_arkhaia_CR_arma, 2},
     {"_arkhaia_VB_arma", (DL_FUNC) &_arkhaia_VB_arma, 2},
     {"_arkhaia_MC_pois_arma", (DL_FUNC) &_arkhaia_MC_pois_arma, 5},
+    {"_arkhaia_wass_R1_arma", (DL_FUNC) &_arkhaia_wass_R1_arma, 4},
+    {"_arkhaia_wass_R1_perm_arma", (DL_FUNC) &_arkhaia_wass_R1_perm_arma, 5},
     {NULL, NULL, 0}
 };
 

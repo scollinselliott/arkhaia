@@ -6,7 +6,7 @@
 #' @param freqs A vector of frequencies to evaluate. By default a grid from 0.001 to 0.5 is tested at an interval of 0.005.
 #' @param intercept Whether to include the intercept. Default is \code{TRUE}.
 #' @param type Type of output. Can be either \code{"frequency"} (the default) or \code{"period"}.
-#' @returns The a data frame containing the power and residual sum of squares for each frequency, as well as coefficients.
+#' @returns A data frame containing the power and residual sum of squares for each frequency, as well as coefficients.
 #' 
 #' @references
 #'   \insertAllCited{}

@@ -37,7 +37,7 @@ LSSA(
 \item{type}{Type of output. Can be either \code{"frequency"} (the default) or \code{"period"}.}
 }
 \value{
-The a data frame containing the power and residual sum of squares for each frequency, as well as coefficients.
+A data frame containing the power and residual sum of squares for each frequency, as well as coefficients.
 }
 \description{
 Peforms a simple least squares fitting to time indexed data of the form \eqn{x(t) = \beta_{0} + \sum_{i =1}^n \beta_{1i} \cos (2 \pi f t) + \beta_{2i} \sin(2 \pi f t)}, using a range of potential frequencies \insertCite{vanicek_approximate_1969,vanicek_further_1971}{arkhaia}. Intercept may be ommitted.
