@@ -172,31 +172,300 @@ BEGIN_RCPP
 END_RCPP
 }
 // wass_R1_arma
-arma::mat wass_R1_arma(arma::vec& X, arma::vec N, int scaled, double incr);
-RcppExport SEXP _arkhaia_wass_R1_arma(SEXP XSEXP, SEXP NSEXP, SEXP scaledSEXP, SEXP incrSEXP) {
+arma::mat wass_R1_arma(arma::vec& X, arma::vec N, int scaled, double scaled_by, double incr);
+RcppExport SEXP _arkhaia_wass_R1_arma(SEXP XSEXP, SEXP NSEXP, SEXP scaledSEXP, SEXP scaled_bySEXP, SEXP incrSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::vec& >::type X(XSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type N(NSEXP);
     Rcpp::traits::input_parameter< int >::type scaled(scaledSEXP);
+    Rcpp::traits::input_parameter< double >::type scaled_by(scaled_bySEXP);
     Rcpp::traits::input_parameter< double >::type incr(incrSEXP);
-    rcpp_result_gen = Rcpp::wrap(wass_R1_arma(X, N, scaled, incr));
+    rcpp_result_gen = Rcpp::wrap(wass_R1_arma(X, N, scaled, scaled_by, incr));
+    return rcpp_result_gen;
+END_RCPP
+}
+// wass_R1_armaV2
+double wass_R1_armaV2(Rcpp::NumericVector Y1, Rcpp::NumericVector Y2, int scaled, double scaled_by, double incr);
+RcppExport SEXP _arkhaia_wass_R1_armaV2(SEXP Y1SEXP, SEXP Y2SEXP, SEXP scaledSEXP, SEXP scaled_bySEXP, SEXP incrSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type Y1(Y1SEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type Y2(Y2SEXP);
+    Rcpp::traits::input_parameter< int >::type scaled(scaledSEXP);
+    Rcpp::traits::input_parameter< double >::type scaled_by(scaled_bySEXP);
+    Rcpp::traits::input_parameter< double >::type incr(incrSEXP);
+    rcpp_result_gen = Rcpp::wrap(wass_R1_armaV2(Y1, Y2, scaled, scaled_by, incr));
     return rcpp_result_gen;
 END_RCPP
 }
 // wass_R1_perm_arma
-arma::cube wass_R1_perm_arma(arma::vec& X, arma::vec N, int scaled, double incr, int n_perm);
-RcppExport SEXP _arkhaia_wass_R1_perm_arma(SEXP XSEXP, SEXP NSEXP, SEXP scaledSEXP, SEXP incrSEXP, SEXP n_permSEXP) {
+arma::cube wass_R1_perm_arma(arma::vec& X, arma::vec N, int scaled, double scaled_by, double incr, int n_perm);
+RcppExport SEXP _arkhaia_wass_R1_perm_arma(SEXP XSEXP, SEXP NSEXP, SEXP scaledSEXP, SEXP scaled_bySEXP, SEXP incrSEXP, SEXP n_permSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::vec& >::type X(XSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type N(NSEXP);
     Rcpp::traits::input_parameter< int >::type scaled(scaledSEXP);
+    Rcpp::traits::input_parameter< double >::type scaled_by(scaled_bySEXP);
     Rcpp::traits::input_parameter< double >::type incr(incrSEXP);
     Rcpp::traits::input_parameter< int >::type n_perm(n_permSEXP);
-    rcpp_result_gen = Rcpp::wrap(wass_R1_perm_arma(X, N, scaled, incr, n_perm));
+    rcpp_result_gen = Rcpp::wrap(wass_R1_perm_arma(X, N, scaled, scaled_by, incr, n_perm));
+    return rcpp_result_gen;
+END_RCPP
+}
+// ks_Rcpp
+double ks_Rcpp(Rcpp::NumericVector x1, Rcpp::NumericVector x2);
+RcppExport SEXP _arkhaia_ks_Rcpp(SEXP x1SEXP, SEXP x2SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type x1(x1SEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type x2(x2SEXP);
+    rcpp_result_gen = Rcpp::wrap(ks_Rcpp(x1, x2));
+    return rcpp_result_gen;
+END_RCPP
+}
+// th_idt_ks_arma
+Rcpp::List th_idt_ks_arma(const arma::vec& x1, const arma::vec& x2, double incr);
+RcppExport SEXP _arkhaia_th_idt_ks_arma(SEXP x1SEXP, SEXP x2SEXP, SEXP incrSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type x1(x1SEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type x2(x2SEXP);
+    Rcpp::traits::input_parameter< double >::type incr(incrSEXP);
+    rcpp_result_gen = Rcpp::wrap(th_idt_ks_arma(x1, x2, incr));
+    return rcpp_result_gen;
+END_RCPP
+}
+// th_idt_ks_perm_arma
+arma::cube th_idt_ks_perm_arma(const arma::vec& x1_input, const arma::vec& x2_input, double incr, int n_perm);
+RcppExport SEXP _arkhaia_th_idt_ks_perm_arma(SEXP x1_inputSEXP, SEXP x2_inputSEXP, SEXP incrSEXP, SEXP n_permSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type x1_input(x1_inputSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type x2_input(x2_inputSEXP);
+    Rcpp::traits::input_parameter< double >::type incr(incrSEXP);
+    Rcpp::traits::input_parameter< int >::type n_perm(n_permSEXP);
+    rcpp_result_gen = Rcpp::wrap(th_idt_ks_perm_arma(x1_input, x2_input, incr, n_perm));
+    return rcpp_result_gen;
+END_RCPP
+}
+// th_idt_wass_arma
+Rcpp::List th_idt_wass_arma(const arma::vec& x1, const arma::vec& x2, int scaled, double scaled_by, double quad_by, double incr);
+RcppExport SEXP _arkhaia_th_idt_wass_arma(SEXP x1SEXP, SEXP x2SEXP, SEXP scaledSEXP, SEXP scaled_bySEXP, SEXP quad_bySEXP, SEXP incrSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type x1(x1SEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type x2(x2SEXP);
+    Rcpp::traits::input_parameter< int >::type scaled(scaledSEXP);
+    Rcpp::traits::input_parameter< double >::type scaled_by(scaled_bySEXP);
+    Rcpp::traits::input_parameter< double >::type quad_by(quad_bySEXP);
+    Rcpp::traits::input_parameter< double >::type incr(incrSEXP);
+    rcpp_result_gen = Rcpp::wrap(th_idt_wass_arma(x1, x2, scaled, scaled_by, quad_by, incr));
+    return rcpp_result_gen;
+END_RCPP
+}
+// th_idt_wass_perm_arma
+arma::cube th_idt_wass_perm_arma(const arma::vec& x1_input, const arma::vec& x2_input, int scaled, double scaled_by, double quad_by, double incr, int n_perm);
+RcppExport SEXP _arkhaia_th_idt_wass_perm_arma(SEXP x1_inputSEXP, SEXP x2_inputSEXP, SEXP scaledSEXP, SEXP scaled_bySEXP, SEXP quad_bySEXP, SEXP incrSEXP, SEXP n_permSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type x1_input(x1_inputSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type x2_input(x2_inputSEXP);
+    Rcpp::traits::input_parameter< int >::type scaled(scaledSEXP);
+    Rcpp::traits::input_parameter< double >::type scaled_by(scaled_bySEXP);
+    Rcpp::traits::input_parameter< double >::type quad_by(quad_bySEXP);
+    Rcpp::traits::input_parameter< double >::type incr(incrSEXP);
+    Rcpp::traits::input_parameter< int >::type n_perm(n_permSEXP);
+    rcpp_result_gen = Rcpp::wrap(th_idt_wass_perm_arma(x1_input, x2_input, scaled, scaled_by, quad_by, incr, n_perm));
+    return rcpp_result_gen;
+END_RCPP
+}
+// th_idt_ks_stat_arma
+Rcpp::List th_idt_ks_stat_arma(const arma::vec& x1, const arma::vec& x2, double incr);
+RcppExport SEXP _arkhaia_th_idt_ks_stat_arma(SEXP x1SEXP, SEXP x2SEXP, SEXP incrSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type x1(x1SEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type x2(x2SEXP);
+    Rcpp::traits::input_parameter< double >::type incr(incrSEXP);
+    rcpp_result_gen = Rcpp::wrap(th_idt_ks_stat_arma(x1, x2, incr));
+    return rcpp_result_gen;
+END_RCPP
+}
+// th_idt_ks_stat_perm_arma
+arma::cube th_idt_ks_stat_perm_arma(const arma::vec& x1_input, const arma::vec& x2_input, double incr, int n_perm);
+RcppExport SEXP _arkhaia_th_idt_ks_stat_perm_arma(SEXP x1_inputSEXP, SEXP x2_inputSEXP, SEXP incrSEXP, SEXP n_permSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type x1_input(x1_inputSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type x2_input(x2_inputSEXP);
+    Rcpp::traits::input_parameter< double >::type incr(incrSEXP);
+    Rcpp::traits::input_parameter< int >::type n_perm(n_permSEXP);
+    rcpp_result_gen = Rcpp::wrap(th_idt_ks_stat_perm_arma(x1_input, x2_input, incr, n_perm));
+    return rcpp_result_gen;
+END_RCPP
+}
+// th_idt_wass_stat_arma
+Rcpp::List th_idt_wass_stat_arma(const arma::vec& x1, const arma::vec& x2, int scaled, double scaled_by, double quad_by, double incr);
+RcppExport SEXP _arkhaia_th_idt_wass_stat_arma(SEXP x1SEXP, SEXP x2SEXP, SEXP scaledSEXP, SEXP scaled_bySEXP, SEXP quad_bySEXP, SEXP incrSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type x1(x1SEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type x2(x2SEXP);
+    Rcpp::traits::input_parameter< int >::type scaled(scaledSEXP);
+    Rcpp::traits::input_parameter< double >::type scaled_by(scaled_bySEXP);
+    Rcpp::traits::input_parameter< double >::type quad_by(quad_bySEXP);
+    Rcpp::traits::input_parameter< double >::type incr(incrSEXP);
+    rcpp_result_gen = Rcpp::wrap(th_idt_wass_stat_arma(x1, x2, scaled, scaled_by, quad_by, incr));
+    return rcpp_result_gen;
+END_RCPP
+}
+// th_idt_wass_stat_perm_arma
+arma::cube th_idt_wass_stat_perm_arma(const arma::vec& x1_input, const arma::vec& x2_input, int scaled, double scaled_by, double quad_by, double incr, int n_perm);
+RcppExport SEXP _arkhaia_th_idt_wass_stat_perm_arma(SEXP x1_inputSEXP, SEXP x2_inputSEXP, SEXP scaledSEXP, SEXP scaled_bySEXP, SEXP quad_bySEXP, SEXP incrSEXP, SEXP n_permSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type x1_input(x1_inputSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type x2_input(x2_inputSEXP);
+    Rcpp::traits::input_parameter< int >::type scaled(scaledSEXP);
+    Rcpp::traits::input_parameter< double >::type scaled_by(scaled_bySEXP);
+    Rcpp::traits::input_parameter< double >::type quad_by(quad_bySEXP);
+    Rcpp::traits::input_parameter< double >::type incr(incrSEXP);
+    Rcpp::traits::input_parameter< int >::type n_perm(n_permSEXP);
+    rcpp_result_gen = Rcpp::wrap(th_idt_wass_stat_perm_arma(x1_input, x2_input, scaled, scaled_by, quad_by, incr, n_perm));
+    return rcpp_result_gen;
+END_RCPP
+}
+// idt_ks_arma
+Rcpp::List idt_ks_arma(const arma::vec& x1, const arma::vec& x2, double incr);
+RcppExport SEXP _arkhaia_idt_ks_arma(SEXP x1SEXP, SEXP x2SEXP, SEXP incrSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type x1(x1SEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type x2(x2SEXP);
+    Rcpp::traits::input_parameter< double >::type incr(incrSEXP);
+    rcpp_result_gen = Rcpp::wrap(idt_ks_arma(x1, x2, incr));
+    return rcpp_result_gen;
+END_RCPP
+}
+// idt_ks_perm_arma
+arma::cube idt_ks_perm_arma(const arma::vec& x1_input, const arma::vec& x2_input, double incr, int n_perm);
+RcppExport SEXP _arkhaia_idt_ks_perm_arma(SEXP x1_inputSEXP, SEXP x2_inputSEXP, SEXP incrSEXP, SEXP n_permSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type x1_input(x1_inputSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type x2_input(x2_inputSEXP);
+    Rcpp::traits::input_parameter< double >::type incr(incrSEXP);
+    Rcpp::traits::input_parameter< int >::type n_perm(n_permSEXP);
+    rcpp_result_gen = Rcpp::wrap(idt_ks_perm_arma(x1_input, x2_input, incr, n_perm));
+    return rcpp_result_gen;
+END_RCPP
+}
+// idt_wass_arma
+Rcpp::List idt_wass_arma(const arma::vec& x1, const arma::vec& x2, int scaled, double scaled_by, double quad_by, double incr);
+RcppExport SEXP _arkhaia_idt_wass_arma(SEXP x1SEXP, SEXP x2SEXP, SEXP scaledSEXP, SEXP scaled_bySEXP, SEXP quad_bySEXP, SEXP incrSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type x1(x1SEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type x2(x2SEXP);
+    Rcpp::traits::input_parameter< int >::type scaled(scaledSEXP);
+    Rcpp::traits::input_parameter< double >::type scaled_by(scaled_bySEXP);
+    Rcpp::traits::input_parameter< double >::type quad_by(quad_bySEXP);
+    Rcpp::traits::input_parameter< double >::type incr(incrSEXP);
+    rcpp_result_gen = Rcpp::wrap(idt_wass_arma(x1, x2, scaled, scaled_by, quad_by, incr));
+    return rcpp_result_gen;
+END_RCPP
+}
+// idt_wass_perm_arma
+arma::cube idt_wass_perm_arma(const arma::vec& x1_input, const arma::vec& x2_input, int scaled, double scaled_by, double quad_by, double incr, int n_perm);
+RcppExport SEXP _arkhaia_idt_wass_perm_arma(SEXP x1_inputSEXP, SEXP x2_inputSEXP, SEXP scaledSEXP, SEXP scaled_bySEXP, SEXP quad_bySEXP, SEXP incrSEXP, SEXP n_permSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type x1_input(x1_inputSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type x2_input(x2_inputSEXP);
+    Rcpp::traits::input_parameter< int >::type scaled(scaledSEXP);
+    Rcpp::traits::input_parameter< double >::type scaled_by(scaled_bySEXP);
+    Rcpp::traits::input_parameter< double >::type quad_by(quad_bySEXP);
+    Rcpp::traits::input_parameter< double >::type incr(incrSEXP);
+    Rcpp::traits::input_parameter< int >::type n_perm(n_permSEXP);
+    rcpp_result_gen = Rcpp::wrap(idt_wass_perm_arma(x1_input, x2_input, scaled, scaled_by, quad_by, incr, n_perm));
+    return rcpp_result_gen;
+END_RCPP
+}
+// idt_ks_stat_arma
+Rcpp::List idt_ks_stat_arma(const arma::vec& x1, const arma::vec& x2, double incr);
+RcppExport SEXP _arkhaia_idt_ks_stat_arma(SEXP x1SEXP, SEXP x2SEXP, SEXP incrSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type x1(x1SEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type x2(x2SEXP);
+    Rcpp::traits::input_parameter< double >::type incr(incrSEXP);
+    rcpp_result_gen = Rcpp::wrap(idt_ks_stat_arma(x1, x2, incr));
+    return rcpp_result_gen;
+END_RCPP
+}
+// idt_ks_stat_perm_arma
+arma::cube idt_ks_stat_perm_arma(const arma::vec& x1_input, const arma::vec& x2_input, double incr, int n_perm);
+RcppExport SEXP _arkhaia_idt_ks_stat_perm_arma(SEXP x1_inputSEXP, SEXP x2_inputSEXP, SEXP incrSEXP, SEXP n_permSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type x1_input(x1_inputSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type x2_input(x2_inputSEXP);
+    Rcpp::traits::input_parameter< double >::type incr(incrSEXP);
+    Rcpp::traits::input_parameter< int >::type n_perm(n_permSEXP);
+    rcpp_result_gen = Rcpp::wrap(idt_ks_stat_perm_arma(x1_input, x2_input, incr, n_perm));
+    return rcpp_result_gen;
+END_RCPP
+}
+// idt_wass_stat_arma
+Rcpp::List idt_wass_stat_arma(const arma::vec& x1, const arma::vec& x2, int scaled, double scaled_by, double quad_by, double incr);
+RcppExport SEXP _arkhaia_idt_wass_stat_arma(SEXP x1SEXP, SEXP x2SEXP, SEXP scaledSEXP, SEXP scaled_bySEXP, SEXP quad_bySEXP, SEXP incrSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type x1(x1SEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type x2(x2SEXP);
+    Rcpp::traits::input_parameter< int >::type scaled(scaledSEXP);
+    Rcpp::traits::input_parameter< double >::type scaled_by(scaled_bySEXP);
+    Rcpp::traits::input_parameter< double >::type quad_by(quad_bySEXP);
+    Rcpp::traits::input_parameter< double >::type incr(incrSEXP);
+    rcpp_result_gen = Rcpp::wrap(idt_wass_stat_arma(x1, x2, scaled, scaled_by, quad_by, incr));
+    return rcpp_result_gen;
+END_RCPP
+}
+// idt_wass_stat_perm_arma
+arma::cube idt_wass_stat_perm_arma(const arma::vec& x1_input, const arma::vec& x2_input, int scaled, double scaled_by, double quad_by, double incr, int n_perm);
+RcppExport SEXP _arkhaia_idt_wass_stat_perm_arma(SEXP x1_inputSEXP, SEXP x2_inputSEXP, SEXP scaledSEXP, SEXP scaled_bySEXP, SEXP quad_bySEXP, SEXP incrSEXP, SEXP n_permSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type x1_input(x1_inputSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type x2_input(x2_inputSEXP);
+    Rcpp::traits::input_parameter< int >::type scaled(scaledSEXP);
+    Rcpp::traits::input_parameter< double >::type scaled_by(scaled_bySEXP);
+    Rcpp::traits::input_parameter< double >::type quad_by(quad_bySEXP);
+    Rcpp::traits::input_parameter< double >::type incr(incrSEXP);
+    Rcpp::traits::input_parameter< int >::type n_perm(n_permSEXP);
+    rcpp_result_gen = Rcpp::wrap(idt_wass_stat_perm_arma(x1_input, x2_input, scaled, scaled_by, quad_by, incr, n_perm));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -214,8 +483,26 @@ static const R_CallMethodDef CallEntries[] = {
     {"_arkhaia_CR_arma", (DL_FUNC) &_arkhaia_CR_arma, 2},
     {"_arkhaia_VB_arma", (DL_FUNC) &_arkhaia_VB_arma, 2},
     {"_arkhaia_MC_pois_arma", (DL_FUNC) &_arkhaia_MC_pois_arma, 5},
-    {"_arkhaia_wass_R1_arma", (DL_FUNC) &_arkhaia_wass_R1_arma, 4},
-    {"_arkhaia_wass_R1_perm_arma", (DL_FUNC) &_arkhaia_wass_R1_perm_arma, 5},
+    {"_arkhaia_wass_R1_arma", (DL_FUNC) &_arkhaia_wass_R1_arma, 5},
+    {"_arkhaia_wass_R1_armaV2", (DL_FUNC) &_arkhaia_wass_R1_armaV2, 5},
+    {"_arkhaia_wass_R1_perm_arma", (DL_FUNC) &_arkhaia_wass_R1_perm_arma, 6},
+    {"_arkhaia_ks_Rcpp", (DL_FUNC) &_arkhaia_ks_Rcpp, 2},
+    {"_arkhaia_th_idt_ks_arma", (DL_FUNC) &_arkhaia_th_idt_ks_arma, 3},
+    {"_arkhaia_th_idt_ks_perm_arma", (DL_FUNC) &_arkhaia_th_idt_ks_perm_arma, 4},
+    {"_arkhaia_th_idt_wass_arma", (DL_FUNC) &_arkhaia_th_idt_wass_arma, 6},
+    {"_arkhaia_th_idt_wass_perm_arma", (DL_FUNC) &_arkhaia_th_idt_wass_perm_arma, 7},
+    {"_arkhaia_th_idt_ks_stat_arma", (DL_FUNC) &_arkhaia_th_idt_ks_stat_arma, 3},
+    {"_arkhaia_th_idt_ks_stat_perm_arma", (DL_FUNC) &_arkhaia_th_idt_ks_stat_perm_arma, 4},
+    {"_arkhaia_th_idt_wass_stat_arma", (DL_FUNC) &_arkhaia_th_idt_wass_stat_arma, 6},
+    {"_arkhaia_th_idt_wass_stat_perm_arma", (DL_FUNC) &_arkhaia_th_idt_wass_stat_perm_arma, 7},
+    {"_arkhaia_idt_ks_arma", (DL_FUNC) &_arkhaia_idt_ks_arma, 3},
+    {"_arkhaia_idt_ks_perm_arma", (DL_FUNC) &_arkhaia_idt_ks_perm_arma, 4},
+    {"_arkhaia_idt_wass_arma", (DL_FUNC) &_arkhaia_idt_wass_arma, 6},
+    {"_arkhaia_idt_wass_perm_arma", (DL_FUNC) &_arkhaia_idt_wass_perm_arma, 7},
+    {"_arkhaia_idt_ks_stat_arma", (DL_FUNC) &_arkhaia_idt_ks_stat_arma, 3},
+    {"_arkhaia_idt_ks_stat_perm_arma", (DL_FUNC) &_arkhaia_idt_ks_stat_perm_arma, 4},
+    {"_arkhaia_idt_wass_stat_arma", (DL_FUNC) &_arkhaia_idt_wass_stat_arma, 6},
+    {"_arkhaia_idt_wass_stat_perm_arma", (DL_FUNC) &_arkhaia_idt_wass_stat_perm_arma, 7},
     {NULL, NULL, 0}
 };
 

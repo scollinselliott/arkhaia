@@ -75,13 +75,121 @@ MC_pois_arma <- function(X, lambda, lambda_grid, omit_zero, M) {
 
 #' @useDynLib arkhaia
 #' @importFrom Rcpp sourceCpp
-wass_R1_arma <- function(X, N, scaled, incr) {
-    .Call('_arkhaia_wass_R1_arma', PACKAGE = 'arkhaia', X, N, scaled, incr)
+wass_R1_arma <- function(X, N, scaled, scaled_by, incr) {
+    .Call('_arkhaia_wass_R1_arma', PACKAGE = 'arkhaia', X, N, scaled, scaled_by, incr)
 }
 
 #' @useDynLib arkhaia
 #' @importFrom Rcpp sourceCpp
-wass_R1_perm_arma <- function(X, N, scaled, incr, n_perm) {
-    .Call('_arkhaia_wass_R1_perm_arma', PACKAGE = 'arkhaia', X, N, scaled, incr, n_perm)
+wass_R1_armaV2 <- function(Y1, Y2, scaled, scaled_by, incr) {
+    .Call('_arkhaia_wass_R1_armaV2', PACKAGE = 'arkhaia', Y1, Y2, scaled, scaled_by, incr)
+}
+
+#' @useDynLib arkhaia
+#' @importFrom Rcpp sourceCpp
+wass_R1_perm_arma <- function(X, N, scaled, scaled_by, incr, n_perm) {
+    .Call('_arkhaia_wass_R1_perm_arma', PACKAGE = 'arkhaia', X, N, scaled, scaled_by, incr, n_perm)
+}
+
+#' @useDynLib arkhaia
+#' @importFrom Rcpp sourceCpp
+ks_Rcpp <- function(x1, x2) {
+    .Call('_arkhaia_ks_Rcpp', PACKAGE = 'arkhaia', x1, x2)
+}
+
+#' @useDynLib arkhaia
+#' @importFrom Rcpp sourceCpp
+th_idt_ks_arma <- function(x1, x2, incr) {
+    .Call('_arkhaia_th_idt_ks_arma', PACKAGE = 'arkhaia', x1, x2, incr)
+}
+
+#' @useDynLib arkhaia
+#' @importFrom Rcpp sourceCpp
+th_idt_ks_perm_arma <- function(x1_input, x2_input, incr, n_perm) {
+    .Call('_arkhaia_th_idt_ks_perm_arma', PACKAGE = 'arkhaia', x1_input, x2_input, incr, n_perm)
+}
+
+#' @useDynLib arkhaia
+#' @importFrom Rcpp sourceCpp
+th_idt_wass_arma <- function(x1, x2, scaled, scaled_by, quad_by, incr) {
+    .Call('_arkhaia_th_idt_wass_arma', PACKAGE = 'arkhaia', x1, x2, scaled, scaled_by, quad_by, incr)
+}
+
+#' @useDynLib arkhaia
+#' @importFrom Rcpp sourceCpp
+th_idt_wass_perm_arma <- function(x1_input, x2_input, scaled, scaled_by, quad_by, incr, n_perm) {
+    .Call('_arkhaia_th_idt_wass_perm_arma', PACKAGE = 'arkhaia', x1_input, x2_input, scaled, scaled_by, quad_by, incr, n_perm)
+}
+
+#' @useDynLib arkhaia
+#' @importFrom Rcpp sourceCpp
+th_idt_ks_stat_arma <- function(x1, x2, incr) {
+    .Call('_arkhaia_th_idt_ks_stat_arma', PACKAGE = 'arkhaia', x1, x2, incr)
+}
+
+#' @useDynLib arkhaia
+#' @importFrom Rcpp sourceCpp
+th_idt_ks_stat_perm_arma <- function(x1_input, x2_input, incr, n_perm) {
+    .Call('_arkhaia_th_idt_ks_stat_perm_arma', PACKAGE = 'arkhaia', x1_input, x2_input, incr, n_perm)
+}
+
+#' @useDynLib arkhaia
+#' @importFrom Rcpp sourceCpp
+th_idt_wass_stat_arma <- function(x1, x2, scaled, scaled_by, quad_by, incr) {
+    .Call('_arkhaia_th_idt_wass_stat_arma', PACKAGE = 'arkhaia', x1, x2, scaled, scaled_by, quad_by, incr)
+}
+
+#' @useDynLib arkhaia
+#' @importFrom Rcpp sourceCpp
+th_idt_wass_stat_perm_arma <- function(x1_input, x2_input, scaled, scaled_by, quad_by, incr, n_perm) {
+    .Call('_arkhaia_th_idt_wass_stat_perm_arma', PACKAGE = 'arkhaia', x1_input, x2_input, scaled, scaled_by, quad_by, incr, n_perm)
+}
+
+#' @useDynLib arkhaia
+#' @importFrom Rcpp sourceCpp
+idt_ks_arma <- function(x1, x2, incr) {
+    .Call('_arkhaia_idt_ks_arma', PACKAGE = 'arkhaia', x1, x2, incr)
+}
+
+#' @useDynLib arkhaia
+#' @importFrom Rcpp sourceCpp
+idt_ks_perm_arma <- function(x1_input, x2_input, incr, n_perm) {
+    .Call('_arkhaia_idt_ks_perm_arma', PACKAGE = 'arkhaia', x1_input, x2_input, incr, n_perm)
+}
+
+#' @useDynLib arkhaia
+#' @importFrom Rcpp sourceCpp
+idt_wass_arma <- function(x1, x2, scaled, scaled_by, quad_by, incr) {
+    .Call('_arkhaia_idt_wass_arma', PACKAGE = 'arkhaia', x1, x2, scaled, scaled_by, quad_by, incr)
+}
+
+#' @useDynLib arkhaia
+#' @importFrom Rcpp sourceCpp
+idt_wass_perm_arma <- function(x1_input, x2_input, scaled, scaled_by, quad_by, incr, n_perm) {
+    .Call('_arkhaia_idt_wass_perm_arma', PACKAGE = 'arkhaia', x1_input, x2_input, scaled, scaled_by, quad_by, incr, n_perm)
+}
+
+#' @useDynLib arkhaia
+#' @importFrom Rcpp sourceCpp
+idt_ks_stat_arma <- function(x1, x2, incr) {
+    .Call('_arkhaia_idt_ks_stat_arma', PACKAGE = 'arkhaia', x1, x2, incr)
+}
+
+#' @useDynLib arkhaia
+#' @importFrom Rcpp sourceCpp
+idt_ks_stat_perm_arma <- function(x1_input, x2_input, incr, n_perm) {
+    .Call('_arkhaia_idt_ks_stat_perm_arma', PACKAGE = 'arkhaia', x1_input, x2_input, incr, n_perm)
+}
+
+#' @useDynLib arkhaia
+#' @importFrom Rcpp sourceCpp
+idt_wass_stat_arma <- function(x1, x2, scaled, scaled_by, quad_by, incr) {
+    .Call('_arkhaia_idt_wass_stat_arma', PACKAGE = 'arkhaia', x1, x2, scaled, scaled_by, quad_by, incr)
+}
+
+#' @useDynLib arkhaia
+#' @importFrom Rcpp sourceCpp
+idt_wass_stat_perm_arma <- function(x1_input, x2_input, scaled, scaled_by, quad_by, incr, n_perm) {
+    .Call('_arkhaia_idt_wass_stat_perm_arma', PACKAGE = 'arkhaia', x1_input, x2_input, scaled, scaled_by, quad_by, incr, n_perm)
 }
 

@@ -39,9 +39,7 @@ install_github("scollinselliott/arkhaia", dependencies = TRUE, build_vignettes =
 Establishing a measure of practical signficance for the comparison of
 finds assemblages in their depositional contexts. Whether or not a
 context is “representative” of another is assessed on the basis of the
-homogeneity of the distribution of finds. The relevant paper has been
-reviewed and is under revision: Collins-Elliott (Under Review),
-“Evaluating…”
+homogeneity of the distribution of finds. See Collins-Elliott (2026).
 
 - Cressie-Read power-divergence statistic to estimate $\chi^2$ (Cressie
   and Read 1984; Read and Cressie 1988)
@@ -90,18 +88,10 @@ Bergsma, W. 2013. “A Bias-Correction for Cramér’s \$V\$ and Tschuprow’s
 
 </div>
 
-<div id="ref-collins-elliott_evaluating_nodate" class="csl-entry">
-
-Collins-Elliott, S. A. Under Review. “Evaluating the Relationship
-Between Surface, Subsurface, and Stratigraphic Assemblages,” Under
-Review.
-
-</div>
-
 <div id="ref-collins-elliott_random_nodate" class="csl-entry">
 
-———. Under Review. “Random Right Censoring of Archaeological Count
-Data,” Under Review.
+Collins-Elliott, S. A. Under Review. “Random Right Censoring of
+Archaeological Count Data,” Under Review.
 
 </div>
 
@@ -110,6 +100,14 @@ Data,” Under Review.
 ———. Under Review. “Revisiting Babylonian Prices: Long-Run and
 Variable-Length Equilibria, <span class="nocase">ca.</span> 385-61 BCE,”
 Under Review.
+
+</div>
+
+<div id="ref-collins-elliott_evaluating_2026" class="csl-entry">
+
+———. 2026. “Evaluating the Relationship Between Surface, Subsurface, and
+Stratigraphic Assemblages.” *Journal of Archaeological Method and
+Theory*. <https://doi.org/10.1007/s10816-026-09815-y>.
 
 </div>
 

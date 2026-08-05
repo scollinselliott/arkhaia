@@ -3,7 +3,20 @@ bibentry(
   title    = "arkhaia: Archaeological and Historical Analysis",
   author   = c(person(c("Stephen", "A."), "Collins-Elliott", role = c("aut", "cre"), email = "sce@utk.edu")),
   year     = "2026",
-  note   =  "R package version 0.5",
+  note   =  "R package version 0.6.8",
   url      = "https://github.com/scollinselliott/arkhaia",
-  key      = "collins-elliott_arkhaia_2026"
+  key      = "collins-elliott_arkhaia_2026",
+  header  = "Citations may be made to specific papers below, but to cite the package generally, please use:"
 )
+
+bibentry(
+  bibtype = "Article",
+  title = "Evaluating the Relationship between Surface, Subsurface, and Stratigraphic Assemblages",
+  author   = c(person(c("Stephen", "A."), "Collins-Elliott", role = c("aut"), email = "sce@utk.edu")),
+  journal  = "Journal of Archaeological Method and Theory",
+  year     = "2026",
+  pages    = "1--21",
+  doi      = "10.1007/s10816-026-09815-y",
+  key      = "collins-elliott_evaluating_2026"
+)
+

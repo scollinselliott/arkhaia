@@ -4,25 +4,48 @@
 \alias{wass_R1}
 \alias{wass_R1.numeric}
 \alias{wass_R1.list}
-\alias{idt.list}
-\title{Empirical Wasserstein R1 Distance betwen Two e.c.d.f.}
+\title{Wasserstein R1 Distance betwen Two e.c.d.f.}
 \usage{
-wass_R1(x1, x2 = NULL, scaled = TRUE, by = 0.001, perm = FALSE, n_perm = 10^5)
+wass_R1(
+  x1,
+  x2 = NULL,
+  scaled = FALSE,
+  scaled_by = 0,
+  quad_by = 0.001,
+  perm = FALSE,
+  n_perm = 10^5
+)
 
-\method{wass_R1}{numeric}(x1, x2 = NULL, scaled = TRUE, by = 0.001, perm = FALSE, n_perm = 10^5)
+\method{wass_R1}{numeric}(
+  x1,
+  x2 = NULL,
+  scaled = FALSE,
+  scaled_by = 0,
+  quad_by = 0.001,
+  perm = FALSE,
+  n_perm = 10^5
+)
 
-\method{wass_R1}{list}(x1, x2 = NULL, scaled = TRUE, by = 0.001, perm = FALSE, n_perm = 10^5)
-
-\method{idt}{list}(x1, x2 = NULL, by = 0.001, n_perm = 10^5)
+\method{wass_R1}{list}(
+  x1,
+  x2 = NULL,
+  scaled = FALSE,
+  scaled_by = 0,
+  quad_by = 0.001,
+  perm = FALSE,
+  n_perm = 10^5
+)
 }
 \arguments{
 \item{x1}{Either a list of vectors or a vector containing observations of sample 1.}
 
 \item{x2}{If \code{x1} is vector, \code{x2} is vector containing observations of sample 2.}
 
-\item{scaled}{Whether to scale the resulting Wasserstein R1 distance to the distributions of \code{x1}, \code{x2}, ensuring a maximum of 1. Default is \code{TRUE}.}
+\item{scaled}{Whether to scale the resulting Wasserstein R1 distance. Default is \code{FALSE}.}
 
-\item{by}{The increment of sampling for performing quadrature. Default is \code{1e-3}.}
+\item{scaled_by}{The magnitude by which to scale the Wasserstein R1 distance, if \code{scaled} is \code{TRUE}. Entering \code{0} (the default) will use the range of the maximum and minimum of the pair of point processes.}
+
+\item{quad_by}{The increment of sampling for performing quadrature. Default is \code{1e-3}.}
 
 \item{perm}{Whether to perform a Monte Carlo permutation across all samples in the input. Default is \code{FALSE}.}
 
@@ -32,7 +55,9 @@ wass_R1(x1, x2 = NULL, scaled = TRUE, by = 0.001, perm = FALSE, n_perm = 10^5)
 For two vectors \code{x1} and \code{x2}, the empirical scaled Wassertein R1 distance between the two e.c.d.f. of their samples. For a list of vectors input in \code{x1}, a matrix of the empirical scaled Wasserstein R1 distances pairwise between all vectors.
 }
 \description{
-For two or more one-dimensional point processes, computes their Wasserstein distance via their empirical cumuluative density functions (e.c.d.f.), adjusting for sample size and the scale of their durations \insertCite{vasershtein_markov_1969,anderson_distribution_1962,ramdas_wasserstein_2017}{arkhaia}, using numerical quadrature: \eqn{W_{1s} = \sqrt{\frac{n_1 n_2}{n_1 + n_2}} \int_\mathbf{R} \vert F_1(x) - F_2(x) \vert \, dx}. More than two processes result in pairwise estimation of processes.
+For two or more one-dimensional point processes, computes their Wasserstein distance via their empirical cumuluative density functions (e.c.d.f.), adjusting for sample size and the scale of their durations \insertCite{vasershtein_markov_1969,anderson_distribution_1962,ramdas_wasserstein_2017}{arkhaia}, using numerical quadrature:
+\deqn{\displaystyle{W_{1s} = \frac{1}{s} \int_\mathbf{R} \vert F_1(x) - F_2(x) \vert \, dx}}
+where \eqn{s} is a scaling coefficient, namely either the range of the point process or its support. More than two processes result in pairwise estimation of processes.
 }
 \references{
 \insertAllCited{}

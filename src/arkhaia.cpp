@@ -794,7 +794,7 @@ Rcpp::NumericVector MC_pois_arma(const arma::mat & X, double lambda, arma::vec &
 //' @useDynLib arkhaia
 //' @importFrom Rcpp sourceCpp
 // [[Rcpp::export]]
-arma::mat wass_R1_arma(arma::vec & X, arma::vec N, int scaled, double incr) {
+arma::mat wass_R1_arma(arma::vec & X, arma::vec N, int scaled, double scaled_by, double incr) {
     int n_vec = N.n_elem; 
 
     arma::mat out (n_vec, n_vec);
@@ -832,9 +832,8 @@ arma::mat wass_R1_arma(arma::vec & X, arma::vec N, int scaled, double incr) {
             if (maxX2 > maxX1) {
                 maxX = maxX2;
             }
-            double len0 = (maxX - minX) / incr;
             Rcpp::NumericVector len0v (1);
-            len0v[0] = len0;
+            len0v[0] = (maxX - minX) / incr;
             arma::vec len1v = Rcpp::round(len0v,0);
             int len1 = len1v[0];
 
@@ -868,20 +867,23 @@ arma::mat wass_R1_arma(arma::vec & X, arma::vec N, int scaled, double incr) {
                 }
                 summa = summa + f;
             }
-            Rcpp::NumericVector sqrtnn (1);
-            sqrtnn[0] = (n1 * n2) / (nn1 + nn2);
-            Rcpp::NumericVector sqrtn = Rcpp::sqrt(sqrtnn);
-            double w = summa * incr * sqrtn[0];
+            // Rcpp::NumericVector sqrtnn (1);
+            // sqrtnn[0] = (nn1 * nn2) / (nn1 + nn2);
+            // Rcpp::NumericVector sqrtn = Rcpp::sqrt(sqrtnn);
+            double w = summa * incr;//* sqrtn[0];
             if (scaled == 1) {
-                w = w / (maxX - minX);
+                if (scaled_by < 0.000001) {
+                    w = w / (maxX - minX);
+                } else {
+                    w = w / scaled_by;
+                }
             } 
             out(kj,ki) = w;
         }
     }
-
     return out;
-
 }
+
 
 
 
@@ -889,7 +891,82 @@ arma::mat wass_R1_arma(arma::vec & X, arma::vec N, int scaled, double incr) {
 //' @useDynLib arkhaia
 //' @importFrom Rcpp sourceCpp
 // [[Rcpp::export]]
-arma::cube wass_R1_perm_arma(arma::vec & X, arma::vec N, int scaled, double incr, int n_perm) {
+double wass_R1_armaV2(Rcpp::NumericVector Y1, Rcpp::NumericVector Y2, int scaled, double scaled_by, double incr) {
+    arma::vec X1 = Y1;
+    arma::vec X2 = Y2;
+
+    double minX1 = arma::min(X1);
+    double minX2 = arma::min(X2);
+    double maxX1 = arma::max(X1);
+    double maxX2 = arma::max(X2);
+
+    double minX = minX1;
+    if (minX2 < minX1) {
+        minX = minX2;
+    }
+    double maxX = maxX2;
+    if (maxX2 > maxX1) {
+        maxX = maxX2;
+    }
+    Rcpp::NumericVector len0v (1);
+    len0v[0] = (maxX - minX) / incr;
+    arma::vec len1v = Rcpp::round(len0v,0);
+    int len1 = len1v[0];
+
+    int n1 = X1.n_elem;
+    int n2 = X2.n_elem;
+
+    double nn1 = n1;
+    double nn2 = n2;
+
+    double t = minX;
+    double summa = 0;
+    for (int i = 0; i < len1; ++i) {
+        t = minX + i * incr;
+        int cnt1 = 0;
+        int cnt2 = 0; 
+        for (int j = 0; j < n1; ++j) {
+            if (X1[j] <= t) {
+                cnt1 = cnt1 + 1;
+            }
+        }
+        for (int j = 0; j < n2; ++j) {
+            if (X2[j] <= t) {
+                cnt2 = cnt2 + 1;
+            }
+        }
+        double f1 = cnt1 / nn1;
+        double f2 = cnt2 / nn2;
+        double f = f2 - f1;
+        if (f < 0) {
+            f = f1 - f2;
+        }
+        summa = summa + f;
+    }
+    // Rcpp::NumericVector sqrtnn (1);
+    // sqrtnn[0] = (nn1 * nn2) / (nn1 + nn2);
+    // Rcpp::NumericVector sqrtn = Rcpp::sqrt(sqrtnn);
+    double w = summa * incr; // * sqrtn[0];
+    if (scaled == 1) {
+        if (scaled_by < 0.000001) {
+            w = w / (maxX - minX);
+        } else {
+            w = w / scaled_by;
+        }
+    } 
+    return w;
+}
+
+
+
+
+
+
+
+//' @useDynLib arkhaia
+//' @importFrom Rcpp sourceCpp
+// [[Rcpp::export]]
+arma::cube wass_R1_perm_arma(arma::vec & X, arma::vec N, int scaled, double scaled_by, double incr, int n_perm) {
     int n_vec = N.n_elem; 
 
     arma::cube out (n_vec, n_vec, n_perm);
@@ -929,9 +1006,8 @@ arma::cube wass_R1_perm_arma(arma::vec & X, arma::vec N, int scaled, double incr
                 if (maxX2 > maxX1) {
                     maxX = maxX2;
                 }
-                double len0 = (maxX - minX) / incr;
                 Rcpp::NumericVector len0v (1);
-                len0v[0] = len0;
+                len0v[0] = (maxX - minX) / incr;
                 arma::vec len1v = Rcpp::round(len0v,0);
                 int len1 = len1v[0];
 
@@ -965,12 +1041,16 @@ arma::cube wass_R1_perm_arma(arma::vec & X, arma::vec N, int scaled, double incr
                     }
                     summa = summa + f;
                 }
-                Rcpp::NumericVector sqrtnn (1);
-                sqrtnn[0] = (n1 * n2) / (nn1 + nn2);
-                Rcpp::NumericVector sqrtn = Rcpp::sqrt(sqrtnn);
-                double w = summa * incr * sqrtn[0];
+                // Rcpp::NumericVector sqrtnn (1);
+                // sqrtnn[0] = (nn1 * nn2) / (nn1 + nn2);
+                // Rcpp::NumericVector sqrtn = Rcpp::sqrt(sqrtnn);
+                double w = summa * incr; // * sqrtn[0];
                 if (scaled == 1) {
-                    w = w / (maxX - minX);
+                    if (scaled_by < 0.000001) {
+                        w = w / (maxX - minX);
+                    } else {
+                        w = w / scaled_by;
+                    }
                 } 
                 out(kj,ki,p) = w;
             }
@@ -981,4 +1061,1711 @@ arma::cube wass_R1_perm_arma(arma::vec & X, arma::vec N, int scaled, double incr
 }
 
 
+
+
+
+
+//' @useDynLib arkhaia
+//' @importFrom Rcpp sourceCpp
+// [[Rcpp::export]]
+double ks_Rcpp(Rcpp::NumericVector x1, Rcpp::NumericVector x2) {
+    double ks = 0.0;
+    int n1 = x1.length();
+    int n2 = x2.length();
+    double nn1 = n1;
+    double nn2 = n2;
+    int nz = n1 + n2;
+    Rcpp::NumericVector z (nz);
+    for (int i = 0; i < n1; ++i) {
+        z[i] = x1[i];
+    }
+    for (int i = n1; i < nz; ++i) {
+        z[i] = x2[i-n1];
+    }
+    Rcpp::NumericVector y = Rcpp::unique(z);
+    int ny = y.length();
+    Rcpp::NumericVector w (ny);
+    for (int i = 0; i < ny; ++i) {
+        int k = 0;
+        double xk1 = 0.0;
+        double xk2 = 0.0;
+        for (int j = 0; j < n1; ++j) {
+            if (x1[j] <= y[i]) {
+              k = k + 1;
+            }
+        }
+        xk1 = k / nn1;
+        k = 0;
+        for (int j = 0; j < n2; ++j) {
+            if (x2[j] <= y[i]) {
+              k = k + 1;
+            }
+        }
+        xk2 = k / nn2;
+        w[i] = xk1 - xk2;
+    }
+    w = Rcpp::abs(w);
+    ks = Rcpp::max(w);
+    // Rcpp::NumericVector sqrtnn (1);
+    // sqrtnn[0] = (nn1 * nn2) / (nn1 + nn2);
+    // Rcpp::NumericVector sqrtn = Rcpp::sqrt(sqrtnn);
+    return ks ;
+}
+
+
+
+
+//' @useDynLib arkhaia
+//' @importFrom Rcpp sourceCpp
+// [[Rcpp::export]]
+Rcpp::List th_idt_ks_arma(const arma::vec & x1, const arma::vec & x2, double incr) {
+    int n1 = x1.n_elem;
+    int n2 = x2.n_elem;
+    int nz = n1 + n2;
+    arma::vec z (nz);
+    for (int i = 0; i < n1; ++i) {
+        z[i] = x1[i];
+    }
+    for (int i = n1; i < nz; ++i) {
+        z[i] = x2[i-n1];
+    }
+    Rcpp::NumericVector len0v (1);
+    double a0 = arma::min(z);
+    double a1 = arma::max(z);
+    len0v[0] = (a1 - a0) / incr;
+    arma::vec len1v = Rcpp::round(len0v,0);
+    int t_ncol = len1v[0];
+    int h_nrow = t_ncol / 2;
+    arma::vec t_ (t_ncol);
+    arma::vec h_ (h_nrow);
+    for (int i = 0; i < t_ncol; ++i) {
+        t_[i] = a0 + i * incr;
+    }
+    for (int i = 0; i < h_nrow; ++i) {
+        h_[i] = incr + i * incr;
+    }
+    arma::mat out (h_nrow , t_ncol, arma::fill::value(9999.0));
+    for (int ti = 0; ti < t_ncol; ++ti) {
+        for (int hi = 0; hi < h_nrow; ++hi) {
+            if ((t_[ti] - h_[hi] >= a0) & (t_[ti] + h_[hi] <= a1)) {
+                int n_x1a = 0;
+                int n_x2a = 0;
+                int n_x1p = 0;
+                int n_x2p = 0;
+                for (int i = 0; i < n1; ++i) {
+                    if ((t_[ti] - h_[hi] < x1[i]) & (x1[i] < t_[ti])) {
+                        n_x1a = n_x1a + 1;
+                    }
+                    if ((t_[ti] <= x1[i]) & (x1[i] < t_[ti] + h_[hi])) {
+                        n_x1p = n_x1p + 1;
+                    }
+                }
+                for (int i = 0; i < n2; ++i) {
+                    if ((t_[ti] - h_[hi] < x2[i]) & (x2[i] < t_[ti])) {
+                        n_x2a = n_x2a + 1;
+                    }
+                    if ((t_[ti] <= x2[i]) & (x2[i] < t_[ti] + h_[hi])) {
+                        n_x2p = n_x2p + 1;
+                    }
+                }
+                if (((n_x1a > 0) & (n_x2a > 0)) & ((n_x1p > 0) & (n_x2p > 0))) {
+                    Rcpp::NumericVector x1a (n_x1a);
+                    Rcpp::NumericVector x2a (n_x2a);
+                    Rcpp::NumericVector x1p (n_x1p);
+                    Rcpp::NumericVector x2p (n_x2p);
+                    int k = 0;
+                    for (int i = 0; i < n1; ++i) {
+                        if ((t_[ti] - h_[hi] < x1[i]) & (x1[i] < t_[ti])) {
+                            x1a[k] = x1[i];
+                            k = k + 1;
+                        }
+                    }            
+                    k = 0;
+                    for (int i = 0; i < n1; ++i) {
+                        if ((t_[ti] <= x1[i]) & (x1[i] < t_[ti] + h_[hi])) {
+                            x1p[k] = x1[i];
+                            k = k + 1;
+                        }
+                    }    
+                    k = 0;
+                    for (int i = 0; i < n2; ++i) {
+                        if ((t_[ti] - h_[hi] < x2[i]) & (x2[i] < t_[ti])) {
+                            x2a[k] = x2[i];
+                            k = k + 1;
+                        }
+                    }    
+                    k = 0;
+                    for (int i = 0; i < n2; ++i) {
+                        if ((t_[ti] <= x2[i]) & (x2[i] < t_[ti] + h_[hi])) {
+                            x2p[k] = x2[i];
+                            k = k + 1;
+                        }
+                    }
+                    double bef = ks_Rcpp(x1a,x2a);
+                    double aft = ks_Rcpp(x1p,x2p);
+                    // Rcpp::Rcout << "t : " << t_[ti] << "\n";
+                    // Rcpp::Rcout << "h : " << h_[hi] << "\n";
+                    // Rcpp::Rcout << "bef : " << bef << "\n";
+                    // Rcpp::Rcout << "aft : " << aft << "\n\n";
+
+                    out(hi,ti) = bef - aft;
+                }
+            }
+        }
+    }
+    return Rcpp::List::create(out, t_, h_);
+}
+
+
+
+
+
+//' @useDynLib arkhaia
+//' @importFrom Rcpp sourceCpp
+// [[Rcpp::export]]
+arma::cube th_idt_ks_perm_arma(const arma::vec & x1_input, const arma::vec & x2_input, double incr, int n_perm) {
+    int n1 = x1_input.n_elem;
+    int n2 = x2_input.n_elem;
+    int nz = n1 + n2;
+    arma::vec z (nz);
+    for (int i = 0; i < n1; ++i) {
+        z[i] = x1_input[i];
+    }
+    for (int i = n1; i < nz; ++i) {
+        z[i] = x2_input[i-n1];
+    }
+    Rcpp::NumericVector len0v (1);
+    double a0 = arma::min(z);
+    double a1 = arma::max(z);
+    len0v[0] = (a1 - a0) / incr;
+    arma::vec len1v = Rcpp::round(len0v,0);
+    int t_ncol = len1v[0];
+    int h_nrow = t_ncol / 2;
+    arma::vec t_ (t_ncol);
+    arma::vec h_ (h_nrow);
+    for (int i = 0; i < t_ncol; ++i) {
+        t_[i] = a0 + i * incr;
+    }
+    for (int i = 0; i < h_nrow; ++i) {
+        h_[i] = incr + i * incr;
+    }
+    arma::cube out (h_nrow , t_ncol, n_perm, arma::fill::value(9999.0));
+
+    for (int p = 0; p < n_perm ; ++p) {
+        arma::vec y = arma::shuffle(z);
+        arma::vec x1 (n1);
+        arma::vec x2 (n2);
+        for (int k = 0; k < n1; ++k) {
+            x1[k] = y[k];
+        }
+        for (int k = 0; k < n2; ++k) {
+            x2[k] = y[k+n1];
+        }
+        for (int ti = 0; ti < t_ncol; ++ti) {
+            for (int hi = 0; hi < h_nrow; ++hi) {
+                if ((t_[ti] - h_[hi] >= a0) & (t_[ti] + h_[hi] <= a1)) {
+                    int n_x1a = 0;
+                    int n_x2a = 0;
+                    int n_x1p = 0;
+                    int n_x2p = 0;
+                    for (int i = 0; i < n1; ++i) {
+                        if ((t_[ti] - h_[hi] < x1[i]) & (x1[i] < t_[ti])) {
+                            n_x1a = n_x1a + 1;
+                        }
+                        if ((t_[ti] <= x1[i]) & (x1[i] < t_[ti] + h_[hi])) {
+                            n_x1p = n_x1p + 1;
+                        }
+                    }
+                    for (int i = 0; i < n2; ++i) {
+                        if ((t_[ti] - h_[hi] < x2[i]) & (x2[i] < t_[ti])) {
+                            n_x2a = n_x2a + 1;
+                        }
+                        if ((t_[ti] <= x2[i]) & (x2[i] < t_[ti] + h_[hi])) {
+                            n_x2p = n_x2p + 1;
+                        }
+                    }
+                    if (((n_x1a > 0) & (n_x2a > 0)) & ((n_x1p > 0) & (n_x2p > 0))) {
+                        Rcpp::NumericVector x1a (n_x1a);
+                        Rcpp::NumericVector x2a (n_x2a);
+                        Rcpp::NumericVector x1p (n_x1p);
+                        Rcpp::NumericVector x2p (n_x2p);
+                        int k = 0;
+                        for (int i = 0; i < n1; ++i) {
+                            if ((t_[ti] - h_[hi] < x1[i]) & (x1[i] < t_[ti])) {
+                                x1a[k] = x1[i];
+                                k = k + 1;
+                            }
+                        }            
+                        k = 0;
+                        for (int i = 0; i < n1; ++i) {
+                            if ((t_[ti] <= x1[i]) & (x1[i] < t_[ti] + h_[hi])) {
+                                x1p[k] = x1[i];
+                                k = k + 1;
+                            }
+                        }    
+                        k = 0;
+                        for (int i = 0; i < n2; ++i) {
+                            if ((t_[ti] - h_[hi] < x2[i]) & (x2[i] < t_[ti])) {
+                                x2a[k] = x2[i];
+                                k = k + 1;
+                            }
+                        }    
+                        k = 0;
+                        for (int i = 0; i < n2; ++i) {
+                            if ((t_[ti] <= x2[i]) & (x2[i] < t_[ti] + h_[hi])) {
+                                x2p[k] = x2[i];
+                                k = k + 1;
+                            }
+                        }
+                        double bef = ks_Rcpp(x1a,x2a);
+                        double aft = ks_Rcpp(x1p,x2p);
+                        out(hi,ti,p) = bef - aft;
+                    }
+                }
+            }
+        }
+    }
+    return out;
+}
+
+
+
+
+//' @useDynLib arkhaia
+//' @importFrom Rcpp sourceCpp
+// [[Rcpp::export]]
+Rcpp::List th_idt_wass_arma(const arma::vec & x1, const arma::vec & x2, int scaled, double scaled_by, double quad_by, double incr) {
+    int n1 = x1.n_elem;
+    int n2 = x2.n_elem;
+    int nz = n1 + n2;
+    arma::vec z (nz);
+    for (int i = 0; i < n1; ++i) {
+        z[i] = x1[i];
+    }
+    for (int i = n1; i < nz; ++i) {
+        z[i] = x2[i-n1];
+    }
+    Rcpp::NumericVector len0v (1);
+    double a0 = arma::min(z);
+    double a1 = arma::max(z);
+    len0v[0] = (a1 - a0) / incr;
+    arma::vec len1v = Rcpp::round(len0v,0);
+    int t_ncol = len1v[0];
+    int h_nrow = t_ncol / 2;
+    arma::vec t_ (t_ncol);
+    arma::vec h_ (h_nrow);
+    for (int i = 0; i < t_ncol; ++i) {
+        t_[i] = a0 + i * incr;
+    }
+    for (int i = 0; i < h_nrow; ++i) {
+        h_[i] = incr + i * incr;
+    }
+    arma::mat out (h_nrow , t_ncol, arma::fill::value(9999.0));
+    for (int ti = 0; ti < t_ncol; ++ti) {
+        for (int hi = 0; hi < h_nrow; ++hi) {
+            if ((t_[ti] - h_[hi] >= a0) & (t_[ti] + h_[hi] <= a1)) {
+                int n_x1a = 0;
+                int n_x2a = 0;
+                int n_x1p = 0;
+                int n_x2p = 0;
+                for (int i = 0; i < n1; ++i) {
+                    if ((t_[ti] - h_[hi] < x1[i]) & (x1[i] < t_[ti])) {
+                        n_x1a = n_x1a + 1;
+                    }
+                    if ((t_[ti] <= x1[i]) & (x1[i] < t_[ti] + h_[hi])) {
+                        n_x1p = n_x1p + 1;
+                    }
+                }
+                for (int i = 0; i < n2; ++i) {
+                    if ((t_[ti] - h_[hi] < x2[i]) & (x2[i] < t_[ti])) {
+                        n_x2a = n_x2a + 1;
+                    }
+                    if ((t_[ti] <= x2[i]) & (x2[i] < t_[ti] + h_[hi])) {
+                        n_x2p = n_x2p + 1;
+                    }
+                }
+                if (((n_x1a > 0) & (n_x2a > 0)) & ((n_x1p > 0) & (n_x2p > 0))) {
+                    Rcpp::NumericVector x1a (n_x1a);
+                    Rcpp::NumericVector x2a (n_x2a);
+                    Rcpp::NumericVector x1p (n_x1p);
+                    Rcpp::NumericVector x2p (n_x2p);
+                    int k = 0;
+                    for (int i = 0; i < n1; ++i) {
+                        if ((t_[ti] - h_[hi] < x1[i]) & (x1[i] < t_[ti])) {
+                            x1a[k] = x1[i];
+                            k = k + 1;
+                        }
+                    }            
+                    k = 0;
+                    for (int i = 0; i < n1; ++i) {
+                        if ((t_[ti] <= x1[i]) & (x1[i] < t_[ti] + h_[hi])) {
+                            x1p[k] = x1[i];
+                            k = k + 1;
+                        }
+                    }    
+                    k = 0;
+                    for (int i = 0; i < n2; ++i) {
+                        if ((t_[ti] - h_[hi] < x2[i]) & (x2[i] < t_[ti])) {
+                            x2a[k] = x2[i];
+                            k = k + 1;
+                        }
+                    }    
+                    k = 0;
+                    for (int i = 0; i < n2; ++i) {
+                        if ((t_[ti] <= x2[i]) & (x2[i] < t_[ti] + h_[hi])) {
+                            x2p[k] = x2[i];
+                            k = k + 1;
+                        }
+                    }
+                    double sc_by = 0;
+                    if (scaled_by < 0) {
+                        sc_by = h_[hi];
+                    } else {
+                        sc_by = scaled_by;
+                    }
+                    double bef = wass_R1_armaV2(x1a,x2a,scaled,sc_by,quad_by);
+                    double aft = wass_R1_armaV2(x1p,x2p,scaled,sc_by,quad_by);
+                    // Rcpp::Rcout << "t : " << t_[ti] << "\n";
+                    // Rcpp::Rcout << "h : " << h_[hi] << "\n";
+                    // Rcpp::Rcout << "bef : " << bef << "\n";
+                    // Rcpp::Rcout << "aft : " << aft << "\n\n";
+
+                    out(hi,ti) = bef - aft;
+                }
+            }
+        }
+    }
+    return Rcpp::List::create(out, t_, h_);
+}
+
+
+
+
+//' @useDynLib arkhaia
+//' @importFrom Rcpp sourceCpp
+// [[Rcpp::export]]
+arma::cube th_idt_wass_perm_arma(const arma::vec & x1_input, const arma::vec & x2_input, int scaled, double scaled_by, double quad_by, double incr, int n_perm) {
+    int n1 = x1_input.n_elem;
+    int n2 = x2_input.n_elem;
+    int nz = n1 + n2;
+    arma::vec z (nz);
+    for (int i = 0; i < n1; ++i) {
+        z[i] = x1_input[i];
+    }
+    for (int i = n1; i < nz; ++i) {
+        z[i] = x2_input[i-n1];
+    }
+    Rcpp::NumericVector len0v (1);
+    double a0 = arma::min(z);
+    double a1 = arma::max(z);
+    len0v[0] = (a1 - a0) / incr;
+    arma::vec len1v = Rcpp::round(len0v,0);
+    int t_ncol = len1v[0];
+    int h_nrow = t_ncol / 2;
+    arma::vec t_ (t_ncol);
+    arma::vec h_ (h_nrow);
+    for (int i = 0; i < t_ncol; ++i) {
+        t_[i] = a0 + i * incr;
+    }
+    for (int i = 0; i < h_nrow; ++i) {
+        h_[i] = incr + i * incr;
+    }
+    arma::cube out (h_nrow , t_ncol, n_perm, arma::fill::value(9999.0));
+
+    for (int p = 0; p < n_perm ; ++p) {
+        arma::vec y = arma::shuffle(z);
+        arma::vec x1 (n1);
+        arma::vec x2 (n2);
+        for (int k = 0; k < n1; ++k) {
+            x1[k] = y[k];
+        }
+        for (int k = 0; k < n2; ++k) {
+            x2[k] = y[k+n1];
+        }
+        for (int ti = 0; ti < t_ncol; ++ti) {
+            for (int hi = 0; hi < h_nrow; ++hi) {
+                if ((t_[ti] - h_[hi] >= a0) & (t_[ti] + h_[hi] <= a1)) {
+                    int n_x1a = 0;
+                    int n_x2a = 0;
+                    int n_x1p = 0;
+                    int n_x2p = 0;
+                    for (int i = 0; i < n1; ++i) {
+                        if ((t_[ti] - h_[hi] < x1[i]) & (x1[i] < t_[ti])) {
+                            n_x1a = n_x1a + 1;
+                        }
+                        if ((t_[ti] <= x1[i]) & (x1[i] < t_[ti] + h_[hi])) {
+                            n_x1p = n_x1p + 1;
+                        }
+                    }
+                    for (int i = 0; i < n2; ++i) {
+                        if ((t_[ti] - h_[hi] < x2[i]) & (x2[i] < t_[ti])) {
+                            n_x2a = n_x2a + 1;
+                        }
+                        if ((t_[ti] <= x2[i]) & (x2[i] < t_[ti] + h_[hi])) {
+                            n_x2p = n_x2p + 1;
+                        }
+                    }
+                    if (((n_x1a > 0) & (n_x2a > 0)) & ((n_x1p > 0) & (n_x2p > 0))) {
+                        Rcpp::NumericVector x1a (n_x1a);
+                        Rcpp::NumericVector x2a (n_x2a);
+                        Rcpp::NumericVector x1p (n_x1p);
+                        Rcpp::NumericVector x2p (n_x2p);
+                        int k = 0;
+                        for (int i = 0; i < n1; ++i) {
+                            if ((t_[ti] - h_[hi] < x1[i]) & (x1[i] < t_[ti])) {
+                                x1a[k] = x1[i];
+                                k = k + 1;
+                            }
+                        }            
+                        k = 0;
+                        for (int i = 0; i < n1; ++i) {
+                            if ((t_[ti] <= x1[i]) & (x1[i] < t_[ti] + h_[hi])) {
+                                x1p[k] = x1[i];
+                                k = k + 1;
+                            }
+                        }    
+                        k = 0;
+                        for (int i = 0; i < n2; ++i) {
+                            if ((t_[ti] - h_[hi] < x2[i]) & (x2[i] < t_[ti])) {
+                                x2a[k] = x2[i];
+                                k = k + 1;
+                            }
+                        }    
+                        k = 0;
+                        for (int i = 0; i < n2; ++i) {
+                            if ((t_[ti] <= x2[i]) & (x2[i] < t_[ti] + h_[hi])) {
+                                x2p[k] = x2[i];
+                                k = k + 1;
+                            }
+                        }
+                        double sc_by = 0;
+                        if (scaled_by < 0) {
+                           sc_by = h_[hi];
+                        } else {
+                            sc_by = scaled_by;
+                        }
+                        double bef = wass_R1_armaV2(x1a,x2a,scaled,sc_by,quad_by);
+                        double aft = wass_R1_armaV2(x1p,x2p,scaled,sc_by,quad_by);
+                        out(hi,ti,p) = bef - aft;
+                    }
+                }
+            }
+        }
+    }
+    return out;
+}
+
+
+
+
+
+// With sample size added
+
+
+
+//' @useDynLib arkhaia
+//' @importFrom Rcpp sourceCpp
+// [[Rcpp::export]]
+Rcpp::List th_idt_ks_stat_arma(const arma::vec & x1, const arma::vec & x2, double incr) {
+    int n1 = x1.n_elem;
+    int n2 = x2.n_elem;
+    int nz = n1 + n2;
+    arma::vec z (nz);
+    for (int i = 0; i < n1; ++i) {
+        z[i] = x1[i];
+    }
+    for (int i = n1; i < nz; ++i) {
+        z[i] = x2[i-n1];
+    }
+    Rcpp::NumericVector len0v (1);
+    double a0 = arma::min(z);
+    double a1 = arma::max(z);
+    len0v[0] = (a1 - a0) / incr;
+    arma::vec len1v = Rcpp::round(len0v,0);
+    int t_ncol = len1v[0];
+    int h_nrow = t_ncol / 2;
+    arma::vec t_ (t_ncol);
+    arma::vec h_ (h_nrow);
+    for (int i = 0; i < t_ncol; ++i) {
+        t_[i] = a0 + i * incr;
+    }
+    for (int i = 0; i < h_nrow; ++i) {
+        h_[i] = incr + i * incr;
+    }
+    arma::mat out (h_nrow , t_ncol, arma::fill::value(9999.0));
+    for (int ti = 0; ti < t_ncol; ++ti) {
+        for (int hi = 0; hi < h_nrow; ++hi) {
+            if ((t_[ti] - h_[hi] >= a0) & (t_[ti] + h_[hi] <= a1)) {
+                int n_x1a = 0;
+                int n_x2a = 0;
+                int n_x1p = 0;
+                int n_x2p = 0;
+                for (int i = 0; i < n1; ++i) {
+                    if ((t_[ti] - h_[hi] < x1[i]) & (x1[i] < t_[ti])) {
+                        n_x1a = n_x1a + 1;
+                    }
+                    if ((t_[ti] <= x1[i]) & (x1[i] < t_[ti] + h_[hi])) {
+                        n_x1p = n_x1p + 1;
+                    }
+                }
+                for (int i = 0; i < n2; ++i) {
+                    if ((t_[ti] - h_[hi] < x2[i]) & (x2[i] < t_[ti])) {
+                        n_x2a = n_x2a + 1;
+                    }
+                    if ((t_[ti] <= x2[i]) & (x2[i] < t_[ti] + h_[hi])) {
+                        n_x2p = n_x2p + 1;
+                    }
+                }
+                if (((n_x1a > 0) & (n_x2a > 0)) & ((n_x1p > 0) & (n_x2p > 0))) {
+                    Rcpp::NumericVector x1a (n_x1a);
+                    Rcpp::NumericVector x2a (n_x2a);
+                    Rcpp::NumericVector x1p (n_x1p);
+                    Rcpp::NumericVector x2p (n_x2p);
+                    int k = 0;
+                    for (int i = 0; i < n1; ++i) {
+                        if ((t_[ti] - h_[hi] < x1[i]) & (x1[i] < t_[ti])) {
+                            x1a[k] = x1[i];
+                            k = k + 1;
+                        }
+                    }            
+                    k = 0;
+                    for (int i = 0; i < n1; ++i) {
+                        if ((t_[ti] <= x1[i]) & (x1[i] < t_[ti] + h_[hi])) {
+                            x1p[k] = x1[i];
+                            k = k + 1;
+                        }
+                    }    
+                    k = 0;
+                    for (int i = 0; i < n2; ++i) {
+                        if ((t_[ti] - h_[hi] < x2[i]) & (x2[i] < t_[ti])) {
+                            x2a[k] = x2[i];
+                            k = k + 1;
+                        }
+                    }    
+                    k = 0;
+                    for (int i = 0; i < n2; ++i) {
+                        if ((t_[ti] <= x2[i]) & (x2[i] < t_[ti] + h_[hi])) {
+                            x2p[k] = x2[i];
+                            k = k + 1;
+                        }
+                    }
+                    double nn1a = x1a.length();
+                    double nn2a = x2a.length();
+                    double nn1p = x1p.length();
+                    double nn2p = x2p.length();
+                    Rcpp::NumericVector sqrtnna (1);
+                    sqrtnna[0] = (nn1a * nn2a) / (nn1a + nn2a);
+                    Rcpp::NumericVector sqrtna = Rcpp::sqrt(sqrtnna);
+                    Rcpp::NumericVector sqrtnnp (1);
+                    sqrtnnp[0] = (nn1p * nn2p) / (nn1p + nn2p);
+                    Rcpp::NumericVector sqrtnp = Rcpp::sqrt(sqrtnnp);
+                    
+                    double bef = ks_Rcpp(x1a,x2a) * sqrtna[0];
+                    double aft = ks_Rcpp(x1p,x2p) * sqrtnp[0];
+
+                    out(hi,ti) = bef - aft;
+                }
+            }
+        }
+    }
+    return Rcpp::List::create(out, t_, h_);
+}
+
+
+
+
+
+//' @useDynLib arkhaia
+//' @importFrom Rcpp sourceCpp
+// [[Rcpp::export]]
+arma::cube th_idt_ks_stat_perm_arma(const arma::vec & x1_input, const arma::vec & x2_input, double incr, int n_perm) {
+    int n1 = x1_input.n_elem;
+    int n2 = x2_input.n_elem;
+    int nz = n1 + n2;
+    arma::vec z (nz);
+    for (int i = 0; i < n1; ++i) {
+        z[i] = x1_input[i];
+    }
+    for (int i = n1; i < nz; ++i) {
+        z[i] = x2_input[i-n1];
+    }
+    Rcpp::NumericVector len0v (1);
+    double a0 = arma::min(z);
+    double a1 = arma::max(z);
+    len0v[0] = (a1 - a0) / incr;
+    arma::vec len1v = Rcpp::round(len0v,0);
+    int t_ncol = len1v[0];
+    int h_nrow = t_ncol / 2;
+    arma::vec t_ (t_ncol);
+    arma::vec h_ (h_nrow);
+    for (int i = 0; i < t_ncol; ++i) {
+        t_[i] = a0 + i * incr;
+    }
+    for (int i = 0; i < h_nrow; ++i) {
+        h_[i] = incr + i * incr;
+    }
+    arma::cube out (h_nrow , t_ncol, n_perm, arma::fill::value(9999.0));
+
+    for (int p = 0; p < n_perm ; ++p) {
+        arma::vec y = arma::shuffle(z);
+        arma::vec x1 (n1);
+        arma::vec x2 (n2);
+        for (int k = 0; k < n1; ++k) {
+            x1[k] = y[k];
+        }
+        for (int k = 0; k < n2; ++k) {
+            x2[k] = y[k+n1];
+        }
+        for (int ti = 0; ti < t_ncol; ++ti) {
+            for (int hi = 0; hi < h_nrow; ++hi) {
+                if ((t_[ti] - h_[hi] >= a0) & (t_[ti] + h_[hi] <= a1)) {
+                    int n_x1a = 0;
+                    int n_x2a = 0;
+                    int n_x1p = 0;
+                    int n_x2p = 0;
+                    for (int i = 0; i < n1; ++i) {
+                        if ((t_[ti] - h_[hi] < x1[i]) & (x1[i] < t_[ti])) {
+                            n_x1a = n_x1a + 1;
+                        }
+                        if ((t_[ti] <= x1[i]) & (x1[i] < t_[ti] + h_[hi])) {
+                            n_x1p = n_x1p + 1;
+                        }
+                    }
+                    for (int i = 0; i < n2; ++i) {
+                        if ((t_[ti] - h_[hi] < x2[i]) & (x2[i] < t_[ti])) {
+                            n_x2a = n_x2a + 1;
+                        }
+                        if ((t_[ti] <= x2[i]) & (x2[i] < t_[ti] + h_[hi])) {
+                            n_x2p = n_x2p + 1;
+                        }
+                    }
+                    if (((n_x1a > 0) & (n_x2a > 0)) & ((n_x1p > 0) & (n_x2p > 0))) {
+                        Rcpp::NumericVector x1a (n_x1a);
+                        Rcpp::NumericVector x2a (n_x2a);
+                        Rcpp::NumericVector x1p (n_x1p);
+                        Rcpp::NumericVector x2p (n_x2p);
+                        int k = 0;
+                        for (int i = 0; i < n1; ++i) {
+                            if ((t_[ti] - h_[hi] < x1[i]) & (x1[i] < t_[ti])) {
+                                x1a[k] = x1[i];
+                                k = k + 1;
+                            }
+                        }            
+                        k = 0;
+                        for (int i = 0; i < n1; ++i) {
+                            if ((t_[ti] <= x1[i]) & (x1[i] < t_[ti] + h_[hi])) {
+                                x1p[k] = x1[i];
+                                k = k + 1;
+                            }
+                        }    
+                        k = 0;
+                        for (int i = 0; i < n2; ++i) {
+                            if ((t_[ti] - h_[hi] < x2[i]) & (x2[i] < t_[ti])) {
+                                x2a[k] = x2[i];
+                                k = k + 1;
+                            }
+                        }    
+                        k = 0;
+                        for (int i = 0; i < n2; ++i) {
+                            if ((t_[ti] <= x2[i]) & (x2[i] < t_[ti] + h_[hi])) {
+                                x2p[k] = x2[i];
+                                k = k + 1;
+                            }
+                        }
+                        double nn1a = x1a.length();
+                        double nn2a = x2a.length();
+                        double nn1p = x1p.length();
+                        double nn2p = x2p.length();
+                        Rcpp::NumericVector sqrtnna (1);
+                        sqrtnna[0] = (nn1a * nn2a) / (nn1a + nn2a);
+                        Rcpp::NumericVector sqrtna = Rcpp::sqrt(sqrtnna);
+                        Rcpp::NumericVector sqrtnnp (1);
+                        sqrtnnp[0] = (nn1p * nn2p) / (nn1p + nn2p);
+                        Rcpp::NumericVector sqrtnp = Rcpp::sqrt(sqrtnnp);
+                        double bef = ks_Rcpp(x1a,x2a) * sqrtna[0];
+                        double aft = ks_Rcpp(x1p,x2p) * sqrtnp[0];
+                        out(hi,ti,p) = bef - aft;
+                    }
+                }
+            }
+        }
+    }
+    return out;
+}
+
+
+
+
+//' @useDynLib arkhaia
+//' @importFrom Rcpp sourceCpp
+// [[Rcpp::export]]
+Rcpp::List th_idt_wass_stat_arma(const arma::vec & x1, const arma::vec & x2, int scaled, double scaled_by, double quad_by, double incr) {
+    int n1 = x1.n_elem;
+    int n2 = x2.n_elem;
+    int nz = n1 + n2;
+    arma::vec z (nz);
+    for (int i = 0; i < n1; ++i) {
+        z[i] = x1[i];
+    }
+    for (int i = n1; i < nz; ++i) {
+        z[i] = x2[i-n1];
+    }
+    Rcpp::NumericVector len0v (1);
+    double a0 = arma::min(z);
+    double a1 = arma::max(z);
+    len0v[0] = (a1 - a0) / incr;
+    arma::vec len1v = Rcpp::round(len0v,0);
+    int t_ncol = len1v[0];
+    int h_nrow = t_ncol / 2;
+    arma::vec t_ (t_ncol);
+    arma::vec h_ (h_nrow);
+    for (int i = 0; i < t_ncol; ++i) {
+        t_[i] = a0 + i * incr;
+    }
+    for (int i = 0; i < h_nrow; ++i) {
+        h_[i] = incr + i * incr;
+    }
+    arma::mat out (h_nrow , t_ncol, arma::fill::value(9999.0));
+    for (int ti = 0; ti < t_ncol; ++ti) {
+        for (int hi = 0; hi < h_nrow; ++hi) {
+            if ((t_[ti] - h_[hi] >= a0) & (t_[ti] + h_[hi] <= a1)) {
+                int n_x1a = 0;
+                int n_x2a = 0;
+                int n_x1p = 0;
+                int n_x2p = 0;
+                for (int i = 0; i < n1; ++i) {
+                    if ((t_[ti] - h_[hi] < x1[i]) & (x1[i] < t_[ti])) {
+                        n_x1a = n_x1a + 1;
+                    }
+                    if ((t_[ti] <= x1[i]) & (x1[i] < t_[ti] + h_[hi])) {
+                        n_x1p = n_x1p + 1;
+                    }
+                }
+                for (int i = 0; i < n2; ++i) {
+                    if ((t_[ti] - h_[hi] < x2[i]) & (x2[i] < t_[ti])) {
+                        n_x2a = n_x2a + 1;
+                    }
+                    if ((t_[ti] <= x2[i]) & (x2[i] < t_[ti] + h_[hi])) {
+                        n_x2p = n_x2p + 1;
+                    }
+                }
+                if (((n_x1a > 0) & (n_x2a > 0)) & ((n_x1p > 0) & (n_x2p > 0))) {
+                    Rcpp::NumericVector x1a (n_x1a);
+                    Rcpp::NumericVector x2a (n_x2a);
+                    Rcpp::NumericVector x1p (n_x1p);
+                    Rcpp::NumericVector x2p (n_x2p);
+                    int k = 0;
+                    for (int i = 0; i < n1; ++i) {
+                        if ((t_[ti] - h_[hi] < x1[i]) & (x1[i] < t_[ti])) {
+                            x1a[k] = x1[i];
+                            k = k + 1;
+                        }
+                    }            
+                    k = 0;
+                    for (int i = 0; i < n1; ++i) {
+                        if ((t_[ti] <= x1[i]) & (x1[i] < t_[ti] + h_[hi])) {
+                            x1p[k] = x1[i];
+                            k = k + 1;
+                        }
+                    }    
+                    k = 0;
+                    for (int i = 0; i < n2; ++i) {
+                        if ((t_[ti] - h_[hi] < x2[i]) & (x2[i] < t_[ti])) {
+                            x2a[k] = x2[i];
+                            k = k + 1;
+                        }
+                    }    
+                    k = 0;
+                    for (int i = 0; i < n2; ++i) {
+                        if ((t_[ti] <= x2[i]) & (x2[i] < t_[ti] + h_[hi])) {
+                            x2p[k] = x2[i];
+                            k = k + 1;
+                        }
+                    }
+                    double sc_by = 0;
+                    if (scaled_by < 0) {
+                        sc_by = h_[hi];
+                    } else {
+                        sc_by = scaled_by;
+                    }
+                    double nn1a = x1a.length();
+                    double nn2a = x2a.length();
+                    double nn1p = x1p.length();
+                    double nn2p = x2p.length();
+                    Rcpp::NumericVector sqrtnna (1);
+                    sqrtnna[0] = (nn1a * nn2a) / (nn1a + nn2a);
+                    Rcpp::NumericVector sqrtna = Rcpp::sqrt(sqrtnna);
+                    Rcpp::NumericVector sqrtnnp (1);
+                    sqrtnnp[0] = (nn1p * nn2p) / (nn1p + nn2p);
+                    Rcpp::NumericVector sqrtnp = Rcpp::sqrt(sqrtnnp);
+                    double bef = wass_R1_armaV2(x1a,x2a,scaled,sc_by,quad_by) * sqrtna[0];
+                    double aft = wass_R1_armaV2(x1p,x2p,scaled,sc_by,quad_by) * sqrtna[0];
+
+                    out(hi,ti) = bef - aft;
+                }
+            }
+        }
+    }
+    return Rcpp::List::create(out, t_, h_);
+}
+
+
+
+
+//' @useDynLib arkhaia
+//' @importFrom Rcpp sourceCpp
+// [[Rcpp::export]]
+arma::cube th_idt_wass_stat_perm_arma(const arma::vec & x1_input, const arma::vec & x2_input, int scaled, double scaled_by, double quad_by, double incr, int n_perm) {
+    int n1 = x1_input.n_elem;
+    int n2 = x2_input.n_elem;
+    int nz = n1 + n2;
+    arma::vec z (nz);
+    for (int i = 0; i < n1; ++i) {
+        z[i] = x1_input[i];
+    }
+    for (int i = n1; i < nz; ++i) {
+        z[i] = x2_input[i-n1];
+    }
+    Rcpp::NumericVector len0v (1);
+    double a0 = arma::min(z);
+    double a1 = arma::max(z);
+    len0v[0] = (a1 - a0) / incr;
+    arma::vec len1v = Rcpp::round(len0v,0);
+    int t_ncol = len1v[0];
+    int h_nrow = t_ncol / 2;
+    arma::vec t_ (t_ncol);
+    arma::vec h_ (h_nrow);
+    for (int i = 0; i < t_ncol; ++i) {
+        t_[i] = a0 + i * incr;
+    }
+    for (int i = 0; i < h_nrow; ++i) {
+        h_[i] = incr + i * incr;
+    }
+    arma::cube out (h_nrow , t_ncol, n_perm, arma::fill::value(9999.0));
+
+    for (int p = 0; p < n_perm ; ++p) {
+        arma::vec y = arma::shuffle(z);
+        arma::vec x1 (n1);
+        arma::vec x2 (n2);
+        for (int k = 0; k < n1; ++k) {
+            x1[k] = y[k];
+        }
+        for (int k = 0; k < n2; ++k) {
+            x2[k] = y[k+n1];
+        }
+        for (int ti = 0; ti < t_ncol; ++ti) {
+            for (int hi = 0; hi < h_nrow; ++hi) {
+                if ((t_[ti] - h_[hi] >= a0) & (t_[ti] + h_[hi] <= a1)) {
+                    int n_x1a = 0;
+                    int n_x2a = 0;
+                    int n_x1p = 0;
+                    int n_x2p = 0;
+                    for (int i = 0; i < n1; ++i) {
+                        if ((t_[ti] - h_[hi] < x1[i]) & (x1[i] < t_[ti])) {
+                            n_x1a = n_x1a + 1;
+                        }
+                        if ((t_[ti] <= x1[i]) & (x1[i] < t_[ti] + h_[hi])) {
+                            n_x1p = n_x1p + 1;
+                        }
+                    }
+                    for (int i = 0; i < n2; ++i) {
+                        if ((t_[ti] - h_[hi] < x2[i]) & (x2[i] < t_[ti])) {
+                            n_x2a = n_x2a + 1;
+                        }
+                        if ((t_[ti] <= x2[i]) & (x2[i] < t_[ti] + h_[hi])) {
+                            n_x2p = n_x2p + 1;
+                        }
+                    }
+                    if (((n_x1a > 0) & (n_x2a > 0)) & ((n_x1p > 0) & (n_x2p > 0))) {
+                        Rcpp::NumericVector x1a (n_x1a);
+                        Rcpp::NumericVector x2a (n_x2a);
+                        Rcpp::NumericVector x1p (n_x1p);
+                        Rcpp::NumericVector x2p (n_x2p);
+                        int k = 0;
+                        for (int i = 0; i < n1; ++i) {
+                            if ((t_[ti] - h_[hi] < x1[i]) & (x1[i] < t_[ti])) {
+                                x1a[k] = x1[i];
+                                k = k + 1;
+                            }
+                        }            
+                        k = 0;
+                        for (int i = 0; i < n1; ++i) {
+                            if ((t_[ti] <= x1[i]) & (x1[i] < t_[ti] + h_[hi])) {
+                                x1p[k] = x1[i];
+                                k = k + 1;
+                            }
+                        }    
+                        k = 0;
+                        for (int i = 0; i < n2; ++i) {
+                            if ((t_[ti] - h_[hi] < x2[i]) & (x2[i] < t_[ti])) {
+                                x2a[k] = x2[i];
+                                k = k + 1;
+                            }
+                        }    
+                        k = 0;
+                        for (int i = 0; i < n2; ++i) {
+                            if ((t_[ti] <= x2[i]) & (x2[i] < t_[ti] + h_[hi])) {
+                                x2p[k] = x2[i];
+                                k = k + 1;
+                            }
+                        }
+                        double sc_by = 0;
+                        if (scaled_by < 0) {
+                           sc_by = h_[hi];
+                        } else {
+                            sc_by = scaled_by;
+                        }
+                        double nn1a = x1a.length();
+                        double nn2a = x2a.length();
+                        double nn1p = x1p.length();
+                        double nn2p = x2p.length();
+                        Rcpp::NumericVector sqrtnna (1);
+                        sqrtnna[0] = (nn1a * nn2a) / (nn1a + nn2a);
+                        Rcpp::NumericVector sqrtna = Rcpp::sqrt(sqrtnna);
+                        Rcpp::NumericVector sqrtnnp (1);
+                        sqrtnnp[0] = (nn1p * nn2p) / (nn1p + nn2p);
+                        Rcpp::NumericVector sqrtnp = Rcpp::sqrt(sqrtnnp);
+                        double bef = wass_R1_armaV2(x1a,x2a,scaled,sc_by,quad_by) * sqrtna[0];
+                        double aft = wass_R1_armaV2(x1p,x2p,scaled,sc_by,quad_by) * sqrtnp[0];
+                        out(hi,ti,p) = bef - aft;
+                    }
+                }
+            }
+        }
+    }
+    return out;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// idf functions
+
+
+
+
+
+
+
+
+
+//' @useDynLib arkhaia
+//' @importFrom Rcpp sourceCpp
+// [[Rcpp::export]]
+Rcpp::List idt_ks_arma(const arma::vec & x1, const arma::vec & x2, double incr) {
+    int n1 = x1.n_elem;
+    int n2 = x2.n_elem;
+    int nz = n1 + n2;
+    arma::vec z (nz);
+    for (int i = 0; i < n1; ++i) {
+        z[i] = x1[i];
+    }
+    for (int i = n1; i < nz; ++i) {
+        z[i] = x2[i-n1];
+    }
+    Rcpp::NumericVector len0v (1);
+    double a0 = arma::min(z);
+    double a1 = arma::max(z);
+    len0v[0] = (a1 - a0) / incr;
+    arma::vec len1v = Rcpp::round(len0v,0);
+    int t_ncol = len1v[0];
+    int h_nrow = t_ncol / 2;
+    arma::vec t_ (t_ncol);
+    arma::vec h_ (h_nrow);
+    for (int i = 0; i < t_ncol; ++i) {
+        t_[i] = a0 + i * incr;
+    }
+    for (int i = 0; i < h_nrow; ++i) {
+        h_[i] = incr + i * incr;
+    }
+    arma::mat out (h_nrow , t_ncol, arma::fill::value(9999.0));
+    for (int ti = 0; ti < t_ncol; ++ti) {
+        for (int hi = 0; hi < h_nrow; ++hi) {
+            if ((t_[ti] - h_[hi] >= a0) & (t_[ti] + h_[hi] <= a1)) {
+                int n_x1a = 0;
+                int n_x2a = 0;
+                for (int i = 0; i < n1; ++i) {
+                    if ((t_[ti] - h_[hi] < x1[i]) & (x1[i] < t_[ti] + h_[hi])) {
+                        n_x1a = n_x1a + 1;
+                    }
+                }
+                for (int i = 0; i < n2; ++i) {
+                    if ((t_[ti] - h_[hi] < x2[i]) & (x2[i] < t_[ti] + h_[hi])) {
+                        n_x2a = n_x2a + 1;
+                    }
+                }
+                if ((n_x1a > 0) & (n_x2a > 0)) {
+                    Rcpp::NumericVector x1a (n_x1a);
+                    Rcpp::NumericVector x2a (n_x2a);
+                    int k = 0;
+                    for (int i = 0; i < n1; ++i) {
+                        if ((t_[ti] - h_[hi] < x1[i]) & (x1[i] < t_[ti] + h_[hi])) {
+                            x1a[k] = x1[i];
+                            k = k + 1;
+                        }
+                    }            
+                    k = 0;
+                    for (int i = 0; i < n2; ++i) {
+                        if ((t_[ti] - h_[hi] < x2[i]) & (x2[i] < t_[ti] + h_[hi])) {
+                            x2a[k] = x2[i];
+                            k = k + 1;
+                        }
+                    }    
+                    // Rcpp::Rcout << "t : " << t_[ti] << "\n";
+                    // Rcpp::Rcout << "h : " << h_[hi] << "\n";
+                    // Rcpp::Rcout << "bef : " << bef << "\n";
+                    // Rcpp::Rcout << "aft : " << aft << "\n\n";
+
+                    out(hi,ti) = ks_Rcpp(x1a,x2a);
+                }
+            }
+        }
+    }
+    return Rcpp::List::create(out, t_, h_);
+}
+
+
+
+
+
+//' @useDynLib arkhaia
+//' @importFrom Rcpp sourceCpp
+// [[Rcpp::export]]
+arma::cube idt_ks_perm_arma(const arma::vec & x1_input, const arma::vec & x2_input, double incr, int n_perm) {
+    int n1 = x1_input.n_elem;
+    int n2 = x2_input.n_elem;
+    int nz = n1 + n2;
+    arma::vec z (nz);
+    for (int i = 0; i < n1; ++i) {
+        z[i] = x1_input[i];
+    }
+    for (int i = n1; i < nz; ++i) {
+        z[i] = x2_input[i-n1];
+    }
+    Rcpp::NumericVector len0v (1);
+    double a0 = arma::min(z);
+    double a1 = arma::max(z);
+    len0v[0] = (a1 - a0) / incr;
+    arma::vec len1v = Rcpp::round(len0v,0);
+    int t_ncol = len1v[0];
+    int h_nrow = t_ncol / 2;
+    arma::vec t_ (t_ncol);
+    arma::vec h_ (h_nrow);
+    for (int i = 0; i < t_ncol; ++i) {
+        t_[i] = a0 + i * incr;
+    }
+    for (int i = 0; i < h_nrow; ++i) {
+        h_[i] = incr + i * incr;
+    }
+    arma::cube out (h_nrow , t_ncol, n_perm, arma::fill::value(9999.0));
+
+    for (int p = 0; p < n_perm ; ++p) {
+        arma::vec y = arma::shuffle(z);
+        arma::vec x1 (n1);
+        arma::vec x2 (n2);
+        for (int k = 0; k < n1; ++k) {
+            x1[k] = y[k];
+        }
+        for (int k = 0; k < n2; ++k) {
+            x2[k] = y[k+n1];
+        }
+        for (int ti = 0; ti < t_ncol; ++ti) {
+            for (int hi = 0; hi < h_nrow; ++hi) {
+                if ((t_[ti] - h_[hi] >= a0) & (t_[ti] + h_[hi] <= a1)) {
+                    int n_x1a = 0;
+                    int n_x2a = 0;
+                    for (int i = 0; i < n1; ++i) {
+                        if ((t_[ti] - h_[hi] < x1[i]) & (x1[i] < t_[ti] + h_[hi])) {
+                            n_x1a = n_x1a + 1;
+                        }
+                    }
+                    for (int i = 0; i < n2; ++i) {
+                        if ((t_[ti] - h_[hi] < x2[i]) & (x2[i] < t_[ti] + h_[hi])) {
+                            n_x2a = n_x2a + 1;
+                        }
+                    }
+                    if ((n_x1a > 0) & (n_x2a > 0)) {
+                        Rcpp::NumericVector x1a (n_x1a);
+                        Rcpp::NumericVector x2a (n_x2a);
+                        int k = 0;
+                        for (int i = 0; i < n1; ++i) {
+                            if ((t_[ti] - h_[hi] < x1[i]) & (x1[i] < t_[ti] + h_[hi])) {
+                                x1a[k] = x1[i];
+                                k = k + 1;
+                            }
+                        }
+                        k = 0;
+                        for (int i = 0; i < n2; ++i) {
+                            if ((t_[ti] - h_[hi] < x2[i] ) & (x2[i] < t_[ti]+ h_[hi])) {
+                                x2a[k] = x2[i];
+                                k = k + 1;
+                            }
+                        }   
+                        // Rcpp::Rcout << "t : " << t_[ti] << "\n";
+                        // Rcpp::Rcout << "h : " << h_[hi] << "\n";     
+                        out(hi,ti,p) = ks_Rcpp(x1a,x2a);
+                    }
+                }
+            }
+        }
+    }
+    // Rcpp::Rcout << "h : " << out << "\n";   
+    return out;
+}
+
+
+
+
+//' @useDynLib arkhaia
+//' @importFrom Rcpp sourceCpp
+// [[Rcpp::export]]
+Rcpp::List idt_wass_arma(const arma::vec & x1, const arma::vec & x2, int scaled, double scaled_by, double quad_by, double incr) {
+    int n1 = x1.n_elem;
+    int n2 = x2.n_elem;
+    int nz = n1 + n2;
+    arma::vec z (nz);
+    for (int i = 0; i < n1; ++i) {
+        z[i] = x1[i];
+    }
+    for (int i = n1; i < nz; ++i) {
+        z[i] = x2[i-n1];
+    }
+    Rcpp::NumericVector len0v (1);
+    double a0 = arma::min(z);
+    double a1 = arma::max(z);
+    len0v[0] = (a1 - a0) / incr;
+    arma::vec len1v = Rcpp::round(len0v,0);
+    int t_ncol = len1v[0];
+    int h_nrow = t_ncol / 2;
+    arma::vec t_ (t_ncol);
+    arma::vec h_ (h_nrow);
+    for (int i = 0; i < t_ncol; ++i) {
+        t_[i] = a0 + i * incr;
+    }
+    for (int i = 0; i < h_nrow; ++i) {
+        h_[i] = incr + i * incr;
+    }
+    arma::mat out (h_nrow , t_ncol, arma::fill::value(9999.0));
+    for (int ti = 0; ti < t_ncol; ++ti) {
+        for (int hi = 0; hi < h_nrow; ++hi) {
+            if ((t_[ti] - h_[hi] >= a0) & (t_[ti] + h_[hi] <= a1)) {
+                int n_x1a = 0;
+                int n_x2a = 0;
+                for (int i = 0; i < n1; ++i) {
+                    if ((t_[ti] - h_[hi] < x1[i]) & (x1[i] < t_[ti] + h_[hi])) {
+                        n_x1a = n_x1a + 1;
+                    }
+                }
+                for (int i = 0; i < n2; ++i) {
+                    if ((t_[ti] - h_[hi] < x2[i]) & (x2[i] < t_[ti] + h_[hi])) {
+                        n_x2a = n_x2a + 1;
+                    }
+                }
+                if (((n_x1a > 0) & (n_x2a > 0))) {
+                    Rcpp::NumericVector x1a (n_x1a);
+                    Rcpp::NumericVector x2a (n_x2a);
+                    int k = 0;
+                    for (int i = 0; i < n1; ++i) {
+                        if ((t_[ti] - h_[hi] < x1[i]) & (x1[i] < t_[ti] + h_[hi])) {
+                            x1a[k] = x1[i];
+                            k = k + 1;
+                        }
+                    }            
+                    k = 0;
+                    for (int i = 0; i < n2; ++i) {
+                        if ((t_[ti] - h_[hi] < x2[i]) & (x2[i] < t_[ti] + h_[hi])) {
+                            x2a[k] = x2[i];
+                            k = k + 1;
+                        }
+                    }    
+                    k = 0;
+                    double sc_by = 0;
+                    if (scaled_by < 0) {
+                        sc_by = h_[hi];
+                    } else {
+                        sc_by = scaled_by;
+                    }
+                    // Rcpp::Rcout << "t : " << t_[ti] << "\n";
+                    // Rcpp::Rcout << "h : " << h_[hi] << "\n";
+                    // Rcpp::Rcout << "bef : " << bef << "\n";
+                    // Rcpp::Rcout << "aft : " << aft << "\n\n";
+
+                    out(hi,ti) = wass_R1_armaV2(x1a,x2a,scaled,sc_by,quad_by);
+                }
+            }
+        }
+    }
+    return Rcpp::List::create(out, t_, h_);
+}
+
+
+
+
+//' @useDynLib arkhaia
+//' @importFrom Rcpp sourceCpp
+// [[Rcpp::export]]
+arma::cube idt_wass_perm_arma(const arma::vec & x1_input, const arma::vec & x2_input, int scaled, double scaled_by, double quad_by, double incr, int n_perm) {
+    int n1 = x1_input.n_elem;
+    int n2 = x2_input.n_elem;
+    int nz = n1 + n2;
+    arma::vec z (nz);
+    for (int i = 0; i < n1; ++i) {
+        z[i] = x1_input[i];
+    }
+    for (int i = n1; i < nz; ++i) {
+        z[i] = x2_input[i-n1];
+    }
+    Rcpp::NumericVector len0v (1);
+    double a0 = arma::min(z);
+    double a1 = arma::max(z);
+    len0v[0] = (a1 - a0) / incr;
+    arma::vec len1v = Rcpp::round(len0v,0);
+    int t_ncol = len1v[0];
+    int h_nrow = t_ncol / 2;
+    arma::vec t_ (t_ncol);
+    arma::vec h_ (h_nrow);
+    for (int i = 0; i < t_ncol; ++i) {
+        t_[i] = a0 + i * incr;
+    }
+    for (int i = 0; i < h_nrow; ++i) {
+        h_[i] = incr + i * incr;
+    }
+    arma::cube out (h_nrow , t_ncol, n_perm, arma::fill::value(9999.0));
+
+    for (int p = 0; p < n_perm ; ++p) {
+        arma::vec y = arma::shuffle(z);
+        arma::vec x1 (n1);
+        arma::vec x2 (n2);
+        for (int k = 0; k < n1; ++k) {
+            x1[k] = y[k];
+        }
+        for (int k = 0; k < n2; ++k) {
+            x2[k] = y[k+n1];
+        }
+        for (int ti = 0; ti < t_ncol; ++ti) {
+            for (int hi = 0; hi < h_nrow; ++hi) {
+                if ((t_[ti] - h_[hi] >= a0) & (t_[ti] + h_[hi] <= a1)) {
+                    int n_x1a = 0;
+                    int n_x2a = 0;
+                    for (int i = 0; i < n1; ++i) {
+                        if ((t_[ti] - h_[hi] < x1[i]) & (x1[i] < t_[ti] + h_[hi])) {
+                            n_x1a = n_x1a + 1;
+                        }
+                    }
+                    for (int i = 0; i < n2; ++i) {
+                        if ((t_[ti] - h_[hi] < x2[i]) & (x2[i] < t_[ti] + h_[hi])) {
+                            n_x2a = n_x2a + 1;
+                        }
+                    }
+                    if (((n_x1a > 0) & (n_x2a > 0))) {
+                        Rcpp::NumericVector x1a (n_x1a);
+                        Rcpp::NumericVector x2a (n_x2a);
+                        int k = 0;
+                        for (int i = 0; i < n1; ++i) {
+                            if ((t_[ti] - h_[hi] < x1[i]) & (x1[i] < t_[ti] + h_[hi])) {
+                                x1a[k] = x1[i];
+                                k = k + 1;
+                            }
+                        }             
+                        k = 0;
+                        for (int i = 0; i < n2; ++i) {
+                            if ((t_[ti] - h_[hi] < x2[i]) & (x2[i] < t_[ti] + h_[hi])) {
+                                x2a[k] = x2[i];
+                                k = k + 1;
+                            }
+                        }    
+                        double sc_by = 0;
+                        if (scaled_by < 0) {
+                           sc_by = h_[hi];
+                        } else {
+                            sc_by = scaled_by;
+                        }
+                        double bef = wass_R1_armaV2(x1a,x2a,scaled,sc_by,quad_by);
+                        out(hi,ti,p) = bef;
+                    }
+                }
+            }
+        }
+    }
+    return out;
+}
+
+
+
+
+
+// With sample size added
+
+
+
+//' @useDynLib arkhaia
+//' @importFrom Rcpp sourceCpp
+// [[Rcpp::export]]
+Rcpp::List idt_ks_stat_arma(const arma::vec & x1, const arma::vec & x2, double incr) {
+    int n1 = x1.n_elem;
+    int n2 = x2.n_elem;
+    int nz = n1 + n2;
+    arma::vec z (nz);
+    for (int i = 0; i < n1; ++i) {
+        z[i] = x1[i];
+    }
+    for (int i = n1; i < nz; ++i) {
+        z[i] = x2[i-n1];
+    }
+    Rcpp::NumericVector len0v (1);
+    double a0 = arma::min(z);
+    double a1 = arma::max(z);
+    len0v[0] = (a1 - a0) / incr;
+    arma::vec len1v = Rcpp::round(len0v,0);
+    int t_ncol = len1v[0];
+    int h_nrow = t_ncol / 2;
+    arma::vec t_ (t_ncol);
+    arma::vec h_ (h_nrow);
+    for (int i = 0; i < t_ncol; ++i) {
+        t_[i] = a0 + i * incr;
+    }
+    for (int i = 0; i < h_nrow; ++i) {
+        h_[i] = incr + i * incr;
+    }
+    arma::mat out (h_nrow , t_ncol, arma::fill::value(9999.0));
+    for (int ti = 0; ti < t_ncol; ++ti) {
+        for (int hi = 0; hi < h_nrow; ++hi) {
+            if ((t_[ti] - h_[hi] >= a0) & (t_[ti] + h_[hi] <= a1)) {
+                int n_x1a = 0;
+                int n_x2a = 0;
+                for (int i = 0; i < n1; ++i) {
+                    if ((t_[ti] - h_[hi] < x1[i]) & (x1[i] < t_[ti] + h_[hi])) {
+                        n_x1a = n_x1a + 1;
+                    }
+                }
+                for (int i = 0; i < n2; ++i) {
+                    if ((t_[ti] - h_[hi] < x2[i]) & (x2[i] < t_[ti] + h_[hi])) {
+                        n_x2a = n_x2a + 1;
+                    }
+                }
+                if (((n_x1a > 0) & (n_x2a > 0))) {
+                    Rcpp::NumericVector x1a (n_x1a);
+                    Rcpp::NumericVector x2a (n_x2a);
+                    int k = 0;
+                    for (int i = 0; i < n1; ++i) {
+                        if ((t_[ti] - h_[hi] < x1[i]) & (x1[i] < t_[ti] + h_[hi])) {
+                            x1a[k] = x1[i];
+                            k = k + 1;
+                        }
+                    }             
+                    k = 0;
+                    for (int i = 0; i < n2; ++i) {
+                        if ((t_[ti] - h_[hi] < x2[i]) & (x2[i] < t_[ti] + h_[hi])) {
+                            x2a[k] = x2[i];
+                            k = k + 1;
+                        }
+                    }    
+                    double nn1a = x1a.length();
+                    double nn2a = x2a.length();
+                    Rcpp::NumericVector sqrtnna (1);
+                    sqrtnna[0] = (nn1a * nn2a) / (nn1a + nn2a);
+                    Rcpp::NumericVector sqrtna = Rcpp::sqrt(sqrtnna);
+
+                    double bef = ks_Rcpp(x1a,x2a) * sqrtna[0];
+
+                    out(hi,ti) = bef;
+                }
+            }
+        }
+    }
+    return Rcpp::List::create(out, t_, h_);
+}
+
+
+
+
+
+//' @useDynLib arkhaia
+//' @importFrom Rcpp sourceCpp
+// [[Rcpp::export]]
+arma::cube idt_ks_stat_perm_arma(const arma::vec & x1_input, const arma::vec & x2_input, double incr, int n_perm) {
+    int n1 = x1_input.n_elem;
+    int n2 = x2_input.n_elem;
+    int nz = n1 + n2;
+    arma::vec z (nz);
+    for (int i = 0; i < n1; ++i) {
+        z[i] = x1_input[i];
+    }
+    for (int i = n1; i < nz; ++i) {
+        z[i] = x2_input[i-n1];
+    }
+    Rcpp::NumericVector len0v (1);
+    double a0 = arma::min(z);
+    double a1 = arma::max(z);
+    len0v[0] = (a1 - a0) / incr;
+    arma::vec len1v = Rcpp::round(len0v,0);
+    int t_ncol = len1v[0];
+    int h_nrow = t_ncol / 2;
+    arma::vec t_ (t_ncol);
+    arma::vec h_ (h_nrow);
+    for (int i = 0; i < t_ncol; ++i) {
+        t_[i] = a0 + i * incr;
+    }
+    for (int i = 0; i < h_nrow; ++i) {
+        h_[i] = incr + i * incr;
+    }
+    arma::cube out (h_nrow , t_ncol, n_perm, arma::fill::value(9999.0));
+
+    for (int p = 0; p < n_perm ; ++p) {
+        arma::vec y = arma::shuffle(z);
+        arma::vec x1 (n1);
+        arma::vec x2 (n2);
+        for (int k = 0; k < n1; ++k) {
+            x1[k] = y[k];
+        }
+        for (int k = 0; k < n2; ++k) {
+            x2[k] = y[k+n1];
+        }
+        for (int ti = 0; ti < t_ncol; ++ti) {
+            for (int hi = 0; hi < h_nrow; ++hi) {
+                if ((t_[ti] - h_[hi] >= a0) & (t_[ti] + h_[hi] <= a1)) {
+                    int n_x1a = 0;
+                    int n_x2a = 0;
+                    for (int i = 0; i < n1; ++i) {
+                        if ((t_[ti] - h_[hi] < x1[i]) & (x1[i] < t_[ti] + h_[hi])) {
+                            n_x1a = n_x1a + 1;
+                        }
+                    }
+                    for (int i = 0; i < n2; ++i) {
+                        if ((t_[ti] - h_[hi] < x2[i]) & (x2[i] < t_[ti] + h_[hi])) {
+                            n_x2a = n_x2a + 1;
+                        }
+                    }
+                    if ((n_x1a > 0) & (n_x2a > 0)) {
+                        Rcpp::NumericVector x1a (n_x1a);
+                        Rcpp::NumericVector x2a (n_x2a);
+                        int k = 0;
+                        for (int i = 0; i < n1; ++i) {
+                            if ((t_[ti] - h_[hi] < x1[i]) & (x1[i] < t_[ti] + h_[hi])) {
+                                x1a[k] = x1[i];
+                                k = k + 1;
+                            }
+                        }
+                        k = 0;
+                        for (int i = 0; i < n2; ++i) {
+                            if ((t_[ti] - h_[hi] < x2[i]) & (x2[i] < t_[ti] + h_[hi])) {
+                                x2a[k] = x2[i];
+                                k = k + 1;
+                            }
+                        }    
+                        double nn1a = x1a.length();
+                        double nn2a = x2a.length();
+                        Rcpp::NumericVector sqrtnna (1);
+                        sqrtnna[0] = (nn1a * nn2a) / (nn1a + nn2a);
+                        Rcpp::NumericVector sqrtna = Rcpp::sqrt(sqrtnna);
+                        double bef = ks_Rcpp(x1a,x2a) * sqrtna[0];
+                        out(hi,ti,p) = bef;
+                    }
+                }
+            }
+        }
+    }
+    return out;
+}
+
+
+
+
+//' @useDynLib arkhaia
+//' @importFrom Rcpp sourceCpp
+// [[Rcpp::export]]
+Rcpp::List idt_wass_stat_arma(const arma::vec & x1, const arma::vec & x2, int scaled, double scaled_by, double quad_by, double incr) {
+    int n1 = x1.n_elem;
+    int n2 = x2.n_elem;
+    int nz = n1 + n2;
+    arma::vec z (nz);
+    for (int i = 0; i < n1; ++i) {
+        z[i] = x1[i];
+    }
+    for (int i = n1; i < nz; ++i) {
+        z[i] = x2[i-n1];
+    }
+    Rcpp::NumericVector len0v (1);
+    double a0 = arma::min(z);
+    double a1 = arma::max(z);
+    len0v[0] = (a1 - a0) / incr;
+    arma::vec len1v = Rcpp::round(len0v,0);
+    int t_ncol = len1v[0];
+    int h_nrow = t_ncol / 2;
+    arma::vec t_ (t_ncol);
+    arma::vec h_ (h_nrow);
+    for (int i = 0; i < t_ncol; ++i) {
+        t_[i] = a0 + i * incr;
+    }
+    for (int i = 0; i < h_nrow; ++i) {
+        h_[i] = incr + i * incr;
+    }
+    arma::mat out (h_nrow , t_ncol, arma::fill::value(9999.0));
+    for (int ti = 0; ti < t_ncol; ++ti) {
+        for (int hi = 0; hi < h_nrow; ++hi) {
+            if ((t_[ti] - h_[hi] >= a0) & (t_[ti] + h_[hi] <= a1)) {
+                int n_x1a = 0;
+                int n_x2a = 0;
+                for (int i = 0; i < n1; ++i) {
+                    if ((t_[ti] - h_[hi] < x1[i]) & (x1[i] < t_[ti] + h_[hi])) {
+                        n_x1a = n_x1a + 1;
+                    }
+                }
+                for (int i = 0; i < n2; ++i) {
+                    if ((t_[ti] - h_[hi] < x2[i]) & (x2[i] < t_[ti] + h_[hi])) {
+                        n_x2a = n_x2a + 1;
+                    }
+                }
+                if (((n_x1a > 0) & (n_x2a > 0))) {
+                    Rcpp::NumericVector x1a (n_x1a);
+                    Rcpp::NumericVector x2a (n_x2a);
+                    int k = 0;
+                    for (int i = 0; i < n1; ++i) {
+                        if ((t_[ti] - h_[hi] < x1[i]) & (x1[i] < t_[ti] + h_[hi])) {
+                            x1a[k] = x1[i];
+                            k = k + 1;
+                        }
+                    } 
+                    k = 0;
+                    for (int i = 0; i < n2; ++i) {
+                        if ((t_[ti] - h_[hi] < x2[i]) & (x2[i] < t_[ti] + h_[hi])) {
+                            x2a[k] = x2[i];
+                            k = k + 1;
+                        }
+                    }    
+                    double sc_by = 0;
+                    if (scaled_by < 0) {
+                        sc_by = h_[hi];
+                    } else {
+                        sc_by = scaled_by;
+                    }
+                    double nn1a = x1a.length();
+                    double nn2a = x2a.length();
+                    Rcpp::NumericVector sqrtnna (1);
+                    sqrtnna[0] = (nn1a * nn2a) / (nn1a + nn2a);
+                    Rcpp::NumericVector sqrtna = Rcpp::sqrt(sqrtnna);
+                    double bef = wass_R1_armaV2(x1a,x2a,scaled,sc_by,quad_by) * sqrtna[0];
+
+                    out(hi,ti) = bef;
+                }
+            }
+        }
+    }
+    return Rcpp::List::create(out, t_, h_);
+}
+
+
+
+
+//' @useDynLib arkhaia
+//' @importFrom Rcpp sourceCpp
+// [[Rcpp::export]]
+arma::cube idt_wass_stat_perm_arma(const arma::vec & x1_input, const arma::vec & x2_input, int scaled, double scaled_by, double quad_by, double incr, int n_perm) {
+    int n1 = x1_input.n_elem;
+    int n2 = x2_input.n_elem;
+    int nz = n1 + n2;
+    arma::vec z (nz);
+    for (int i = 0; i < n1; ++i) {
+        z[i] = x1_input[i];
+    }
+    for (int i = n1; i < nz; ++i) {
+        z[i] = x2_input[i-n1];
+    }
+    Rcpp::NumericVector len0v (1);
+    double a0 = arma::min(z);
+    double a1 = arma::max(z);
+    len0v[0] = (a1 - a0) / incr;
+    arma::vec len1v = Rcpp::round(len0v,0);
+    int t_ncol = len1v[0];
+    int h_nrow = t_ncol / 2;
+    arma::vec t_ (t_ncol);
+    arma::vec h_ (h_nrow);
+    for (int i = 0; i < t_ncol; ++i) {
+        t_[i] = a0 + i * incr;
+    }
+    for (int i = 0; i < h_nrow; ++i) {
+        h_[i] = incr + i * incr;
+    }
+    arma::cube out (h_nrow , t_ncol, n_perm, arma::fill::value(9999.0));
+
+    for (int p = 0; p < n_perm ; ++p) {
+        arma::vec y = arma::shuffle(z);
+        arma::vec x1 (n1);
+        arma::vec x2 (n2);
+        for (int k = 0; k < n1; ++k) {
+            x1[k] = y[k];
+        }
+        for (int k = 0; k < n2; ++k) {
+            x2[k] = y[k+n1];
+        }
+        for (int ti = 0; ti < t_ncol; ++ti) {
+            for (int hi = 0; hi < h_nrow; ++hi) {
+                if ((t_[ti] - h_[hi] >= a0) & (t_[ti] + h_[hi] <= a1)) {
+                    int n_x1a = 0;
+                    int n_x2a = 0;
+                    for (int i = 0; i < n1; ++i) {
+                        if ((t_[ti] - h_[hi] < x1[i]) & (x1[i] < t_[ti] + h_[hi])) {
+                            n_x1a = n_x1a + 1;
+                        }
+                    }
+                    for (int i = 0; i < n2; ++i) {
+                        if ((t_[ti] - h_[hi] < x2[i]) & (x2[i] < t_[ti] + h_[hi])) {
+                            n_x2a = n_x2a + 1;
+                        }
+                    }
+                    if (((n_x1a > 0) & (n_x2a > 0)) ) {
+                        Rcpp::NumericVector x1a (n_x1a);
+                        Rcpp::NumericVector x2a (n_x2a);
+                        int k = 0;
+                        for (int i = 0; i < n1; ++i) {
+                            if ((t_[ti] - h_[hi] < x1[i]) & (x1[i] < t_[ti] + h_[hi])) {
+                                x1a[k] = x1[i];
+                                k = k + 1;
+                            }
+                        } 
+                        k = 0;
+                        for (int i = 0; i < n2; ++i) {
+                            if ((t_[ti] - h_[hi] < x2[i]) & (x2[i] < t_[ti] + h_[hi])) {
+                                x2a[k] = x2[i];
+                                k = k + 1;
+                            }
+                        }    
+                        double sc_by = 0;
+                        if (scaled_by < 0) {
+                           sc_by = h_[hi];
+                        } else {
+                            sc_by = scaled_by;
+                        }
+                        double nn1a = x1a.length();
+                        double nn2a = x2a.length();
+                        Rcpp::NumericVector sqrtnna (1);
+                        sqrtnna[0] = (nn1a * nn2a) / (nn1a + nn2a);
+                        Rcpp::NumericVector sqrtna = Rcpp::sqrt(sqrtnna);
+                        double bef = wass_R1_armaV2(x1a,x2a,scaled,sc_by,quad_by) * sqrtna[0];
+                        out(hi,ti,p) = bef ;
+                    }
+                }
+            }
+        }
+    }
+    return out;
+}
 
