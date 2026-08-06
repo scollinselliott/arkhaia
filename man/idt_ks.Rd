@@ -17,7 +17,7 @@ idt_ks(x1, x2 = NULL, stat = FALSE, incr = 0.5, perm = FALSE, n_perm = 1e+05)
 
 \item{x2}{If \code{x1} is vector, \code{x2} is vector containing observations of sample 2.}
 
-\item{stat}{Whether to multiply the distance by \eqn{\sqrt{\frac(n_1 n_2){n_1 + n_2}}}. Default is \code{FALSE}.}
+\item{stat}{Whether to multiply the distance by \eqn{\sqrt{\frac{n_1 n_2}{n_1 + n_2}}}. Default is \code{FALSE}.}
 
 \item{incr}{The increment at which to sample values of \eqn{t} and \eqn{h}. Default is 0.5.}
 

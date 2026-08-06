@@ -21,5 +21,8 @@ ks_arkhaia(x1, x2 = NULL)
 The KS distance between the two vectors.
 }
 \description{
-This function computes the Kolmogorov-Smirnov (KS) distance between two empirical cumulative distribution functions. For more functionality, see \code{\link[stats]{ks.test}}).
+This function computes the Kolmogorov-Smirnov (KS) distance between two empirical cumulative distribution functions. For more functionality, use \code{\link[stats]{ks.test}}.
+}
+\details{
+The Rcpp-based function \code{\link[arkhaia]{ks_arkhaia}} is used for faster estimation of the KS distance than \code{\link[stats]{ks.test}}.
 }

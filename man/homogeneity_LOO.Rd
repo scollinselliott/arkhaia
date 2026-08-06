@@ -62,11 +62,11 @@ homogeneity_LOO(
 \value{
 A list containing:
 \itemize{
- \item EQ - The mean quantile expressing the degree of homogeneity among related contexts.
- \item EQ_T_mean - The mean quantile upon iterating over the omission of each type (of the LOO samples).
- \item EQ_T_var - The variance of the LOO type samples.
- \item EQ_C_mean - The mean quantile upon iterating over the omission of each context.
- \item EQ_C_var - The variance of the LOO context samples.
+ \item \code{EQ} - The mean quantile expressing the degree of homogeneity among related contexts.
+ \item \code{EQ_T_mean} - The mean quantile upon iterating over the omission of each type (of the LOO samples).
+ \item \code{EQ_T_var} - The variance of the LOO type samples.
+ \item \code{EQ_C_mean} - The mean quantile upon iterating over the omission of each context.
+ \item \code{EQ_C_var} - The variance of the LOO context samples.
 }
 }
 \description{

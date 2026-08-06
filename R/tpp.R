@@ -259,7 +259,7 @@ th_idt_ks.list <- function(x1, x2 = NULL, stat = FALSE, incr = 0.5, perm = FALSE
 #' 
 #' @param x1 Either a list of vectors or a vector containing observations of sample 1.
 #' @param x2 If \code{x1} is vector, \code{x2} is vector containing observations of sample 2.
-#' @param stat Whether to multiply the distance by \eqn{\sqrt{\frac(n_1 n_2){n_1 + n_2}}}. Default is \code{FALSE}.
+#' @param stat Whether to multiply the distance by \eqn{\sqrt{\frac{n_1 n_2}{n_1 + n_2}}}. Default is \code{FALSE}.
 #' @param scaled Whether to scale the Wasserstein R1 distance used in the course of estimation. Default is \code{FALSE}.
 #' @param scaled_by The magnitude by which to scale the Wasserstein R1 distance, if \code{scaled} is \code{TRUE}. Entering \code{0} (the default) will use the range of the maximum and minimum of the pair of point processes, while entering \code{-1} will use the value of \eqn{h}.
 #' @param quad_by The increment of sampling for performing quadrature. Default is \code{1e-3}.
@@ -447,7 +447,7 @@ th_idt_wass.list <- function(x1, x2 = NULL, stat = FALSE, scaled = FALSE, scaled
 #' 
 #' @param x1 Either a list of vectors or a vector containing observations of sample 1.
 #' @param x2 If \code{x1} is vector, \code{x2} is vector containing observations of sample 2.
-#' @param stat Whether to multiply the distance by \eqn{\sqrt{\frac(n_1 n_2){n_1 + n_2}}}. Default is \code{FALSE}.
+#' @param stat Whether to multiply the distance by \eqn{\sqrt{\frac{n_1 n_2}{n_1 + n_2}}}. Default is \code{FALSE}.
 #' @param incr The increment at which to sample values of \eqn{t} and \eqn{h}. Default is 0.5. 
 #' @param perm Whether to perform a Monte Carlo permutation across all samples in the input, which will return the probability of an integrating threshold at time \eqn{t}. Default is \code{FALSE}.
 #' @param n_perm Number of Monte Carlo permutations to perform. Default is \code{1e5}.
@@ -543,7 +543,7 @@ idt_ks.list <- function(x1, x2 = NULL, stat = FALSE, incr = 0.5, perm = FALSE, n
 #' 
 #' @param x1 Either a list of vectors or a vector containing observations of sample 1.
 #' @param x2 If \code{x1} is vector, \code{x2} is vector containing observations of sample 2.
-#' @param stat Whether to multiply the distance by \eqn{\sqrt{\frac(n_1 n_2){n_1 + n_2}}}. Default is \code{FALSE}.
+#' @param stat Whether to multiply the distance by \eqn{\sqrt{\frac{n_1 n_2}{n_1 + n_2}}}. Default is \code{FALSE}.
 #' @param scaled Whether to scale the Wasserstein R1 distance used in the course of estimation. Default is \code{FALSE}.
 #' @param scaled_by The magnitude by which to scale the Wasserstein R1 distance, if \code{scaled} is \code{TRUE}. Entering \code{0} (the default) will use the range of the maximum and minimum of the pair of point processes, while entering \code{-1} will use the value of \eqn{h}.
 #' @param quad_by The increment of sampling for performing quadrature. Default is \code{1e-3}.

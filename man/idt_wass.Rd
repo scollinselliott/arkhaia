@@ -47,7 +47,7 @@ idt_wass(
 
 \item{x2}{If \code{x1} is vector, \code{x2} is vector containing observations of sample 2.}
 
-\item{stat}{Whether to multiply the distance by \eqn{\sqrt{\frac(n_1 n_2){n_1 + n_2}}}. Default is \code{FALSE}.}
+\item{stat}{Whether to multiply the distance by \eqn{\sqrt{\frac{n_1 n_2}{n_1 + n_2}}}. Default is \code{FALSE}.}
 
 \item{scaled}{Whether to scale the Wasserstein R1 distance used in the course of estimation. Default is \code{FALSE}.}
 

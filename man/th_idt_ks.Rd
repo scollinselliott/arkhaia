@@ -38,7 +38,7 @@ th_idt_ks(
 
 \item{x2}{If \code{x1} is vector, \code{x2} is vector containing observations of sample 2.}
 
-\item{stat}{Whether to multiply the distance by \eqn{\sqrt{\frac(n_1 n_2){n_1 + n_2}}}. Default is \code{FALSE}.}
+\item{stat}{Whether to multiply the distance by \eqn{\sqrt{\frac{n_1 n_2}{n_1 + n_2}}}. Default is \code{FALSE}.}
 
 \item{incr}{The increment at which to sample values of \eqn{t} and \eqn{h}. Default is 0.5.}
 
@@ -51,7 +51,4 @@ A list containing a data frame  two vectors \code{x1} and \code{x2}, the probabi
 }
 \description{
 For two one-dimensional temporal point processes \eqn{X_1} and \eqn{X_2}, this function estimates the condition of the two processes becoming "integrated in distribution over time" (i.d.t.) at a moment in time \eqn{t}. This is achieved by computing the Kolmogorov-Smirnov distance \eqn{D} between their empirical culumative distribution functions (e.c.d.f.), before and after \eqn{t} for some duration \eqn{h}, and taking the difference between the distances \eqn{\theta = D_{before}} - \eqn{D_{after}}. For practical significance in the estimation of \eqn{\theta}, Monte Carlo permutation of samples is used to estimate the probability that the observed value of \eqn{\theta} is greater than the distribution of permuted samples (i.e., that observations are interchangable between \eqn{X_1} and \eqn{X_2}).
-}
-\details{
-The Rcpp-based function \code{\link[arkhaia]{ks_arkhaia}} is used for faster estimation of the KS distance than \code{\link[stats]{ks.test}}.
 }
