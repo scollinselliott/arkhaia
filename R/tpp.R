@@ -121,7 +121,9 @@ print.wass <- function(x, ...) {
 
 #' Kolmogorov-Smirnov Distance
 #'
-#' This function computes the Kolmogorov-Smirnov (KS) distance between two empirical cumulative distribution functions. For more functionality, see \code{\link[stats]{ks.test}}).
+#' This function computes the Kolmogorov-Smirnov (KS) distance between two empirical cumulative distribution functions. For more functionality, use \code{\link[stats]{ks.test}}.
+#' 
+#' The Rcpp-based function \code{\link[arkhaia]{ks_arkhaia}} is used for faster estimation of the KS distance than \code{\link[stats]{ks.test}}.
 #' 
 #' @param x1 A vector of observations, or a list containing both vectors.
 #' @param x2 A vector of observations, if \code{x1} is not a list. 
@@ -159,11 +161,9 @@ ks_arkhaia.list <- function(x1, x2 = NULL) {
 #'
 #' For two one-dimensional temporal point processes \eqn{X_1} and \eqn{X_2}, this function estimates the condition of the two processes becoming "integrated in distribution over time" (i.d.t.) at a moment in time \eqn{t}. This is achieved by computing the Kolmogorov-Smirnov distance \eqn{D} between their empirical culumative distribution functions (e.c.d.f.), before and after \eqn{t} for some duration \eqn{h}, and taking the difference between the distances \eqn{\theta = D_{before}} - \eqn{D_{after}}. For practical significance in the estimation of \eqn{\theta}, Monte Carlo permutation of samples is used to estimate the probability that the observed value of \eqn{\theta} is greater than the distribution of permuted samples (i.e., that observations are interchangable between \eqn{X_1} and \eqn{X_2}). 
 #' 
-#' The Rcpp-based function \code{\link[arkhaia]{ks_arkhaia}} is used for faster estimation of the KS distance than \code{\link[stats]{ks.test}}.
-#' 
 #' @param x1 Either a list of vectors or a vector containing observations of sample 1.
 #' @param x2 If \code{x1} is vector, \code{x2} is vector containing observations of sample 2.
-#' @param stat Whether to multiply the distance by \eqn{\sqrt{\frac(n_1 n_2){n_1 + n_2}}}. Default is \code{FALSE}.
+#' @param stat Whether to multiply the distance by \eqn{\sqrt{\frac{n_1 n_2}{n_1 + n_2}}}. Default is \code{FALSE}.
 #' @param incr The increment at which to sample values of \eqn{t} and \eqn{h}. Default is 0.5. 
 #' @param perm Whether to perform a Monte Carlo permutation across all samples in the input, which will return the probability of an integrating threshold at time \eqn{t}. Default is \code{FALSE}.
 #' @param n_perm Number of Monte Carlo permutations to perform. Default is \code{1e5}.
