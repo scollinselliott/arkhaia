@@ -24,11 +24,11 @@ Sanderson 2014; Eddelbuettel and Balamuta 2018).
 
 ## Installation
 
-To obtain the current development version of the package, `devtools` can
+To obtain the current development version of the package, `remotes` can
 be used to install `arkhaia` from GitHub:
 
 ``` r
-library(devtools)
+library(remotes)
 install_github("scollinselliott/arkhaia", dependencies = TRUE, build_vignettes = TRUE) 
 ```
 

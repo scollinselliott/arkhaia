@@ -14,8 +14,9 @@ bibentry(
   title = "Evaluating the Relationship between Surface, Subsurface, and Stratigraphic Assemblages",
   author   = c(person(c("Stephen", "A."), "Collins-Elliott", role = c("aut"), email = "sce@utk.edu")),
   journal  = "Journal of Archaeological Method and Theory",
-  year     = "2026",
-  pages    = "1--21",
+  year     = "2027",
+  pages    = "1--21{ paper no. }10",
+  volume = "34",
   doi      = "10.1007/s10816-026-09815-y",
   key      = "collins-elliott_evaluating_2026"
 )
