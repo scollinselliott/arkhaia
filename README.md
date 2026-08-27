@@ -39,7 +39,7 @@ install_github("scollinselliott/arkhaia", dependencies = TRUE, build_vignettes =
 Establishing a measure of practical signficance for the comparison of
 finds assemblages in their depositional contexts. Whether or not a
 context is “representative” of another is assessed on the basis of the
-homogeneity of the distribution of finds. See Collins-Elliott (2026).
+homogeneity of the distribution of finds. See Collins-Elliott (2027).
 
 - Cressie-Read power-divergence statistic to estimate $\chi^2$ (Cressie
   and Read 1984; Read and Cressie 1988)
@@ -103,11 +103,12 @@ Under Review.
 
 </div>
 
-<div id="ref-collins-elliott_evaluating_2026" class="csl-entry">
+<div id="ref-collins-elliott_evaluating_2027" class="csl-entry">
 
-———. 2026. “Evaluating the Relationship Between Surface, Subsurface, and
+———. 2027. “Evaluating the Relationship Between Surface, Subsurface, and
 Stratigraphic Assemblages.” *Journal of Archaeological Method and
-Theory*. <https://doi.org/10.1007/s10816-026-09815-y>.
+Theory* 34: 1–21, paper no. 10.
+<https://doi.org/10.1007/s10816-026-09815-y>.
 
 </div>
 
