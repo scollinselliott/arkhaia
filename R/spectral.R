@@ -1,6 +1,6 @@
 #' Least Squares Spectral Analysis (LSSA)
 #'
-#' Peforms a simple least squares fitting to time indexed data of the form \eqn{x(t) = \beta_{0} + \sum_{i =1}^n \beta_{1i} \cos (2 \pi f t) + \beta_{2i} \sin(2 \pi f t)}, using a range of potential frequencies \insertCite{vanicek_approximate_1969,vanicek_further_1971}{arkhaia}. Intercept may be ommitted. 
+#' Performs a simple least squares fitting to time indexed data of the form \eqn{x(t) = \beta_{0} + \sum_{i =1}^n \beta_{1i} \cos (2 \pi f t) + \beta_{2i} \sin(2 \pi f t)}, using a range of potential frequencies \insertCite{vanicek_approximate_1969,vanicek_further_1971}{arkhaia}. Intercept may be ommitted. 
 #' 
 #' @param x A data frame of two columns, the first containing time indices and the second containing values.
 #' @param freqs A vector of frequencies to evaluate. By default a grid from 0.001 to 0.5 is tested at an interval of 0.005.
@@ -49,7 +49,7 @@ LSSA.data.frame <- function(x, freqs = seq(0.001, 0.5, by = 0.0005), intercept =
 
 #' Least Squares Spectral Analysis via Lowest Frequency Iteration (LSSA-LFI)
 #'
-#' Peforms a simple least squares fitting to time indexed data of the form  \eqn{x(t) = \beta_{0} + \sum_{i =1}^n \beta_{1i} \cos (2 \pi f t) + \beta_{2i} \sin(2 \pi f t)}, using an input of frequencies; the lowest frequency peak (not the highest power frequency) is chosen for regression, up to a chosen number of iterations. Intercept may be ommitted. The lowest frequency is equivalent to the longest period.
+#' Performs a simple least squares fitting to time indexed data of the form  \eqn{x(t) = \beta_{0} + \sum_{i =1}^n \beta_{1i} \cos (2 \pi f t) + \beta_{2i} \sin(2 \pi f t)}, using an input of frequencies; the lowest frequency peak (not the highest power frequency) is chosen for regression, up to a chosen number of iterations. Intercept may be ommitted. The lowest frequency is equivalent to the longest period.
 #' 
 #' @param x A data frame of two columns, with the first column containing time indices and the second containing values.
 #' @param n_iter The number of iterations to run. Default is 1.
@@ -230,7 +230,7 @@ repartition.list <- function(x, set = NULL) {
 
 # #' Model Selection of LSSA-LFI Candidates
 # #'
-# #' For an \code{LSSA_LFI_AIC} object see \code{\link[arkhaia]{LSSA_LFI_candidates}}), returns the index of the candidate model. If \code{sets} is \code{NULL} in the \code{LSSA_LFI_candidates} function, an index of [1] refers to the model of a pooled (joint) grouping, [2] refers to the model of discrete, separate groupings. 
+# #' For an \code{LSSA_LFI_AIC} object (see \code{\link[arkhaia]{LSSA_LFI_candidates}}), returns the index of the candidate model. If \code{sets} is \code{NULL} in the \code{LSSA_LFI_candidates} function, an index of [1] refers to the model of a pooled (joint) grouping, [2] refers to the model of discrete, separate groupings. 
 # #' 
 # #' @param x An \code{LSSA_LFI_AIC} object. 
 # #' @returns The index of the grouping which contains the lowest AIC score.
@@ -537,7 +537,6 @@ LSSA_LFI_multi.list <- function(x, n_iter = 1, intercept = TRUE, AIC = FALSE) {
 
 
 
-
 #' Partitioned LSSA-LFI Model Terms and AIC: Composite Number of Parameters
 #'
 #' For multiple time series contained in a list, this function will compute the Akaike Information Criterion (AIC) for the best-fitting models particular to each series, including the case of an intercept-only model. This function can be performed after \code{\link[arkhaia]{LSSA_LFI_candidates}} and \code{\link[arkhaia]{repartition}} to determine the appropriate number of terms. For the situation where all time series must have the same number of terms, \code{\link[arkhaia]{LSSA_LFI_multi}} should be used, but this function should chosose a better fitting model, since it adjusts the number of parameters for each dataset.
@@ -589,5 +588,125 @@ LSSA_LFI_comp.list <- function(x, intercept = TRUE) {
 
   return(out)
 }
+
+
+
+#' Decaying Trend-after-Event Model
+#'
+#' For multiple time-indexed observations and a number of events, \eqn{r = 1, ldots, n_r}, that occur at a given time index, this function performs a regression of the form \eqn{x(t) = \beta_0 + \sum_{r = 1}^{n_r} \gamma t I(t \leq t_r ) e^{-\lambda t} }, where \eqn{I(t \geq t_r )} is an indicator function equaling 1 if \eqn{t \geq t_r}. Estimation of \eqn{\gamma}, \eqn{\lambda}, and \eqn{\beta_0} is performed numerically on specified ranges of potential values. The intercept term is not used where cases where a zero intercept is expected (e.g., standardized observations).
+#' 
+#' @param x A data frame of two columns, with the first column containing time indices and the second containing values.
+#' @param events A vector of the time indices of the events, \eqn{t_1, \ldots, t_{n_r}}.
+#' @param gamma The range of values of \eqn{\gamma} to evaluate. Default is \code{c(-10,10)}.
+#' @param lambda The range of values of \eqn{\lambda} to evaluate. Default is \code{c(0,5)}.
+#' @param intercept The range of values of the intercept \eqn{\beta_0} to evaluate. If  \code{FALSE} is given instead (the default) no intercept term is included.
+#' @param incr Increment by which to sample values of \code{gamma} and \code{lambda}. Default is \code{0.01}.
+
+#' @examples
+#' # generate example of positive trend (gamma = 2) 
+#' # after event with slow decay (lambda = 0.05)
+#' x <- runif(100, 0, 100)
+#' events <- c(0, 54, 89)
+#' gam <- 2
+#' lam <- 0.05
+#' x_ev1 <-  (x - events[1]) * gam  * exp(- lam * (x - events[1]))
+#' x_ev2 <-  (x - events[2]) * gam  * exp(- lam * (x - events[2]))
+#' x_ev3 <-  (x - events[3]) * gam  * exp(- lam * (x - events[3]))
+#' x_ev1[x < events[1]] <- 0
+#' x_ev2[x < events[2]] <- 0
+#' x_ev3[x < events[3]] <- 0
+#' y <- x_ev1 + x_ev2 + x_ev3 + rnorm(length(x), 0, 0.25)
+#' dat <- matrix(c(x,y), ncol = 2)
+#' 
+#' # fit model
+#' res <- dtem(dat, events, gamma = c(-2.5,2.5), lam = c(0,0.1))
+#' 
+#' # coefficients
+#' res$coefs
+#' 
+#' @returns A list containing
+#' \itemize{
+#'  \item A vector of coefficients and the residual sum of squares.
+#'  \item A matrix of the residual sum of squares for samples within the ranges of gamma and lambda.
+#' }
+#' 
+#' @references
+#'   \insertAllCited{}
+#' 
+#' @importFrom Rdpack reprompt
+#' @export
+dtem <- function(x, events, gamma = c(-10,10), lambda = c(0,5), intercept = FALSE, incr = 0.01) {
+    UseMethod("dtem")
+}
+
+#' @rdname dtem
+#' @export
+dtem.matrix <- function(x, events, gamma = c(-10,10), lambda = c(0,5), intercept = FALSE, incr = 0.01) {
+
+  if (!(is.numeric(events))) {
+    stop("events must be numeric")
+  }
+  if (!(is.numeric(gamma) & length(gamma) == 2)) {
+    stop("invalid range for gamma")
+  }
+  if (!(is.numeric(lambda) & length(lambda) == 2)) {
+    stop("invalid range for lambda")
+  }
+  if (is.numeric(intercept)) {
+    if (length(intercept) != 2) {
+      stop("invalid range for intercept")
+    }
+    if (intercept[1] > intercept[2]) {
+      stop("invalid range for intercept")
+    }
+    if ((intercept[2]-intercept[1]) < incr) {
+      stop("invalid increment used")
+    }
+  } else {
+    if (intercept != FALSE) {
+      stop("invalid input for intercept")
+    }
+  }
+  if (gamma[1] > gamma[2]) {
+    stop("invalid range for gamma")
+  }  
+  if (lambda[1] > lambda[2]) {
+    stop("invalid range for lambda")
+  }
+  if (lambda[1] < 0 | lambda[2] < 0) {
+    stop("lambda must be non-negative")
+  }
+  if ((gamma[2]-gamma[1]) < incr | (lambda[2]-lambda[1]) < incr) {
+    stop("invalid increment used")
+  }
+
+  gammas <- seq(gamma[1], gamma[2], by = incr)
+  lambdas <- seq(lambda[1], lambda[2], by = incr)
+  if (!is.numeric(intercept)) {
+    out0 <- dtem_arma(x, events, gammas, lambdas) 
+    idx <- which(out0 == min(out0), arr.ind = TRUE)
+    coefs <- c(gammas[idx[1]], lambdas[idx[2]], out0[idx])
+    names(coefs) <- c("gamma", "lambda", "rss")
+  } else {
+    intercepts <- seq(intercept[1], intercept[2], by = incr)
+    out0 <- dtem_intrcpt_arma(x, events, gammas, lambdas, intercepts) 
+    idx <- which(out0 == min(out0), arr.ind = TRUE)
+    coefs <- c(gammas[idx[1]], lambdas[idx[2]], intercepts[idx[3]], out0[idx])
+    names(coefs) <- c("gamma", "lambda", "intercept", "rss")
+  }
+  out <- list(coefs = coefs,  rss = out0)
+  class(out) <- c("dtem", "list")
+  return(out)
+}
+
+#' @rdname dtem
+#' @export
+dtem.data.frame <- function(x, events, gamma = c(-10,10), lambda = c(0,5), intercept = FALSE, incr = 0.01) {
+  x <- as.matrix(x)
+  out <- dtem.matrix(x, events, gamma, lambda, intercept, incr)
+  return(out)
+}
+
+
 
 

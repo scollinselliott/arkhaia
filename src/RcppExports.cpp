@@ -106,6 +106,35 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// dtem_arma
+arma::mat dtem_arma(const arma::mat& x, arma::vec& events, arma::vec& gammas, arma::vec& lambdas);
+RcppExport SEXP _arkhaia_dtem_arma(SEXP xSEXP, SEXP eventsSEXP, SEXP gammasSEXP, SEXP lambdasSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type events(eventsSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type gammas(gammasSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type lambdas(lambdasSEXP);
+    rcpp_result_gen = Rcpp::wrap(dtem_arma(x, events, gammas, lambdas));
+    return rcpp_result_gen;
+END_RCPP
+}
+// dtem_intrcpt_arma
+arma::cube dtem_intrcpt_arma(const arma::mat& x, arma::vec& events, arma::vec& gammas, arma::vec& lambdas, arma::vec& intercept);
+RcppExport SEXP _arkhaia_dtem_intrcpt_arma(SEXP xSEXP, SEXP eventsSEXP, SEXP gammasSEXP, SEXP lambdasSEXP, SEXP interceptSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type events(eventsSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type gammas(gammasSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type lambdas(lambdasSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type intercept(interceptSEXP);
+    rcpp_result_gen = Rcpp::wrap(dtem_intrcpt_arma(x, events, gammas, lambdas, intercept));
+    return rcpp_result_gen;
+END_RCPP
+}
 // lambda_col_arma
 arma::vec lambda_col_arma(const arma::mat& dat, arma::vec& lambda_grid, int omit_zero);
 RcppExport SEXP _arkhaia_lambda_col_arma(SEXP datSEXP, SEXP lambda_gridSEXP, SEXP omit_zeroSEXP) {
@@ -478,6 +507,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_arkhaia_partition_list_to_matrix_arma", (DL_FUNC) &_arkhaia_partition_list_to_matrix_arma, 1},
     {"_arkhaia_LSSA_LFI_candidates_arma", (DL_FUNC) &_arkhaia_LSSA_LFI_candidates_arma, 6},
     {"_arkhaia_LSSA_LFI_multi_arma", (DL_FUNC) &_arkhaia_LSSA_LFI_multi_arma, 5},
+    {"_arkhaia_dtem_arma", (DL_FUNC) &_arkhaia_dtem_arma, 4},
+    {"_arkhaia_dtem_intrcpt_arma", (DL_FUNC) &_arkhaia_dtem_intrcpt_arma, 5},
     {"_arkhaia_lambda_col_arma", (DL_FUNC) &_arkhaia_lambda_col_arma, 3},
     {"_arkhaia_trunc_pois_mat_arma", (DL_FUNC) &_arkhaia_trunc_pois_mat_arma, 3},
     {"_arkhaia_CR_arma", (DL_FUNC) &_arkhaia_CR_arma, 2},

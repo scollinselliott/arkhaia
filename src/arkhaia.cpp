@@ -481,83 +481,70 @@ arma::mat LSSA_LFI_multi_arma(arma::mat & x, arma::vec & start_idx, arma::vec & 
 
 
 
+//' @useDynLib arkhaia
+//' @importFrom Rcpp sourceCpp
+// [[Rcpp::export]]
+arma::mat dtem_arma(const arma::mat & x, arma::vec & events, arma::vec & gammas,  arma::vec & lambdas) {
+    int nT = x.n_rows;
+    int nE = events.n_elem;
+
+    int ngam = gammas.n_elem;
+    int nlam = lambdas.n_elem;
+
+    arma::mat rss (ngam, nlam); 
+
+    for (int g = 0; g < ngam; g++) {
+        for (int l = 0; l < nlam; l++) {
+            arma::vec xhat (x.n_rows);
+            for (int i = 0; i < nT; i++) {
+                for (int r = 0; r < nE; r++) {
+                    if (events[r] < x(i, 0)) {
+                        xhat[i] = xhat[i] + (x(i, 0) - events[r]) * gammas[g] * std::exp(-1 * lambdas[l] * (x(i, 0) - events[r])) ;
+                    }
+                }
+            }
+            arma::vec resid = xhat - x.col(1);
+            arma::vec resid2 = arma::square(resid);
+            rss(g,l) = arma::accu(resid2);
+        }
+    }
+    return rss;
+}
 
 
+//' @useDynLib arkhaia
+//' @importFrom Rcpp sourceCpp
+// [[Rcpp::export]]
+arma::cube dtem_intrcpt_arma(const arma::mat & x, arma::vec & events, arma::vec & gammas,  arma::vec & lambdas, arma::vec & intercept) {
+    int nT = x.n_rows;
+    int nE = events.n_elem;
 
+    int ngam = gammas.n_elem;
+    int nlam = lambdas.n_elem;
+    int nint = intercept.n_elem;
 
+    arma::cube rss (ngam, nlam, nint); 
 
-
-
-
-
-// //' @useDynLib arkhaia
-// //' @importFrom Rcpp sourceCpp
-// // [[Rcpp::export]]
-// arma::mat LSSA_LFI_multi_arma2(arma::mat & x, arma::vec & start_idx, arma::vec & x_rows, int n_iter, int intercept) {
-
-//     int n_obs = x.n_rows;
-
-//     int nA = start_idx.n_elem;
-
-
-
-//     arma::vec epsilon (n_iter); 
-//     int n_iter_max = n_iter;
-
-// //    for (int Q = 0; Q < nA; Q++) {
-// int Q = 0;
-//         int h = start_idx[Q];
-//         int nh = x_rows[Q];
-
-//         arma::mat Y (nh,2);
-        
-//         for (int hi = h; hi < (h + nh); hi++) {
-//             Y(hi - h, 0) = x(hi, 0);
-//             Y(hi - h, 1) = x(hi, 1);
-//         }
-
-
-//         return Y;
-
-//     }
-
-// //         arma::mat W = LSSA_LFI_arma(Y, n_iter, intercept);
-
-// //         arma::vec rss = W.col(4);
-// //         int n_rss = rss.n_elem;
-// //         for (int i = 0; i < n_rss; i++) {
-// //             epsilon[i] = epsilon[i] + rss[i];
-// //         }
-
-// //         if (n_rss < n_iter_max) {
-// //             n_iter_max = n_rss;
-// //         }
-// //     }
-
-// //     arma::vec epsilon2 (n_iter_max);
-// //     for (int i = 0; i < n_iter_max; i++) {
-// //         epsilon2[i] = epsilon[i];
-// //     }
-
-// // //     arma::vec n_iter_out = arma::linspace(1, n_iter_max, n_iter_max);
-// // //     arma::vec aic = 2 * nA * (n_iter_out * 3 + 1 + intercept) + n_obs * log(epsilon2 / n_obs) + n_obs + n_obs * log(2 * M_PI);
-
-// // //     arma::mat out (aic.n_elem , 3);
-// // //     out.col(0) = n_iter_out;
-// // //     out.col(1) = epsilon2;
-// // //     out.col(2) = aic;
-
-// // //     return out;
-// // // }
-
-
-
-
-
-
-
-
-
+    for (int g = 0; g < ngam; g++) {
+        for (int l = 0; l < nlam; l++) {
+            for (int a = 0; a < nint; a++) {
+                arma::vec xhat (x.n_rows);
+                for (int i = 0; i < nT; i++) {
+                    for (int r = 0; r < nE; r++) {
+                        if (events[r] < x(i, 0)) {
+                            xhat[i] = xhat[i] + (x(i, 0) - events[r]) * gammas[g] * std::exp(-1 * lambdas[l] * (x(i, 0) - events[r])) ;
+                        }
+                    }
+                }
+                xhat = xhat + intercept[a];
+                arma::vec resid = xhat - x.col(1);
+                arma::vec resid2 = arma::square(resid);
+                rss(g,l,a) = arma::accu(resid2);
+            }
+        }
+    }
+    return rss;
+}
 
 
 
