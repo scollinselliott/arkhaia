@@ -45,14 +45,14 @@ LSSA_LFI_multi_arma <- function(x, start_idx, x_rows, n_iter, intercept) {
 
 #' @useDynLib arkhaia
 #' @importFrom Rcpp sourceCpp
-dtem_arma <- function(x, events, gammas, lambdas) {
-    .Call('_arkhaia_dtem_arma', PACKAGE = 'arkhaia', x, events, gammas, lambdas)
+dtem_arma <- function(x, events, gammas, lambdas, weights) {
+    .Call('_arkhaia_dtem_arma', PACKAGE = 'arkhaia', x, events, gammas, lambdas, weights)
 }
 
 #' @useDynLib arkhaia
 #' @importFrom Rcpp sourceCpp
-dtem_intrcpt_arma <- function(x, events, gammas, lambdas, intercept) {
-    .Call('_arkhaia_dtem_intrcpt_arma', PACKAGE = 'arkhaia', x, events, gammas, lambdas, intercept)
+dtem_intrcpt_arma <- function(x, events, gammas, lambdas, intercept, weights) {
+    .Call('_arkhaia_dtem_intrcpt_arma', PACKAGE = 'arkhaia', x, events, gammas, lambdas, intercept, weights)
 }
 
 #' @useDynLib arkhaia

@@ -2,8 +2,7 @@
 % Please edit documentation in R/spectral.R
 \name{dtem}
 \alias{dtem}
-\alias{dtem.matrix}
-\alias{dtem.data.frame}
+\alias{dtem.time_series}
 \title{Decaying Trend-after-Event Model}
 \usage{
 dtem(
@@ -15,16 +14,7 @@ dtem(
   incr = 0.01
 )
 
-\method{dtem}{matrix}(
-  x,
-  events,
-  gamma = c(-10, 10),
-  lambda = c(0, 5),
-  intercept = FALSE,
-  incr = 0.01
-)
-
-\method{dtem}{data.frame}(
+\method{dtem}{time_series}(
   x,
   events,
   gamma = c(-10, 10),
@@ -70,7 +60,7 @@ x_ev1[x < events[1]] <- 0
 x_ev2[x < events[2]] <- 0
 x_ev3[x < events[3]] <- 0
 y <- x_ev1 + x_ev2 + x_ev3 + rnorm(length(x), 0, 0.25)
-dat <- matrix(c(x,y), ncol = 2)
+dat <- time_series(matrix(c(x,y), ncol = 2))
 
 # fit model
 res <- dtem(dat, events, gamma = c(-2.5,2.5), lam = c(0,0.1))
