@@ -684,9 +684,9 @@ dtem.time_series <- function(x, events, gamma = c(-10,10), lambda = c(0,5), inte
 
   gammas <- seq(gamma[1], gamma[2], by = incr)
   lambdas <- seq(lambda[1], lambda[2], by = incr)
-  if (length(levels(x$variate)) > 1) {
-    total <- table(x$variable)
-    weights <- 1/total[x$variable]
+  if (nlevels(x$variate) > 1) {
+    total <- table(x$variate)
+    weights <- 1/total[x$variate]
   } else {
     weights <- rep(1, nrow(x))
   }
@@ -726,12 +726,15 @@ print.dtem <- function(x, ...) {
 #'
 #' Creates an object of class \code{time_series} from a matrix or data frame, or by giving a filename for a \code{csv} file in the working directory. The first column contains time indices (\code{t}), the second the value of observations (\code{x}), both of which must be numeric, and the third contains a label as a factor column (\code{variate}). Multiple time series are contained in the same \code{time_series} object, distinguished by different labels.
 #' 
-#' @param ... A matrix or data frame, or a filename as character.
+#' @param x A matrix or data frame, or a filename as character.
 #' @param log Whether to take the logarithm of observations for \code{x} (default is \code{FALSE}).
 #' @param inverse Whether to use the inverse of observations (default is \code{FALSE}). If both \code{log} and \code{inverse} are true, the log inverse (\eqn{\log(1/x)}) is used.
-#' @param header If a filename, whether the csv file contains a header (default \code{TRUE}).
-#' @param tabular If a filename, whether the data are presented in a tabular format, as opposed to "long" (tidyverse) format (default \code{TRUE}). 
-#' 
+#' @param z Whether to standardize the observations, using \eqn{z = (x -\bar{x})/s}, grouped by variate (default is \code{FALSE}). This operation is performed after \code{log} and/or \code{inverse}.
+#' @param ... Additional arguments for importing from csv
+#' \itemize{
+#'  \item \code{header} If a filename, whether the csv file contains a header (default \code{TRUE}).
+#'  \item \code{tabular} If a filename, whether the data are presented in a tabular fonrmat, as opposed to "long" (tidyverse) format (default \code{TRUE}). 
+#' } 
 #' @examples
 #' idx <- runif(100,0,100)
 #' x <- cumsum(rnorm(100,0,1))
@@ -745,56 +748,68 @@ print.dtem <- function(x, ...) {
 #' @returns A time_series object.
 #' 
 #' @export
-time_series <- function(...) {
+time_series <- function(x, log = FALSE, inverse = FALSE, z = FALSE, ...) {
   UseMethod("time_series")
 }
 #' 
 #' @rdname time_series
 #' @export
-time_series.matrix <- function(..., log = FALSE, inverse = FALSE) {
-  out <- list(...)
-  out <- out[[1]]
-  out <- time_series.data.frame(out, log, inverse)
+time_series.matrix <- function(x, log = FALSE, inverse = FALSE, z = FALSE, ...) {
+  out <- time_series.data.frame(x, log, inverse, z)
   return(out)
 }
 #' 
 #' @rdname time_series
 #' @export
-time_series.data.frame <- function(..., log = FALSE, inverse = FALSE) {
-  out <- list(...)
-  out <- out[[1]]
+time_series.data.frame <- function(x, log = FALSE, inverse = FALSE, z = FALSE, ...) {
+  out <- x
   if (NA %in% out) {
     stop('input cannot contain NA')
   }
   if (ncol(out) == 2) {
-    df <- data.frame(t = as.numeric(out[,1]), x = as.numeric(out[,2]), variate = factor(rep("x", nrow(out))))
+    out <- data.frame(t = as.numeric(out[,1]), x = as.numeric(out[,2]), variate = factor(rep("x", nrow(out))))
   } else if (ncol(out) == 3) {
-    df <- data.frame(t = as.numeric(out[,1]), x = as.numeric(out[,2]), variate = factor(as.character(out[,3])))
+    out <- data.frame(t = as.numeric(out[,1]), x = as.numeric(out[,2]), variate = factor(as.character(out[,3])))
   } else {
-    stop('invalid dimensions')
+    stop('invalid dimensions. If reading from csv check whether "tabular = TRUE" should be used')
   }
   if (inverse == TRUE) {
-    df$x <- 1/(df$x)
+    out$x <- 1/(out$x)
   }
   if (log == TRUE) {
-    df$x <- log(df$x)
+    out$x <- log(out$x)
   }
-  class(df) <- c("time_series", "data.frame")
-  return(df)
+  if (z == TRUE) {
+    out$x <- array2DF(tapply(out$x, out$variate, scale))
+    colnames(out) <- c("t", "z", "variate")
+  }
+  class(out) <- c("time_series", "data.frame")
+  return(out)
 }
 
 #' 
 #' @rdname time_series
 #' @export
-time_series.character <- function(..., log = FALSE, inverse = FALSE, header = TRUE, tabular = TRUE) {
-  out <- list(...)
-  out <- utils::read.csv(out[[1]], header = header)
+time_series.character <- function(x, log = FALSE, inverse = FALSE, z = FALSE, ...) {
+  out <- x
+  other <- list(...)
+  if (!"header" %in% names(other)) {
+    header <- FALSE
+  } else {
+    header <- other$header
+  }
+  if (!"tabular" %in% names(other)) {
+    tabular <- FALSE
+  } else {
+    tabular <- other$tabular
+  }
+  out <- utils::read.csv(x, header = header)
   if (tabular == TRUE) {
     out <- data.frame(out[1], utils::stack(out[2:ncol(out)]))
   }
   out <- out[!is.na(out[,2]),]
   rownames(out) <- NULL
-  out <- time_series.data.frame(out, log, inverse)
+  out <- time_series.data.frame(out, log, inverse, z)
   return(out)
 }
 

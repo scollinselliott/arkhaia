@@ -7,24 +7,28 @@
 \alias{time_series.character}
 \title{Create a Time Series Object}
 \usage{
-time_series(...)
+time_series(x, log = FALSE, inverse = FALSE, z = FALSE, ...)
 
-\method{time_series}{matrix}(..., log = FALSE, inverse = FALSE)
+\method{time_series}{matrix}(x, log = FALSE, inverse = FALSE, z = FALSE, ...)
 
-\method{time_series}{data.frame}(..., log = FALSE, inverse = FALSE)
+\method{time_series}{data.frame}(x, log = FALSE, inverse = FALSE, z = FALSE, ...)
 
-\method{time_series}{character}(..., log = FALSE, inverse = FALSE, header = TRUE, tabular = TRUE)
+\method{time_series}{character}(x, log = FALSE, inverse = FALSE, z = FALSE, ...)
 }
 \arguments{
-\item{...}{A matrix or data frame, or a filename as character.}
+\item{x}{A matrix or data frame, or a filename as character.}
 
 \item{log}{Whether to take the logarithm of observations for \code{x} (default is \code{FALSE}).}
 
 \item{inverse}{Whether to use the inverse of observations (default is \code{FALSE}). If both \code{log} and \code{inverse} are true, the log inverse (\eqn{\log(1/x)}) is used.}
 
-\item{header}{If a filename, whether the csv file contains a header (default \code{TRUE}).}
+\item{z}{Whether to standardize the observations, using \eqn{z = (x -\bar{x})/s}, grouped by variate (default is \code{FALSE}). This operation is performed after \code{log} and/or \code{inverse}.}
 
-\item{tabular}{If a filename, whether the data are presented in a tabular format, as opposed to "long" (tidyverse) format (default \code{TRUE}).}
+\item{...}{Additional arguments for importing from csv
+\itemize{
+ \item \code{header} If a filename, whether the csv file contains a header (default \code{TRUE}).
+ \item \code{tabular} If a filename, whether the data are presented in a tabular fonrmat, as opposed to "long" (tidyverse) format (default \code{TRUE}). 
+}}
 }
 \value{
 A time_series object.
