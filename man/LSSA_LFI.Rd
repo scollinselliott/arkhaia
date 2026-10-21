@@ -5,12 +5,14 @@
 \alias{LSSA_LFI.time_series}
 \title{Least Squares Spectral Analysis via Lowest Frequency Iteration (LSSA-LFI)}
 \usage{
-LSSA_LFI(x, n_iter = 1, intercept = TRUE, AIC = FALSE)
+LSSA_LFI(x, subset = NULL, n_iter = 1, intercept = TRUE, AIC = FALSE)
 
-\method{LSSA_LFI}{time_series}(x, n_iter = 1, intercept = TRUE, AIC = FALSE)
+\method{LSSA_LFI}{time_series}(x, subset = NULL, n_iter = 1, intercept = TRUE, AIC = FALSE)
 }
 \arguments{
 \item{x}{A time_series object (see \code{\link[arkhaia]{time_series}}) with only one variate.}
+
+\item{subset}{Whether to subset a multivariate time_series input to fit just one variate. Default is \code{NULL}.}
 
 \item{n_iter}{The number of iterations to run. Default is 1.}
 

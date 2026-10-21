@@ -53,6 +53,7 @@ LSSA.time_series <- function(x, freqs = seq(0.001, 0.5, by = 0.0005), intercept 
 #' Performs a simple least squares fitting to time indexed data of the form  \eqn{x(t) = \beta_{0} + \sum_{i =1}^n \beta_{1i} \cos (2 \pi f t) + \beta_{2i} \sin(2 \pi f t)}, using an input of frequencies; the lowest frequency peak (not the highest power frequency) is chosen for regression, up to a chosen number of iterations. Intercept may be ommitted. The lowest frequency is equivalent to the longest period.
 #' 
 #' @param x A time_series object (see \code{\link[arkhaia]{time_series}}) with only one variate.
+#' @param subset Whether to subset a multivariate time_series input to fit just one variate. Default is \code{NULL}.
 #' @param n_iter The number of iterations to run. Default is 1.
 #' @param intercept Whether to include the intercept. Default is \code{TRUE}.
 #' @param AIC If \code{TRUE}, only the result that has yeilded the lowest AIC is given \insertCite{akaike_information_1973}{arkhaia}. Default is \code{FALSE}.
@@ -69,13 +70,22 @@ LSSA.time_series <- function(x, freqs = seq(0.001, 0.5, by = 0.0005), intercept 
 #'
 #' @importFrom Rdpack reprompt
 #' @export
-LSSA_LFI <- function(x, n_iter = 1, intercept = TRUE, AIC = FALSE) {
+LSSA_LFI <- function(x, subset = NULL, n_iter = 1, intercept = TRUE, AIC = FALSE) {
     UseMethod("LSSA_LFI")
 }
 
 #' @rdname LSSA_LFI
 #' @export
-LSSA_LFI.time_series <- function(x, n_iter = 1, intercept = TRUE, AIC = FALSE) {
+LSSA_LFI.time_series <- function(x, subset = NULL, n_iter = 1, intercept = TRUE, AIC = FALSE) {
+  if (!is.null(subset)) {
+    if (subset %in% levels(x$variate)) {
+      x <- x[x$variate == subset, ]
+      x$variate <- factor(x$variate)
+    } else {
+      stop("subset not in variate column.")
+    }
+  }
+
   if (nlevels(x[,3]) > 1) {
     warning("more than one variate in time series. Pooling observations.")
   }
@@ -185,7 +195,7 @@ trim_epoch.time_series <- function(x, epoch = NULL) {
     stop("start of epoch must be earlier than end.")
   }
 
-  out <- x[x[,1] > epoch[1] & x[,1] < epoch[2]  ,]
+  out <- x[x$t > epoch[1] & x$t < epoch[2]  ,]
   out <- as.data.frame(out)
   class(out) <- c("time_series", "data.frame")
   return(out)
