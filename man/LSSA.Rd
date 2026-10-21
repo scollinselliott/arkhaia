@@ -2,8 +2,7 @@
 % Please edit documentation in R/spectral.R
 \name{LSSA}
 \alias{LSSA}
-\alias{LSSA.matrix}
-\alias{LSSA.data.frame}
+\alias{LSSA.time_series}
 \title{Least Squares Spectral Analysis (LSSA)}
 \usage{
 LSSA(
@@ -13,14 +12,7 @@ LSSA(
   type = "frequency"
 )
 
-\method{LSSA}{matrix}(
-  x,
-  freqs = seq(0.001, 0.5, by = 5e-04),
-  intercept = TRUE,
-  type = "frequency"
-)
-
-\method{LSSA}{data.frame}(
+\method{LSSA}{time_series}(
   x,
   freqs = seq(0.001, 0.5, by = 5e-04),
   intercept = TRUE,
@@ -28,7 +20,7 @@ LSSA(
 )
 }
 \arguments{
-\item{x}{A data frame of two columns, the first containing time indices and the second containing values.}
+\item{x}{A time_series object (see \code{\link[arkhaia]{time_series}}) with only one variate.}
 
 \item{freqs}{A vector of frequencies to evaluate. By default a grid from 0.001 to 0.5 is tested at an interval of 0.005.}
 
@@ -41,6 +33,13 @@ A data frame containing the power and residual sum of squares for each frequency
 }
 \description{
 Performs a simple least squares fitting to time indexed data of the form \eqn{x(t) = \beta_{0} + \sum_{i =1}^n \beta_{1i} \cos (2 \pi f t) + \beta_{2i} \sin(2 \pi f t)}, using a range of potential frequencies \insertCite{vanicek_approximate_1969,vanicek_further_1971}{arkhaia}. Intercept may be ommitted.
+}
+\examples{
+t_ <- runif(100, 0, 100)
+y <- 5 * sin(0.1 * t_) - 2.3 * cos(0.3 * t_ + 1)
+dat <- time_series(t = t_, x = y)
+LSSA(dat)
+
 }
 \references{
 \insertAllCited{}

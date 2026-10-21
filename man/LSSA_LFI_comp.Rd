@@ -2,15 +2,15 @@
 % Please edit documentation in R/spectral.R
 \name{LSSA_LFI_comp}
 \alias{LSSA_LFI_comp}
-\alias{LSSA_LFI_comp.list}
+\alias{LSSA_LFI_comp.time_series}
 \title{Partitioned LSSA-LFI Model Terms and AIC: Composite Number of Parameters}
 \usage{
 LSSA_LFI_comp(x, intercept = TRUE)
 
-\method{LSSA_LFI_comp}{list}(x, intercept = TRUE)
+\method{LSSA_LFI_comp}{time_series}(x, intercept = TRUE)
 }
 \arguments{
-\item{x}{A \code{list} containing the time series, each of which should be a matrix or data frame with time index in the first column and value in the second.}
+\item{x}{A time_series object (see \code{\link[arkhaia]{time_series}}).}
 
 \item{intercept}{Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.}
 }

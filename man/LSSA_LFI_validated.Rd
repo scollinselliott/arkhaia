@@ -2,17 +2,17 @@
 % Please edit documentation in R/spectral.R
 \name{LSSA_LFI_validated}
 \alias{LSSA_LFI_validated}
-\alias{LSSA_LFI_validated.list}
+\alias{LSSA_LFI_validated.time_series}
 \title{Validated Linear Dependence via LSSA-LFI}
 \usage{
 LSSA_LFI_validated(x, pair = NULL, n_iter = 1, intercept = TRUE)
 
-\method{LSSA_LFI_validated}{list}(x, pair = NULL, n_iter = 1, intercept = TRUE)
+\method{LSSA_LFI_validated}{time_series}(x, pair = NULL, n_iter = 1, intercept = TRUE)
 }
 \arguments{
-\item{x}{A list of data frames.}
+\item{x}{A time_series object (see \code{\link[arkhaia]{time_series}}) with at least three variates.}
 
-\item{pair}{The pair of series to evaluate in the list \code{x}, given as indices.}
+\item{pair}{The pair of series to evaluate in the \code{x}, given levels in \code{x$variate}.}
 
 \item{n_iter}{The number of iterations to run. Default is 1.}
 

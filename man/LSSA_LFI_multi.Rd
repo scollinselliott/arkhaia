@@ -2,15 +2,15 @@
 % Please edit documentation in R/spectral.R
 \name{LSSA_LFI_multi}
 \alias{LSSA_LFI_multi}
-\alias{LSSA_LFI_multi.list}
+\alias{LSSA_LFI_multi.time_series}
 \title{Partitioned LSSA-LFI Model Terms and AIC}
 \usage{
 LSSA_LFI_multi(x, n_iter = 1, intercept = TRUE, AIC = FALSE)
 
-\method{LSSA_LFI_multi}{list}(x, n_iter = 1, intercept = TRUE, AIC = FALSE)
+\method{LSSA_LFI_multi}{time_series}(x, n_iter = 1, intercept = TRUE, AIC = FALSE)
 }
 \arguments{
-\item{x}{A \code{list} containing the time series, each of which should be a matrix or data frame with time index in the first column and value in the second.}
+\item{x}{A time_series object (see \code{\link[arkhaia]{time_series}}).}
 
 \item{n_iter}{The number of iterations to run for the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is 1.}
 
@@ -22,7 +22,7 @@ LSSA_LFI_multi(x, n_iter = 1, intercept = TRUE, AIC = FALSE)
 A data frame giving the number of iterations and the AIC for each.
 }
 \description{
-For multiple time series contained in a list, this function will compute the Akaike Information Criterion (AIC) as the number of terms (\code{n_iter}) is increased. This function can be performed after \code{\link[arkhaia]{LSSA_LFI_candidates}} and \code{\link[arkhaia]{repartition}} to determine the appropriate number of terms.
+For multiple time series contained in a \code{\link[arkhaia]{time_series}} object, this function will compute the Akaike Information Criterion (AIC) as the number of terms (\code{n_iter}) is increased. This function can be performed after \code{\link[arkhaia]{LSSA_LFI_candidates}} and \code{\link[arkhaia]{repartition}} to determine the appropriate number of terms.
 }
 \references{
 \insertAllCited{}

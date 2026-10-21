@@ -2,10 +2,17 @@
 #'
 #' Performs a simple least squares fitting to time indexed data of the form \eqn{x(t) = \beta_{0} + \sum_{i =1}^n \beta_{1i} \cos (2 \pi f t) + \beta_{2i} \sin(2 \pi f t)}, using a range of potential frequencies \insertCite{vanicek_approximate_1969,vanicek_further_1971}{arkhaia}. Intercept may be ommitted. 
 #' 
-#' @param x A data frame of two columns, the first containing time indices and the second containing values.
+#' @param x A time_series object (see \code{\link[arkhaia]{time_series}}) with only one variate.
 #' @param freqs A vector of frequencies to evaluate. By default a grid from 0.001 to 0.5 is tested at an interval of 0.005.
 #' @param intercept Whether to include the intercept. Default is \code{TRUE}.
 #' @param type Type of output. Can be either \code{"frequency"} (the default) or \code{"period"}.
+#' 
+#' @examples
+#' t_ <- runif(100, 0, 100)
+#' y <- 5 * sin(0.1 * t_) - 2.3 * cos(0.3 * t_ + 1)
+#' dat <- time_series(t = t_, x = y)
+#' LSSA(dat)
+#' 
 #' @returns A data frame containing the power and residual sum of squares for each frequency, as well as coefficients.
 #' 
 #' @references
@@ -19,13 +26,17 @@ LSSA <- function(x, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE, type
 
 #' @rdname LSSA
 #' @export
-LSSA.matrix <- function(x, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE, type = "frequency") {
+LSSA.time_series <- function(x, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE, type = "frequency") {
+  if (nlevels(x[,3]) > 1) {
+    warning("More than one variate in time series. Pooling observations.")
+  }
+
   if (intercept == TRUE) {
       intrcpt <- 1
   } else if (intercept == FALSE) {
       intrcpt <- 0
   }
-  P <- LSSA_arma(x, freqs, intrcpt)
+  P <- LSSA_arma(as.matrix(x[,1:2]), freqs, intrcpt)
 
   if (type == "frequency") {
     out <- data.frame(freq = freqs, power = P[,1], rss = P[,2], coef_cos = P[,3], coef_sin = P[,4], coef_const = P[,5])
@@ -35,13 +46,13 @@ LSSA.matrix <- function(x, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRU
   return(out)
 }
 
-#' @rdname LSSA
-#' @export
-LSSA.data.frame <- function(x, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE, type = "frequency") {
-  x <- as.matrix(x)
-  out <- LSSA.matrix(x, freqs, intercept, type) 
-  return(out)
-}
+# #' @rdname LSSA
+# #' @export
+# LSSA.data.frame <- function(x, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE, type = "frequency") {
+#   x <- as.matrix(x)
+#   out <- LSSA.matrix(x, freqs, intercept, type) 
+#   return(out)
+# }
 
 
 
@@ -51,7 +62,7 @@ LSSA.data.frame <- function(x, freqs = seq(0.001, 0.5, by = 0.0005), intercept =
 #'
 #' Performs a simple least squares fitting to time indexed data of the form  \eqn{x(t) = \beta_{0} + \sum_{i =1}^n \beta_{1i} \cos (2 \pi f t) + \beta_{2i} \sin(2 \pi f t)}, using an input of frequencies; the lowest frequency peak (not the highest power frequency) is chosen for regression, up to a chosen number of iterations. Intercept may be ommitted. The lowest frequency is equivalent to the longest period.
 #' 
-#' @param x A data frame of two columns, with the first column containing time indices and the second containing values.
+#' @param x A time_series object (see \code{\link[arkhaia]{time_series}}) with only one variate.
 #' @param n_iter The number of iterations to run. Default is 1.
 #' @param intercept Whether to include the intercept. Default is \code{TRUE}.
 #' @param AIC If \code{TRUE}, only the result that has yeilded the lowest AIC is given \insertCite{akaike_information_1973}{arkhaia}. Default is \code{FALSE}.
@@ -74,13 +85,17 @@ LSSA_LFI <- function(x, n_iter = 1, intercept = TRUE, AIC = FALSE) {
 
 #' @rdname LSSA_LFI
 #' @export
-LSSA_LFI.matrix <- function(x, n_iter = 1, intercept = TRUE, AIC = FALSE) {
+LSSA_LFI.time_series <- function(x, n_iter = 1, intercept = TRUE, AIC = FALSE) {
+  if (nlevels(x[,3]) > 1) {
+    warning("more than one variate in time series. Pooling observations.")
+  }
+
   if (intercept == TRUE) {
     intrcpt = 1
   } else {
     intrcpt = 0
   }
-  out0 <- LSSA_LFI_arma(x, n_iter, intrcpt)
+  out0 <- LSSA_LFI_arma(as.matrix(x[,1:2]), n_iter, intrcpt)
 
   out <- list(coefs = out0[,1:3], freqs = out0[,4], rss = out0[,5], aic = out0[,6])
 
@@ -93,13 +108,13 @@ LSSA_LFI.matrix <- function(x, n_iter = 1, intercept = TRUE, AIC = FALSE) {
   return(out)
 }
 
-#' @rdname LSSA_LFI
-#' @export
-LSSA_LFI.data.frame <- function(x, n_iter = 1, intercept = TRUE, AIC = FALSE) {
-  x <- as.matrix(x)
-  out <- LSSA_LFI.matrix(x, n_iter, intercept, AIC) 
-  return(out)
-}
+# #' @rdname LSSA_LFI
+# #' @export
+# LSSA_LFI.data.frame <- function(x, n_iter = 1, intercept = TRUE, AIC = FALSE) {
+#   x <- as.matrix(x)
+#   out <- LSSA_LFI.matrix(x, n_iter, intercept, AIC) 
+#   return(out)
+# }
 
 
 
@@ -108,8 +123,8 @@ LSSA_LFI.data.frame <- function(x, n_iter = 1, intercept = TRUE, AIC = FALSE) {
 #'
 #' For a set of time series (namely partitions of set of series) contained in a list, will compute the Akaike Information Criterion (AIC) for each candidate set \insertCite{akaike_information_1973}{arkhaia}.  
 #' 
-#' @param x A \code{list} containing the time series, each of which should be a matrix or data frame with time index in the first column and value in the second.
-#' @param sets Candidate sets to evaluate; must be a \code{list} of \code{lists} containing the indices of the sets in \code{x}. If left \code{NULL}, two sets are evaluated: all series pooled together [1] and all series kept separate [2].
+#' @param x A time_series object (see \code{\link[arkhaia]{time_series}}) with more than one variate.
+#' @param sets Candidate sets of variates to evaluate; must be a \code{list} of \code{lists} containing the indices of the levels  in \code{x$variate}. If left \code{NULL}, two sets are evaluated: all series pooled together [1] and all series kept separate [2].
 #' @param n_iter The number of iterations to run for the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is 1.
 #' @param intercept Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.
 #' @returns The index of the set yielding the lowest AIC. If \code{sets} is \code{NULL}, the output of \code{[1]} indicates linear dependence; if the output is \code{[2]}, linear independence.
@@ -125,19 +140,19 @@ LSSA_LFI_candidates <- function(x, sets = NULL, n_iter = 1, intercept = TRUE) {
 
 #' @rdname LSSA_LFI_candidates
 #' @export
-LSSA_LFI_candidates.list <- function(x, sets = NULL, n_iter = 1, intercept = TRUE) {
-  if (length(x) < 2) {
-    stop("Input list must contain more than one time series.")
+LSSA_LFI_candidates.time_series <- function(x, sets = NULL, n_iter = 1, intercept = TRUE) {
+  if (nlevels(x$variate) < 2) {
+    stop("time_series input must contain more than one time series.")
   }
-  n <- length(x)
-  y <- as.matrix(do.call(rbind, x))
-  x_rows <- unlist(lapply(x, nrow))
+  n <- nlevels(x$variate)
+  # y <- as.matrix(do.call(rbind, x))
+  x_rows <- table(x$variate) # unlist(lapply(x, nrow))
   idx <- c(0, cumsum(x_rows)[1:(n-1)]) 
 
   # if sets is null; first set is pooled, second separate
   if ( is.null(sets) ) {
-    pld <- rep(0, length(x))
-    tog <- 0:(length(x)-1)
+    pld <- rep(0, n)
+    tog <- 0:(n-1)
     sets0 <- matrix(c(pld, tog), nrow = 2, byrow = TRUE)
   } else {
     sets0 <- partition_list_to_matrix_arma(sets)
@@ -150,7 +165,7 @@ LSSA_LFI_candidates.list <- function(x, sets = NULL, n_iter = 1, intercept = TRU
   }
 
   # add 1 for R indexing
-  out <- LSSA_LFI_candidates_arma(y, idx, x_rows, sets0, n_iter, intrcpt) + 1
+  out <- LSSA_LFI_candidates_arma(as.matrix(x[,1:2]), idx, x_rows, sets0, n_iter, intrcpt) + 1
   
   return(out)
 }
@@ -161,7 +176,7 @@ LSSA_LFI_candidates.list <- function(x, sets = NULL, n_iter = 1, intercept = TRU
 #'
 #' For a data frame in which the first column contains a time index and the second colum observations, trim the data frame to include observations only with a given epoch (time period).
 #' 
-#' @param x A data frame or matrix containing time-indexed data, with time index in the first column and value in the second.
+#' @param x A time_series object (see \code{\link[arkhaia]{time_series}}).
 #' @param epoch A numeric vector given the start and end time indices of the epoch.
 #' @returns A data frame containing only those observations with time indices within the epoch.
 #' 
@@ -172,36 +187,43 @@ trim_epoch <- function(x, epoch = NULL) {
 
 #' @rdname trim_epoch
 #' @export
-trim_epoch.matrix <- function(x, epoch = NULL) {
+trim_epoch.time_series <- function(x, epoch = NULL) {
   if (!(is.numeric(epoch) & length(epoch) == 2)  ) {
-    stop("Epoch must a numeric vector of length 2 indicating start and end.")
+    stop("epoch must a numeric vector of length 2 indicating start and end.")
   }
   if (epoch[2] < epoch[1]) {
-    stop("Start of epoch must be earlier than end.")
+    stop("start of epoch must be earlier than end.")
   }
 
   out <- x[x[,1] > epoch[1] & x[,1] < epoch[2]  ,]
   out <- as.data.frame(out)
+  class(out) <- c("time_series", "data.frame")
   return(out)
 }
 
-#' @rdname trim_epoch
-#' @export
-trim_epoch.data.frame <- function(x, epoch = NULL) {
-  x <- as.matrix(x)
-  trim_epoch.matrix(x, epoch)
-}
 
 
 
 
-
-#' Repartition (Group) Datasets
+#' Repartition (Regroup) Variates
 #'
-#' Given a list of data frames (or matrices), labeled \code{x}, and another list which contains indices of \code{x} as vectors, labeled \code{set}, returns a new list which pools (row-binds) the data frames together  according to the grouprings in \code{set}.
+#' Given multiple time series in a \code{\link[arkhaia]{time_series}} object (\code{x}), group the variates into a new set of variates, expressed as a list of the variate names (\code{set}). Returns a \code{time_series} object using the new partitioning of variates.
 #' 
-#' @param x A \code{list} containing the time series, each of which should be a matrix or data frame with time index in the first column and value in the second.
-#' @param set A \code{list} of vectors containing the indices of the sets in \code{x}, according to which to pool the datasets into a new list. 
+#' @param x A \code{time_series} object containing multiple  time series, each of which should be a matrix or data frame with time index in the first column and value in the second.
+#' @param set A \code{list} of vectors containing the names of variates in each of the new groups.
+#' 
+#' @examples 
+#' idx <- runif(40, 0, 100)
+#' x1 <- runif(10, 0, 1) + 3
+#' x2 <- runif(10, 0, 1) + 2
+#' x3 <- runif(10, 0, 1) + 1
+#' x4 <- runif(10, 0, 1)
+#' x <- time_series(t = idx, x = c(x1,x2,x3,x4),
+#'   variate = c(rep("x1", 10), rep("x2", 10), 
+#'   rep("x3", 10), rep("x4", 10)))
+#' 
+#' repartition(x, set = list(c("x1", "x4"), "x2", "x3"))
+#' 
 #' @returns A \code{list} containing the data according to the partition structure described by \code{set}.
 #' 
 #' @export
@@ -211,19 +233,27 @@ repartition <- function(x, set = NULL) {
 
 #' @rdname repartition
 #' @export
-repartition.list <- function(x, set = NULL) {
+repartition.time_series <- function(x, set = NULL) {
   if (!is.list(set)) {
-    stop("Repartitioning set must be provided.")
+    stop("repartitioning set must be provided.")
   }
-  out <- vector("list", length(set))
+  vars <- unlist(set)
+  if (TRUE %in% is.na(match(vars, levels(x$variate)))) {
+    stop("set contains variates not in x")
+  }
+  if (TRUE %in% is.na(match(levels(x$variate), vars))) {
+    stop("variates in x are not designated in set")
+  }
+  x$variate <- as.character(x$variate)
   for (i in 1:length(set)) {
-    idx <- set[[i]]
-    sub <- x[idx]
-    y <- as.matrix(do.call(rbind, sub))
-    out[[i]] <- y
+    x[x$variate %in% set[[i]], 3] <- i
   }
+  out <- x
+  out$variate <- factor(out$variate)
+  class(out) <- c("time_series", "data.frame")
   return(out)
 }
+
 
 
 
@@ -257,14 +287,14 @@ repartition.list <- function(x, set = NULL) {
 
 #' LSSA-LFI Model
 #'
-#' Generates a data frame of values \eqn{f(t)} of the model generated by LSSA-LFI (see \code{\link[arkhaia]{LSSA_LFI}}).
+#' Generates a data frame of values \eqn{x(t)} of the model generated by LSSA-LFI (see \code{\link[arkhaia]{LSSA_LFI}}).
 #' 
-#' @param x A data frame where time indices are in the first column and values are in the second.
-#' @param t_  A vector giving samples range of \eqn{t} for computing \eqn{f(t)}. Default is from the minimum to maximum time index sampled at 0.01 intervals.
+#' @param x A time_series object (see \code{\link[arkhaia]{time_series}}) with only one variate.
+#' @param t_  A vector giving samples range of \eqn{t} for computing \eqn{x(t)}. Default is from the minimum to maximum time index sampled at 0.01 intervals.
 #' @param n_iter The number of iterations to run. Default is 1.
 #' @param intercept Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.
 #' @param label Default is \code{"model"}.
-#' @returns A data frame containing \eqn{t, f(t)}.
+#' @returns A data frame containing \eqn{t, x(t)}.
 #' 
 #' @export
 LSSA_LFI_model <- function(x, t_ = NULL, n_iter = 1, intercept = TRUE, label = "model") {
@@ -273,7 +303,7 @@ LSSA_LFI_model <- function(x, t_ = NULL, n_iter = 1, intercept = TRUE, label = "
 
 #' @rdname LSSA_LFI_model
 #' @export
-LSSA_LFI_model.matrix <- function(x, t_ = NULL, n_iter = 1, intercept = TRUE, label = "model") {  
+LSSA_LFI_model.time_series <- function(x, t_ = NULL, n_iter = 1, intercept = TRUE, label = "model") {  
   if (intercept == TRUE) {
     intrcpt <- 1
   } else {
@@ -284,18 +314,20 @@ LSSA_LFI_model.matrix <- function(x, t_ = NULL, n_iter = 1, intercept = TRUE, la
     t_ <- seq(min(x[,1]), max(x[,1]), by = 0.01)
   }
 
-  Y <- LSSA_LFI_model_arma(x[,1:2], t_, n_iter, intrcpt) 
+  Y <- LSSA_LFI_model_arma(as.matrix(x[,1:2]), t_, n_iter, intrcpt) 
 
-  out <- data.frame(t = Y[,1], y = Y[,2], label =  rep(label, length(t_)))
+  out <- data.frame(t = Y[,1], x = Y[,2], variate =  rep(label, length(t_)))
+  colnames(out) <- colnames(x)
+  class(out) <- c("time_series", "data.frame")
   return(out)
 }
 
-#' @rdname LSSA_LFI_model
-#' @export
-LSSA_LFI_model.data.frame <- function(x, t_ = NULL, n_iter = 1, intercept = TRUE, label = "model") {  
-  x <- as.matrix(x[,1:2])
-  LSSA_LFI_model.matrix(x, t_ = t_, n_iter = n_iter, intercept = intercept, label = label)
-}
+# #' @rdname LSSA_LFI_model
+# #' @export
+# LSSA_LFI_model.data.frame <- function(x, t_ = NULL, n_iter = 1, intercept = TRUE, label = "model") {  
+#   x <- as.matrix(x[,1:2])
+#   LSSA_LFI_model.matrix(x, t_ = t_, n_iter = n_iter, intercept = intercept, label = label)
+# }
 
 
 
@@ -303,11 +335,11 @@ LSSA_LFI_model.data.frame <- function(x, t_ = NULL, n_iter = 1, intercept = TRUE
 #'
 #' Probability of linear dependence between two groups of time series observations using a LSSA-LFI model selection (see \code{\link[arkhaia]{LSSA_LFI_candidates}}), on the basis of the inclusion of a third "attendant" variate. The third attendant variate is selected from the remaining time series in the list, hence the input list must include at least three times series.
 #' 
-#' @param x A list of data frames.
-#' @param pair The pair of series to evaluate in the list \code{x}, given as indices.
+#' @param x A time_series object (see \code{\link[arkhaia]{time_series}}) with at least three variates.
+#' @param pair The pair of series to evaluate in the \code{x}, given levels in \code{x$variate}.
 #' @param n_iter The number of iterations to run. Default is 1.
 #' @param intercept Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.
-
+#'
 #' @returns The probability of linear dependence between two time series, in which 1 indicates linear dependence almost surely and 0 indicates independence.
 #' 
 #' @export
@@ -317,19 +349,29 @@ LSSA_LFI_validated <- function(x, pair = NULL, n_iter = 1, intercept = TRUE) {
 
 #' @rdname LSSA_LFI_validated
 #' @export
-LSSA_LFI_validated.list <- function(x, pair = NULL, n_iter = 1, intercept = TRUE) {
-  if (length(x) < 3) {
-    stop("Must have at least three time series in x.")
+LSSA_LFI_validated.time_series <- function(x, pair = NULL, n_iter = 1, intercept = TRUE) {
+  if (nlevels(x$variate) < 3) {
+    stop("must have at least three time series in x.")
   }
   if (is.null(pair)) {
-    stop("Must supply the pair of data frames in x to be evaluated.")
+    stop("must supply the pair of data frames in x to be evaluated.")
   }
-  if (typeof(pair) == "character") {
-    pair <- which(names(x) %in% pair)
+  if (!is.character(pair)) {
+    stop("invalid input type for pair.")
   }
-  n <- length(x)
-  nx <- 1:n
-  attend <- nx[-pair]
+  if (length(pair) != 2) {
+    stop("pair must contain two elements")
+  }
+  if (NA %in% match(pair, levels(x$variate))) {
+    stop("pair element not in variate")
+  }
+
+  base <- x[x$variate %in% pair,]
+  base$variate <- as.numeric(factor(base$variate))
+  lev <- levels(x$variate)
+
+  idx_p <- match(pair, lev)
+  attend <- lev[-idx_p]
   res <- numeric(length(attend))
 
   if (intercept == TRUE) {
@@ -344,34 +386,30 @@ LSSA_LFI_validated.list <- function(x, pair = NULL, n_iter = 1, intercept = TRUE
                          0,1,1,
                          0,1,2), ncol = 3, byrow = TRUE)
 
-
   for (i in 1:length(attend)) {
-    ii <- c(pair, attend[i])
-    y <- x[ii]
-    ny <- length(y)
+    y0 <- x[x$variate == attend[i], ]
+    y0$variate <- rep(3, nrow(y0))
+    y <- rbind(base, y0)
+    y_rows <- table(y$variate)
+    idx <- c(0, cumsum(y_rows)[1:2]) 
 
-    x_rows <- unlist(lapply(y, nrow))
-    idx <- c(0, cumsum(x_rows)[1:(ny-1)]) 
-    y0 <- as.matrix(do.call(rbind, y))
-
-    mod <- LSSA_LFI_candidates_arma(y0, idx, x_rows, partition, n_iter, intrcpt) + 1 # add 1 for R indexing
+    mod <- LSSA_LFI_candidates_arma(as.matrix(y[,1:2]), idx, y_rows, partition, n_iter, intrcpt) + 1 # add 1 for R indexing
     if (mod %in% c(1,2)) {
       res[i] <- 1
-    } else {
-      res[i] <- 0
-    }
+    } # else {
+    #  res[i] <- 0
+    # }
   }
   return(mean(res))
 }
 
 
 
-
 #' Pairwise Selection of Linearly Dependent LSSA-LFI Models
 #'
-#' Evaluate pairwise linear dependence between observations using a LSSA-LFI valdiated model selection (see \code{\link[arkhaia]{LSSA_LFI_validated}}). 
+#' Evaluate pairwise linear dependence between observations using a LSSA-LFI validated model selection (see \code{\link[arkhaia]{LSSA_LFI_validated}}). 
 #' 
-#' @param x A list of data frames.
+#' @param x A time_series object (see \code{\link[arkhaia]{time_series}}) with at least three variates.
 #' @param n_iter The number of iterations to run. Default is 1.
 #' @param intercept Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.
 
@@ -384,17 +422,21 @@ LSSA_LFI_pairwise <- function(x, n_iter = 1, intercept = TRUE) {
 
 #' @rdname LSSA_LFI_pairwise
 #' @export
-LSSA_LFI_pairwise.list <- function(x, n_iter = 1, intercept = TRUE) {
-  idx_list <- list()
-  mat <- matrix(NA, nrow = length(x), ncol = length(x))
-  for (i in 1:(length(x)-1)) {
-    for (j in (i+1):length(x)) {
-      pair <- c(i,j)
+LSSA_LFI_pairwise.time_series <- function(x, n_iter = 1, intercept = TRUE) {
+  n_factors <- nlevels(x$variate)
+  if (n_factors < 3) {
+    stop("need at least three variates to evaluate pairwise.")
+  }
+  lev <- levels(x$variate)
+  mat <- matrix(NA, nrow = n_factors, ncol = n_factors)
+  for (i in 1:(n_factors-1)) {
+    for (j in (i+1):n_factors) {
+      pair <- c(lev[i],lev[j])
       mat[i,j] <- LSSA_LFI_validated(x, pair, n_iter = n_iter, intercept = intercept)
     }
   }
-  rownames(mat) <- names(x)
-  colnames(mat) <- names(x)
+  rownames(mat) <- levels(x$variate)
+  colnames(mat) <- levels(x$variate)
   return(mat)
 }
 
@@ -423,7 +465,7 @@ LSSA_LFI_epoch <- function(x, pair = NULL, n_iter = 1, intercept = TRUE, t_range
 #' @export
 LSSA_LFI_epoch.list <- function(x, pair = NULL, n_iter = 1, intercept = TRUE, t_range = NULL, h_range = NULL, t_grid = 1, h_grid = 1) {
   if (is.null(pair)) {
-    stop("Must supply the pair of data frames in x to be evaluated.")
+    stop("must supply the pair of data frames in x to be evaluated.")
   }
   if (intercept == TRUE) {
     intrcpt <- 1
@@ -486,9 +528,9 @@ LSSA_LFI_epoch.list <- function(x, pair = NULL, n_iter = 1, intercept = TRUE, t_
 
 #' Partitioned LSSA-LFI Model Terms and AIC
 #'
-#' For multiple time series contained in a list, this function will compute the Akaike Information Criterion (AIC) as the number of terms (\code{n_iter}) is increased. This function can be performed after \code{\link[arkhaia]{LSSA_LFI_candidates}} and \code{\link[arkhaia]{repartition}} to determine the appropriate number of terms.
+#' For multiple time series contained in a \code{\link[arkhaia]{time_series}} object, this function will compute the Akaike Information Criterion (AIC) as the number of terms (\code{n_iter}) is increased. This function can be performed after \code{\link[arkhaia]{LSSA_LFI_candidates}} and \code{\link[arkhaia]{repartition}} to determine the appropriate number of terms.
 #' 
-#' @param x A \code{list} containing the time series, each of which should be a matrix or data frame with time index in the first column and value in the second.
+#' @param x A time_series object (see \code{\link[arkhaia]{time_series}}).
 #' @param n_iter The number of iterations to run for the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is 1.
 #' @param intercept Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.
 #' @param AIC If \code{TRUE}, only the result that has yeilded the lowest AIC is given \insertCite{akaike_information_1973}{arkhaia}. Default is \code{FALSE}.
@@ -506,11 +548,14 @@ LSSA_LFI_multi <- function(x, n_iter = 1, intercept = TRUE, AIC = FALSE) {
 
 #' @rdname LSSA_LFI_multi
 #' @export
-LSSA_LFI_multi.list <- function(x, n_iter = 1, intercept = TRUE, AIC = FALSE) {
-  n <- length(x)
-  y <- as.matrix(do.call(rbind, x))
-  x_rows <- unlist(lapply(x, nrow))
+LSSA_LFI_multi.time_series <- function(x, n_iter = 1, intercept = TRUE, AIC = FALSE) {
+  n <- nlevels(x$variate)
+  x_rows <- table(x$variate) # unlist(lapply(x, nrow))
   idx <- c(0, cumsum(x_rows)[1:(n-1)]) 
+  # n <- length(x)
+  # y <- as.matrix(do.call(rbind, x))
+  # x_rows <- unlist(lapply(x, nrow))
+  # idx <- c(0, cumsum(x_rows)[1:(n-1)]) 
   if (length(x_rows) == 1) {
     idx <- idx[1]
   }
@@ -521,7 +566,7 @@ LSSA_LFI_multi.list <- function(x, n_iter = 1, intercept = TRUE, AIC = FALSE) {
     intrcpt <- 0
   }
 
-  out <- LSSA_LFI_multi_arma(y, idx, x_rows, n_iter, intrcpt)
+  out <- LSSA_LFI_multi_arma(as.matrix(x[,1:2]), idx, x_rows, n_iter, intrcpt)
 
   out <- as.data.frame(out)
   colnames(out) <- c("n_iter", "rss", "aic")
@@ -541,7 +586,7 @@ LSSA_LFI_multi.list <- function(x, n_iter = 1, intercept = TRUE, AIC = FALSE) {
 #'
 #' For multiple time series contained in a list, this function will compute the Akaike Information Criterion (AIC) for the best-fitting models particular to each series, including the case of an intercept-only model. This function can be performed after \code{\link[arkhaia]{LSSA_LFI_candidates}} and \code{\link[arkhaia]{repartition}} to determine the appropriate number of terms. For the situation where all time series must have the same number of terms, \code{\link[arkhaia]{LSSA_LFI_multi}} should be used, but this function should chosose a better fitting model, since it adjusts the number of parameters for each dataset.
 #' 
-#' @param x A \code{list} containing the time series, each of which should be a matrix or data frame with time index in the first column and value in the second.
+#' @param x A time_series object (see \code{\link[arkhaia]{time_series}}).
 #' @param intercept Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.
 #' 
 #' @returns A list giving the number of parameters (\code{k}) and residual sum of squares (\code{rss}) for each dataset in \code{x}, along with the AIC for the paritioned model. 
@@ -553,10 +598,14 @@ LSSA_LFI_comp <- function(x, intercept = TRUE) {
 
 #' @rdname LSSA_LFI_comp
 #' @export
-LSSA_LFI_comp.list <- function(x, intercept = TRUE) {  
-  n <- length(x)
-  y <- as.matrix(do.call(rbind, x))
-  nx <- nrow(y)
+LSSA_LFI_comp.time_series <- function(x, intercept = TRUE) {  
+  # n <- length(x)
+  # y <- as.matrix(do.call(rbind, x))
+  # nx <- nrow(y)
+  nx <- nrow(x)
+  n <- nlevels(x$variate)
+  x_rows <- table(x$variate) # unlist(lapply(x, nrow))
+  idx <- c(0, cumsum(x_rows)[1:(n-1)]) 
 
   if (intercept == TRUE) {
     intrcpt <- 1
@@ -567,11 +616,15 @@ LSSA_LFI_comp.list <- function(x, intercept = TRUE) {
   rss_i <- numeric(n)
   K <- numeric(n)
 
+  lev <- levels(x$variate)
+
   for (i in 1:n) {
-    nxi <- nrow(x[[i]])
-    lssa_lfi_i <- LSSA_LFI(x[[i]], n_iter = nxi-1, intercept = intrcpt, AIC = TRUE)
+    xsub <- x[x$variate == lev[i], ]
+    xsub$variate <- factor(xsub$variate)
+    nxi <- nrow(xsub)
+    lssa_lfi_i <- LSSA_LFI(xsub, n_iter = nxi-1, intercept = intrcpt, AIC = TRUE)
     k <- length(lssa_lfi_i$rss)
-    rss0 <- sum((x[[i]][,2] - mean(x[[i]][,2]))^2)
+    rss0 <- sum((xsub[,2] - mean(xsub[,2]))^2)
     aic0 <- 2 * (1) + nxi * log(rss0 / nxi) + nxi + nxi * log(2 * pi)
     if (aic0 < lssa_lfi_i$aic[k]) {
       rss_i[i] <- rss0
@@ -601,21 +654,22 @@ LSSA_LFI_comp.list <- function(x, intercept = TRUE) {
 #' @param lambda The range of values of \eqn{\lambda} to evaluate. Default is \code{c(0,5)}.
 #' @param intercept The range of values of the intercept \eqn{\beta_0} to evaluate. If  \code{FALSE} is given instead (the default) no intercept term is included.
 #' @param incr Increment by which to sample values of \code{gamma} and \code{lambda}. Default is \code{0.01}.
+#' 
 #' @examples
 #' # generate example of positive trend (gamma = 2) 
 #' # after event with slow decay (lambda = 0.05)
-#' x <- runif(100, 0, 100)
+#' t_ <- runif(100, 0, 100)
 #' events <- c(0, 54, 89)
 #' gam <- 2
 #' lam <- 0.05
-#' x_ev1 <-  (x - events[1]) * gam  * exp(- lam * (x - events[1]))
-#' x_ev2 <-  (x - events[2]) * gam  * exp(- lam * (x - events[2]))
-#' x_ev3 <-  (x - events[3]) * gam  * exp(- lam * (x - events[3]))
-#' x_ev1[x < events[1]] <- 0
-#' x_ev2[x < events[2]] <- 0
-#' x_ev3[x < events[3]] <- 0
-#' y <- x_ev1 + x_ev2 + x_ev3 + rnorm(length(x), 0, 0.25)
-#' dat <- time_series(matrix(c(x,y), ncol = 2))
+#' x_ev1 <-  (t_ - events[1]) * gam  * exp(- lam * (t_ - events[1]))
+#' x_ev2 <-  (t_ - events[2]) * gam  * exp(- lam * (t_ - events[2]))
+#' x_ev3 <-  (t_ - events[3]) * gam  * exp(- lam * (t_ - events[3]))
+#' x_ev1[t_ < events[1]] <- 0
+#' x_ev2[t_ < events[2]] <- 0
+#' x_ev3[t_ < events[3]] <- 0
+#' y <- x_ev1 + x_ev2 + x_ev3 + rnorm(length(t_), 0, 0.25)
+#' dat <- time_series(t = t_, x = y)
 #' 
 #' # fit model
 #' res <- dtem(dat, events, gamma = c(-2.5,2.5), lam = c(0,0.1))
@@ -641,7 +695,6 @@ dtem <- function(x, events, gamma = c(-10,10), lambda = c(0,5), intercept = FALS
 #' @rdname dtem
 #' @export
 dtem.time_series <- function(x, events, gamma = c(-10,10), lambda = c(0,5), intercept = FALSE, incr = 0.01) {
-
   if (!(is.numeric(events))) {
     stop("events must be numeric")
   }
@@ -726,15 +779,19 @@ print.dtem <- function(x, ...) {
 #'
 #' Creates an object of class \code{time_series} from a matrix or data frame, or by giving a filename for a \code{csv} file in the working directory. The first column contains time indices (\code{t}), the second the value of observations (\code{x}), both of which must be numeric, and the third contains a label as a factor column (\code{variate}). Multiple time series are contained in the same \code{time_series} object, distinguished by different labels.
 #' 
-#' @param x A matrix or data frame, or a filename as character.
+#' @param input A matrix, data frame, or a filename given as character.
+#' @param t If used, ignores ime indices of the observations; requires also input  \code{x}
+#' @param x The values of the 
+#' @param variate The label of the variate if 
 #' @param log Whether to take the logarithm of observations for \code{x} (default is \code{FALSE}).
 #' @param inverse Whether to use the inverse of observations (default is \code{FALSE}). If both \code{log} and \code{inverse} are true, the log inverse (\eqn{\log(1/x)}) is used.
-#' @param z Whether to standardize the observations, using \eqn{z = (x -\bar{x})/s}, grouped by variate (default is \code{FALSE}). This operation is performed after \code{log} and/or \code{inverse}.
-#' @param ... Additional arguments for importing from csv
+#' @param standard Whether to standardize the observations, using \eqn{z = (x -\bar{x})/s}, grouped by variate (default is \code{FALSE}). This operation is performed after \code{log} and/or \code{inverse}.
+#' @param ... Additional arguments for importing from csv.
 #' \itemize{
 #'  \item \code{header} If a filename, whether the csv file contains a header (default \code{TRUE}).
 #'  \item \code{tabular} If a filename, whether the data are presented in a tabular fonrmat, as opposed to "long" (tidyverse) format (default \code{TRUE}). 
 #' } 
+#' 
 #' @examples
 #' idx <- runif(100,0,100)
 #' x <- cumsum(rnorm(100,0,1))
@@ -745,24 +802,26 @@ print.dtem <- function(x, ...) {
 #' dat <- data.frame(idx, x, label)
 #' time_series(dat)
 #' 
+#' time_series(t = idx, x = x, variate = label)
+#'  
 #' @returns A time_series object.
 #' 
 #' @export
-time_series <- function(x, log = FALSE, inverse = FALSE, z = FALSE, ...) {
+time_series <- function(input, t = NULL, x = NULL, variate = NULL, log = FALSE, inverse = FALSE, standard = FALSE, ...) {
   UseMethod("time_series")
 }
 #' 
 #' @rdname time_series
 #' @export
-time_series.matrix <- function(x, log = FALSE, inverse = FALSE, z = FALSE, ...) {
-  out <- time_series.data.frame(x, log, inverse, z)
+time_series.matrix <- function(input, t = NULL, x = NULL, variate = NULL, log = FALSE, inverse = FALSE, standard = FALSE, ...) {
+  out <- time_series.data.frame(input, log = log, inverse = inverse, standard = standard)
   return(out)
 }
 #' 
 #' @rdname time_series
 #' @export
-time_series.data.frame <- function(x, log = FALSE, inverse = FALSE, z = FALSE, ...) {
-  out <- x
+time_series.data.frame <- function(input, t = NULL, x = NULL, variate = NULL, log = FALSE, inverse = FALSE, standard = FALSE, ...) {
+  out <- input
   if (NA %in% out) {
     stop('input cannot contain NA')
   }
@@ -779,19 +838,18 @@ time_series.data.frame <- function(x, log = FALSE, inverse = FALSE, z = FALSE, .
   if (log == TRUE) {
     out$x <- log(out$x)
   }
-  if (z == TRUE) {
-    out$x <- array2DF(tapply(out$x, out$variate, scale))
+  if (standard == TRUE) {
+    out$x <- array2DF(tapply(out$x, out$variate, scale))$Value
     colnames(out) <- c("t", "z", "variate")
   }
   class(out) <- c("time_series", "data.frame")
   return(out)
 }
-
 #' 
 #' @rdname time_series
 #' @export
-time_series.character <- function(x, log = FALSE, inverse = FALSE, z = FALSE, ...) {
-  out <- x
+time_series.character <- function(input, t = NULL, x = NULL, variate = NULL, log = FALSE, inverse = FALSE, standard = FALSE, ...) {
+  out <- input
   other <- list(...)
   if (!"header" %in% names(other)) {
     header <- FALSE
@@ -803,16 +861,40 @@ time_series.character <- function(x, log = FALSE, inverse = FALSE, z = FALSE, ..
   } else {
     tabular <- other$tabular
   }
-  out <- utils::read.csv(x, header = header)
+  out <- utils::read.csv(out, header = header)
   if (tabular == TRUE) {
     out <- data.frame(out[1], utils::stack(out[2:ncol(out)]))
   }
   out <- out[!is.na(out[,2]),]
   rownames(out) <- NULL
-  out <- time_series.data.frame(out, log, inverse, z)
+  out <- time_series.data.frame(input = out, log = log, inverse = inverse, standard = standard)
   return(out)
 }
-
+#' 
+#' @rdname time_series
+#' @export
+time_series.numeric <- function(input = NULL, t = NULL, x = NULL, variate = NULL, log = FALSE, inverse = FALSE, standard = FALSE, ...) {
+  if (is.null(t) | is.null(x)) {
+    stop("no input given; t and/or x are NULL")
+  }
+  if (length(t) != length(x)) {
+    stop("t and x are of different length")
+  }
+  if (is.null(variate)) {
+    variate <- rep("x", length(t))
+  } else {
+    if (length(variate) == 1) {
+      variate <- rep(variate, length(t))
+    } else {
+      if (length(variate) != length(t)) {
+        stop("t and variate are of different length")
+      }
+    }
+  }
+  input <- data.frame(t = t, x = x, variate = variate)
+  out <- time_series.data.frame(input = input, log = log, inverse = inverse, standard = standard)
+  return(out)
+}
 
 # #' @export 
 # print.time_series <- function(...) {

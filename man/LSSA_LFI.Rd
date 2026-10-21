@@ -2,18 +2,15 @@
 % Please edit documentation in R/spectral.R
 \name{LSSA_LFI}
 \alias{LSSA_LFI}
-\alias{LSSA_LFI.matrix}
-\alias{LSSA_LFI.data.frame}
+\alias{LSSA_LFI.time_series}
 \title{Least Squares Spectral Analysis via Lowest Frequency Iteration (LSSA-LFI)}
 \usage{
 LSSA_LFI(x, n_iter = 1, intercept = TRUE, AIC = FALSE)
 
-\method{LSSA_LFI}{matrix}(x, n_iter = 1, intercept = TRUE, AIC = FALSE)
-
-\method{LSSA_LFI}{data.frame}(x, n_iter = 1, intercept = TRUE, AIC = FALSE)
+\method{LSSA_LFI}{time_series}(x, n_iter = 1, intercept = TRUE, AIC = FALSE)
 }
 \arguments{
-\item{x}{A data frame of two columns, with the first column containing time indices and the second containing values.}
+\item{x}{A time_series object (see \code{\link[arkhaia]{time_series}}) with only one variate.}
 
 \item{n_iter}{The number of iterations to run. Default is 1.}
 

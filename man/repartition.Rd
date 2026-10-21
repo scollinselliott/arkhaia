@@ -2,21 +2,34 @@
 % Please edit documentation in R/spectral.R
 \name{repartition}
 \alias{repartition}
-\alias{repartition.list}
-\title{Repartition (Group) Datasets}
+\alias{repartition.time_series}
+\title{Repartition (Regroup) Variates}
 \usage{
 repartition(x, set = NULL)
 
-\method{repartition}{list}(x, set = NULL)
+\method{repartition}{time_series}(x, set = NULL)
 }
 \arguments{
-\item{x}{A \code{list} containing the time series, each of which should be a matrix or data frame with time index in the first column and value in the second.}
+\item{x}{A \code{time_series} object containing multiple  time series, each of which should be a matrix or data frame with time index in the first column and value in the second.}
 
-\item{set}{A \code{list} of vectors containing the indices of the sets in \code{x}, according to which to pool the datasets into a new list.}
+\item{set}{A \code{list} of vectors containing the names of variates in each of the new groups.}
 }
 \value{
 A \code{list} containing the data according to the partition structure described by \code{set}.
 }
 \description{
-Given a list of data frames (or matrices), labeled \code{x}, and another list which contains indices of \code{x} as vectors, labeled \code{set}, returns a new list which pools (row-binds) the data frames together  according to the grouprings in \code{set}.
+Given multiple time series in a \code{\link[arkhaia]{time_series}} object (\code{x}), group the variates into a new set of variates, expressed as a list of the variate names (\code{set}). Returns a \code{time_series} object using the new partitioning of variates.
+}
+\examples{
+idx <- runif(40, 0, 100)
+x1 <- runif(10, 0, 1) + 3
+x2 <- runif(10, 0, 1) + 2
+x3 <- runif(10, 0, 1) + 1
+x4 <- runif(10, 0, 1)
+x <- time_series(t = idx, x = c(x1,x2,x3,x4),
+  variate = c(rep("x1", 10), rep("x2", 10), 
+  rep("x3", 10), rep("x4", 10)))
+
+repartition(x, set = list(c("x1", "x4"), "x2", "x3"))
+
 }

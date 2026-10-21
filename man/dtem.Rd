@@ -49,18 +49,18 @@ For multiple time-indexed observations and a number of events, \eqn{r = 1, ldots
 \examples{
 # generate example of positive trend (gamma = 2) 
 # after event with slow decay (lambda = 0.05)
-x <- runif(100, 0, 100)
+t_ <- runif(100, 0, 100)
 events <- c(0, 54, 89)
 gam <- 2
 lam <- 0.05
-x_ev1 <-  (x - events[1]) * gam  * exp(- lam * (x - events[1]))
-x_ev2 <-  (x - events[2]) * gam  * exp(- lam * (x - events[2]))
-x_ev3 <-  (x - events[3]) * gam  * exp(- lam * (x - events[3]))
-x_ev1[x < events[1]] <- 0
-x_ev2[x < events[2]] <- 0
-x_ev3[x < events[3]] <- 0
-y <- x_ev1 + x_ev2 + x_ev3 + rnorm(length(x), 0, 0.25)
-dat <- time_series(matrix(c(x,y), ncol = 2))
+x_ev1 <-  (t_ - events[1]) * gam  * exp(- lam * (t_ - events[1]))
+x_ev2 <-  (t_ - events[2]) * gam  * exp(- lam * (t_ - events[2]))
+x_ev3 <-  (t_ - events[3]) * gam  * exp(- lam * (t_ - events[3]))
+x_ev1[t_ < events[1]] <- 0
+x_ev2[t_ < events[2]] <- 0
+x_ev3[t_ < events[3]] <- 0
+y <- x_ev1 + x_ev2 + x_ev3 + rnorm(length(t_), 0, 0.25)
+dat <- time_series(t = t_, x = y)
 
 # fit model
 res <- dtem(dat, events, gamma = c(-2.5,2.5), lam = c(0,0.1))

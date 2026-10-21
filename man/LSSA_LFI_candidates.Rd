@@ -2,17 +2,17 @@
 % Please edit documentation in R/spectral.R
 \name{LSSA_LFI_candidates}
 \alias{LSSA_LFI_candidates}
-\alias{LSSA_LFI_candidates.list}
+\alias{LSSA_LFI_candidates.time_series}
 \title{Linear Dependence of LSSA-LFI Candidate Models via AIC}
 \usage{
 LSSA_LFI_candidates(x, sets = NULL, n_iter = 1, intercept = TRUE)
 
-\method{LSSA_LFI_candidates}{list}(x, sets = NULL, n_iter = 1, intercept = TRUE)
+\method{LSSA_LFI_candidates}{time_series}(x, sets = NULL, n_iter = 1, intercept = TRUE)
 }
 \arguments{
-\item{x}{A \code{list} containing the time series, each of which should be a matrix or data frame with time index in the first column and value in the second.}
+\item{x}{A time_series object (see \code{\link[arkhaia]{time_series}}) with more than one variate.}
 
-\item{sets}{Candidate sets to evaluate; must be a \code{list} of \code{lists} containing the indices of the sets in \code{x}. If left \code{NULL}, two sets are evaluated: all series pooled together [1] and all series kept separate [2].}
+\item{sets}{Candidate sets of variates to evaluate; must be a \code{list} of \code{lists} containing the indices of the levels  in \code{x$variate}. If left \code{NULL}, two sets are evaluated: all series pooled together [1] and all series kept separate [2].}
 
 \item{n_iter}{The number of iterations to run for the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is 1.}
 

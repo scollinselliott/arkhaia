@@ -5,13 +5,13 @@ x1 <- 2 + 5 * cos(2 * pi * 0.03 * t_) - 0.25 * sin(2 * pi * 0.03 * t_) + rnorm(5
 x2 <- x1 + rnorm(50)
 x3 <- 1 + 3 * cos(2 * pi * 0.001 * t_) + 7 * sin(2 * pi * 0.001 * t_) + rnorm(50)
 
-dat1 <- data.frame(t = t_, y = x1)
-dat2 <- data.frame(t = t_, y = x2)
-dat3 <- data.frame(t = t_, y = x3)
+dat1 <- time_series(t = t_, x = x1, variate = "x1")
+dat2 <- time_series(t = t_, x = x2, variate = "x2")
+dat3 <- time_series(t = t_, x = x3, variate = "x3")
 
-Y1 <- list(dat1, dat2)
-Y2 <- list(dat1, dat3)
-Y3 <- list(dat1, dat2, dat3)
+Y1 <- rbind(dat1, dat2)
+Y2 <- rbind(dat1, dat3)
+Y3 <- rbind(dat1, dat2, dat3)
 
 
 test_that("LSSA functions: S3 class check", {
@@ -39,7 +39,7 @@ test_that("trim_epoch works", {
 })
 
 test_that("Correct validated candidate model selected", {
-  res <- LSSA_LFI_validated(Y3, pair = c(1,2), n_iter = 50) 
+  res <- LSSA_LFI_validated(Y3, pair = c("x1", "x2"), n_iter = 50) 
   expect_equal(res, 1)
 })
 
@@ -47,14 +47,16 @@ test_that("Pairwise validated candidate model selection works", {
   expected <- matrix(NA, 3, 3)
   expected[1,2] <- 1
   expected[1:2,3] <- 0
+  rownames(expected) <- c("x1", "x2", "x3")
+  colnames(expected) <- c("x1", "x2", "x3")
   res <- LSSA_LFI_pairwise(Y3, n_iter = 50) 
   expect_equal(res, expected)
 })
 
 test_that("repartition works", {
-  out <- repartition(Y3, list(c(1,2), 3))
-  expect_equal(nrow(out[[1]]), 100)
-  expect_equal(nrow(out[[2]]), 50)
+  out <- repartition(Y3, list(c("x1","x2"), "x3"))
+  expect_equal(nrow(out[out$variate == 1,]), 100)
+  expect_equal(nrow(out[out$variate == 2,]), 50)
 })
 
 test_that("LSSA_LFI_model fits results below 1e-12 threshold", {
@@ -137,7 +139,7 @@ test_that("AIC values correct in LSSA_LFI_multi - including intercept", {
 
 test_that("LSSA_LFI_comp chooses better fitting model than LSSA_LFI_multi", {
 
-  Y3_repar <- repartition(Y3, list(c(1,2), 3))
+  Y3_repar <- repartition(Y3, list(c("x1","x2"), "x3"))
   Y3_repar_multi <- LSSA_LFI_multi(Y3_repar, n_iter = 100, intercept = FALSE, AIC = TRUE)
   aic1 <- Y3_repar_multi["aic"]
 

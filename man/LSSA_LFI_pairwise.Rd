@@ -2,15 +2,15 @@
 % Please edit documentation in R/spectral.R
 \name{LSSA_LFI_pairwise}
 \alias{LSSA_LFI_pairwise}
-\alias{LSSA_LFI_pairwise.list}
+\alias{LSSA_LFI_pairwise.time_series}
 \title{Pairwise Selection of Linearly Dependent LSSA-LFI Models}
 \usage{
 LSSA_LFI_pairwise(x, n_iter = 1, intercept = TRUE)
 
-\method{LSSA_LFI_pairwise}{list}(x, n_iter = 1, intercept = TRUE)
+\method{LSSA_LFI_pairwise}{time_series}(x, n_iter = 1, intercept = TRUE)
 }
 \arguments{
-\item{x}{A list of data frames.}
+\item{x}{A time_series object (see \code{\link[arkhaia]{time_series}}) with at least three variates.}
 
 \item{n_iter}{The number of iterations to run. Default is 1.}
 
@@ -20,5 +20,5 @@ LSSA_LFI_pairwise(x, n_iter = 1, intercept = TRUE)
 An upper-triangular matrix, containing the probability of linear dependence between series.
 }
 \description{
-Evaluate pairwise linear dependence between observations using a LSSA-LFI valdiated model selection (see \code{\link[arkhaia]{LSSA_LFI_validated}}).
+Evaluate pairwise linear dependence between observations using a LSSA-LFI validated model selection (see \code{\link[arkhaia]{LSSA_LFI_validated}}).
 }

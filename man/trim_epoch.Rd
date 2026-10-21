@@ -2,18 +2,15 @@
 % Please edit documentation in R/spectral.R
 \name{trim_epoch}
 \alias{trim_epoch}
-\alias{trim_epoch.matrix}
-\alias{trim_epoch.data.frame}
+\alias{trim_epoch.time_series}
 \title{Trim to Epoch}
 \usage{
 trim_epoch(x, epoch = NULL)
 
-\method{trim_epoch}{matrix}(x, epoch = NULL)
-
-\method{trim_epoch}{data.frame}(x, epoch = NULL)
+\method{trim_epoch}{time_series}(x, epoch = NULL)
 }
 \arguments{
-\item{x}{A data frame or matrix containing time-indexed data, with time index in the first column and value in the second.}
+\item{x}{A time_series object (see \code{\link[arkhaia]{time_series}}).}
 
 \item{epoch}{A numeric vector given the start and end time indices of the epoch.}
 }

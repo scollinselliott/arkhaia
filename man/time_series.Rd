@@ -5,26 +5,80 @@
 \alias{time_series.matrix}
 \alias{time_series.data.frame}
 \alias{time_series.character}
+\alias{time_series.numeric}
 \title{Create a Time Series Object}
 \usage{
-time_series(x, log = FALSE, inverse = FALSE, z = FALSE, ...)
+time_series(
+  input,
+  t = NULL,
+  x = NULL,
+  variate = NULL,
+  log = FALSE,
+  inverse = FALSE,
+  standard = FALSE,
+  ...
+)
 
-\method{time_series}{matrix}(x, log = FALSE, inverse = FALSE, z = FALSE, ...)
+\method{time_series}{matrix}(
+  input,
+  t = NULL,
+  x = NULL,
+  variate = NULL,
+  log = FALSE,
+  inverse = FALSE,
+  standard = FALSE,
+  ...
+)
 
-\method{time_series}{data.frame}(x, log = FALSE, inverse = FALSE, z = FALSE, ...)
+\method{time_series}{data.frame}(
+  input,
+  t = NULL,
+  x = NULL,
+  variate = NULL,
+  log = FALSE,
+  inverse = FALSE,
+  standard = FALSE,
+  ...
+)
 
-\method{time_series}{character}(x, log = FALSE, inverse = FALSE, z = FALSE, ...)
+\method{time_series}{character}(
+  input,
+  t = NULL,
+  x = NULL,
+  variate = NULL,
+  log = FALSE,
+  inverse = FALSE,
+  standard = FALSE,
+  ...
+)
+
+\method{time_series}{numeric}(
+  input = NULL,
+  t = NULL,
+  x = NULL,
+  variate = NULL,
+  log = FALSE,
+  inverse = FALSE,
+  standard = FALSE,
+  ...
+)
 }
 \arguments{
-\item{x}{A matrix or data frame, or a filename as character.}
+\item{input}{A matrix, data frame, or a filename given as character.}
+
+\item{t}{If used, ignores ime indices of the observations; requires also input  \code{x}}
+
+\item{x}{The values of the}
+
+\item{variate}{The label of the variate if}
 
 \item{log}{Whether to take the logarithm of observations for \code{x} (default is \code{FALSE}).}
 
 \item{inverse}{Whether to use the inverse of observations (default is \code{FALSE}). If both \code{log} and \code{inverse} are true, the log inverse (\eqn{\log(1/x)}) is used.}
 
-\item{z}{Whether to standardize the observations, using \eqn{z = (x -\bar{x})/s}, grouped by variate (default is \code{FALSE}). This operation is performed after \code{log} and/or \code{inverse}.}
+\item{standard}{Whether to standardize the observations, using \eqn{z = (x -\bar{x})/s}, grouped by variate (default is \code{FALSE}). This operation is performed after \code{log} and/or \code{inverse}.}
 
-\item{...}{Additional arguments for importing from csv
+\item{...}{Additional arguments for importing from csv.
 \itemize{
  \item \code{header} If a filename, whether the csv file contains a header (default \code{TRUE}).
  \item \code{tabular} If a filename, whether the data are presented in a tabular fonrmat, as opposed to "long" (tidyverse) format (default \code{TRUE}). 
@@ -46,4 +100,6 @@ time_series(mat)
 dat <- data.frame(idx, x, label)
 time_series(dat)
 
+time_series(t = idx, x = x, variate = label)
+ 
 }
