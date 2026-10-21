@@ -46,16 +46,6 @@ LSSA.time_series <- function(x, freqs = seq(0.001, 0.5, by = 0.0005), intercept 
   return(out)
 }
 
-# #' @rdname LSSA
-# #' @export
-# LSSA.data.frame <- function(x, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE, type = "frequency") {
-#   x <- as.matrix(x)
-#   out <- LSSA.matrix(x, freqs, intercept, type) 
-#   return(out)
-# }
-
-
-
 
 
 #' Least Squares Spectral Analysis via Lowest Frequency Iteration (LSSA-LFI)
@@ -107,15 +97,6 @@ LSSA_LFI.time_series <- function(x, n_iter = 1, intercept = TRUE, AIC = FALSE) {
 
   return(out)
 }
-
-# #' @rdname LSSA_LFI
-# #' @export
-# LSSA_LFI.data.frame <- function(x, n_iter = 1, intercept = TRUE, AIC = FALSE) {
-#   x <- as.matrix(x)
-#   out <- LSSA_LFI.matrix(x, n_iter, intercept, AIC) 
-#   return(out)
-# }
-
 
 
 
@@ -209,8 +190,6 @@ trim_epoch.time_series <- function(x, epoch = NULL) {
   class(out) <- c("time_series", "data.frame")
   return(out)
 }
-
-
 
 
 
@@ -331,13 +310,6 @@ LSSA_LFI_model.time_series <- function(x, t_ = NULL, n_iter = 1, intercept = TRU
   return(out)
 }
 
-# #' @rdname LSSA_LFI_model
-# #' @export
-# LSSA_LFI_model.data.frame <- function(x, t_ = NULL, n_iter = 1, intercept = TRUE, label = "model") {  
-#   x <- as.matrix(x[,1:2])
-#   LSSA_LFI_model.matrix(x, t_ = t_, n_iter = n_iter, intercept = intercept, label = label)
-# }
-
 
 
 #' Validated Linear Dependence via LSSA-LFI
@@ -405,9 +377,7 @@ LSSA_LFI_validated.time_series <- function(x, pair = NULL, n_iter = 1, intercept
     mod <- LSSA_LFI_candidates_arma(as.matrix(y[,1:2]), idx, y_rows, partition, n_iter, intrcpt) + 1 # add 1 for R indexing
     if (mod %in% c(1,2)) {
       res[i] <- 1
-    } # else {
-    #  res[i] <- 0
-    # }
+    }
   }
   return(mean(res))
 }
@@ -512,7 +482,6 @@ LSSA_LFI_epoch.list <- function(x, pair = NULL, n_iter = 1, intercept = TRUE, t_
           if (n_obs < 4) {
             do_lssa <- FALSE
           }
-          # tmp[[names(x)[i]]] <- trimmed
           tmp[[i]] <- trimmed
         } 
         if (do_lssa == TRUE) {
@@ -559,12 +528,8 @@ LSSA_LFI_multi <- function(x, n_iter = 1, intercept = TRUE, AIC = FALSE) {
 #' @export
 LSSA_LFI_multi.time_series <- function(x, n_iter = 1, intercept = TRUE, AIC = FALSE) {
   n <- nlevels(x$variate)
-  x_rows <- table(x$variate) # unlist(lapply(x, nrow))
+  x_rows <- table(x$variate)
   idx <- c(0, cumsum(x_rows)[1:(n-1)]) 
-  # n <- length(x)
-  # y <- as.matrix(do.call(rbind, x))
-  # x_rows <- unlist(lapply(x, nrow))
-  # idx <- c(0, cumsum(x_rows)[1:(n-1)]) 
   if (length(x_rows) == 1) {
     idx <- idx[1]
   }
@@ -777,10 +742,6 @@ print.dtem <- function(x, ...) {
   cat("Decaying Trend-after-Event Regression: \n")
   print(x$coefs)
 }
-
-
-
-
 
 
 
