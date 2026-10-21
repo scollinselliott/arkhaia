@@ -142,7 +142,7 @@ LSSA_LFI_candidates <- function(x, sets = NULL, n_iter = 1, intercept = TRUE) {
 #' @export
 LSSA_LFI_candidates.time_series <- function(x, sets = NULL, n_iter = 1, intercept = TRUE) {
   if (nlevels(x$variate) < 2) {
-    stop("time_series input must contain more than one time series.")
+    stop("time_series input must contain more than one variate.")
   }
   n <- nlevels(x$variate)
   # y <- as.matrix(do.call(rbind, x))
@@ -155,6 +155,15 @@ LSSA_LFI_candidates.time_series <- function(x, sets = NULL, n_iter = 1, intercep
     tog <- 0:(n-1)
     sets0 <- matrix(c(pld, tog), nrow = 2, byrow = TRUE)
   } else {
+    lev <- levels(x$variate)
+    for (i in 1:n) {
+      sets1 <- unlist(sets)
+      sets1[sets1 == lev[i]] <- i
+      sets <- relist(sets1, sets)
+    }
+    sets1 <- unlist(sets)
+    sets1 <- as.numeric(sets1)
+    sets <- relist(sets1, sets)
     sets0 <- partition_list_to_matrix_arma(sets)
   }
 
