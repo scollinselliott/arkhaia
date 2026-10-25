@@ -170,10 +170,12 @@ LSSA_LFI_candidates.time_series <- function(x, sets = NULL, n_iter = 1, freqs = 
   }
 
   if (intercept == TRUE) {
-    intrcpt <- 1
-  } else {
-    intrcpt <- 0
-  }
+      intrcpt <- 1
+  } else if (intercept == FALSE) {
+      intrcpt <- 0
+  } else (
+    stop('intercept must be TRUE or FALSE')
+  )
 
   # add 1 for R indexing
   out <- LSSA_LFI_candidates_arma(as.matrix(x[,1:2]), idx, x_rows, sets0, n_iter, freqs, intrcpt) + 1
@@ -381,11 +383,12 @@ LSSA_LFI_validated.time_series <- function(x, pair = NULL, n_iter = 1, freqs = s
   res <- numeric(length(attend))
 
   if (intercept == TRUE) {
-    intrcpt <- 1
-  } else {
-    intrcpt <- 0
-  }
-
+      intrcpt <- 1
+  } else if (intercept == FALSE) {
+      intrcpt <- 0
+  } else (
+    stop('intercept must be TRUE or FALSE')
+  )
   partition <-  matrix(c(0,0,0,
                          0,0,1,
                          0,1,0,
