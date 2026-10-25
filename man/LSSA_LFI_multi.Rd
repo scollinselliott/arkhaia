@@ -36,7 +36,7 @@ LSSA_LFI_multi(
 A data frame giving the number of iterations and the AIC for each.
 }
 \description{
-For multiple time series contained in a \code{\link[arkhaia]{time_series}} object, this function will compute the Akaike Information Criterion (AIC) as the number of terms (\code{n_iter}) is increased. This function can be performed after \code{\link[arkhaia]{LSSA_LFI_candidates}} and \code{\link[arkhaia]{repartition}} to determine the appropriate number of terms.
+For multiple time series contained in a \code{\link[arkhaia]{time_series}} object, this function will compute the Akaike Information Criterion (AIC) as the number of terms (\code{n_iter}) is increased. This function can be performed after \code{\link[arkhaia]{LSSA_LFI_dependence}} and \code{\link[arkhaia]{repartition}} to determine the appropriate number of terms.
 }
 \references{
 \insertAllCited{}

@@ -119,12 +119,12 @@ LSSA_LFI.time_series <- function(x, subset = NULL, n_iter = 1, freqs = seq(0.001
 
 
 
-#' Linear Dependence of LSSA-LFI Candidate Models via AIC
+#' Linear Dependence via LSSA-LFI Model Selection of Partitioned Variates
 #'
-#' For a set of time series (namely partitions of set of series) contained in a list, will compute the Akaike Information Criterion (AIC) for each candidate set \insertCite{akaike_information_1973}{arkhaia}.  
+#' For a \code{\link[arkhaia]{time_series}} with multiple variates, will compute the Akaike Information Criterion (AIC) for each candidate set \insertCite{akaike_information_1973}{arkhaia}, in order to determine whether some variates are dependent upon the same process.
 #' 
 #' @param x A time_series object (see \code{\link[arkhaia]{time_series}}) with more than one variate.
-#' @param sets Candidate sets of variates to evaluate; must be a \code{list} of \code{lists} containing the indices of the levels  in \code{x$variate}. If left \code{NULL}, two sets are evaluated: all series pooled together [1] and all series kept separate [2].
+#' @param sets Candidate partitions of variates to evaluate; must be a \code{list} of \code{lists} containing the indices of the levels  in \code{x$variate}. If left \code{NULL}, two sets are evaluated: all series pooled together [1] and all series kept separate [2].
 #' @param n_iter The number of iterations to run for the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is 1.
 #' @param freqs A vector of frequencies to evaluate. By default a grid from 0.001 to 0.5 is tested at an interval of 0.005.
 #' @param intercept Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.
@@ -135,13 +135,13 @@ LSSA_LFI.time_series <- function(x, subset = NULL, n_iter = 1, freqs = seq(0.001
 #'
 #' @importFrom Rdpack reprompt
 #' @export
-LSSA_LFI_candidates <- function(x, sets = NULL, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE) {
-    UseMethod("LSSA_LFI_candidates")
+LSSA_LFI_dependence <- function(x, sets = NULL, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE) {
+    UseMethod("LSSA_LFI_dependence")
 }
 
-#' @rdname LSSA_LFI_candidates
+#' @rdname LSSA_LFI_dependence
 #' @export
-LSSA_LFI_candidates.time_series <- function(x, sets = NULL, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE) {
+LSSA_LFI_dependence.time_series <- function(x, sets = NULL, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE) {
   if (nlevels(x$variate) < 2) {
     stop("time_series input must contain more than one variate.")
   }
@@ -168,7 +168,7 @@ LSSA_LFI_candidates.time_series <- function(x, sets = NULL, n_iter = 1, freqs = 
     sets <- relist(sets1, sets)
     sets0 <- partition_list_to_matrix_arma(sets)
   }
-
+  
   if (intercept == TRUE) {
       intrcpt <- 1
   } else if (intercept == FALSE) {
@@ -178,7 +178,7 @@ LSSA_LFI_candidates.time_series <- function(x, sets = NULL, n_iter = 1, freqs = 
   )
 
   # add 1 for R indexing
-  out <- LSSA_LFI_candidates_arma(as.matrix(x[,1:2]), idx, x_rows, sets0, n_iter, freqs, intrcpt) + 1
+  out <- LSSA_LFI_dependence_arma(as.matrix(x[,1:2]), idx, x_rows, sets0, n_iter, freqs, intrcpt) + 1
   
   return(out)
 }
@@ -340,7 +340,7 @@ LSSA_LFI_model.time_series <- function(x, t_ = NULL, n_iter = 1, freqs = seq(0.0
 
 #' Validated Linear Dependence via LSSA-LFI
 #'
-#' Probability of linear dependence between two groups of time series observations using a LSSA-LFI model selection (see \code{\link[arkhaia]{LSSA_LFI_candidates}}), on the basis of the inclusion of a third "attendant" variate. The third attendant variate is selected from the remaining time series in the list, hence the input list must include at least three times series.
+#' Probability of linear dependence between two groups of time series observations using a LSSA-LFI model selection (see \code{\link[arkhaia]{LSSA_LFI_dependence}}), on the basis of the inclusion of a third "attendant" variate. The third attendant variate is selected from the remaining time series in the list, hence the input list must include at least three times series.
 #' 
 #' @param x A time_series object (see \code{\link[arkhaia]{time_series}}) with at least three variates.
 #' @param pair The pair of series to evaluate in the \code{x}, given levels in \code{x$variate}.
@@ -402,7 +402,7 @@ LSSA_LFI_validated.time_series <- function(x, pair = NULL, n_iter = 1, freqs = s
     y_rows <- table(y$variate)
     idx <- c(0, cumsum(y_rows)[1:2]) 
 
-    mod <- LSSA_LFI_candidates_arma(as.matrix(y[,1:2]), idx, y_rows, partition, n_iter, freqs, intrcpt) + 1 # add 1 for R indexing
+    mod <- LSSA_LFI_dependence_arma(as.matrix(y[,1:2]), idx, y_rows, partition, n_iter, freqs, intrcpt) + 1 # add 1 for R indexing
     if (mod %in% c(1,2)) {
       res[i] <- 1
     }
@@ -540,7 +540,7 @@ LSSA_LFI_epoch.list <- function(x, pair = NULL, n_iter = 1, freqs = seq(0.001, 0
 
 #' Partitioned LSSA-LFI Model Terms and AIC
 #'
-#' For multiple time series contained in a \code{\link[arkhaia]{time_series}} object, this function will compute the Akaike Information Criterion (AIC) as the number of terms (\code{n_iter}) is increased. This function can be performed after \code{\link[arkhaia]{LSSA_LFI_candidates}} and \code{\link[arkhaia]{repartition}} to determine the appropriate number of terms.
+#' For multiple time series contained in a \code{\link[arkhaia]{time_series}} object, this function will compute the Akaike Information Criterion (AIC) as the number of terms (\code{n_iter}) is increased. This function can be performed after \code{\link[arkhaia]{LSSA_LFI_dependence}} and \code{\link[arkhaia]{repartition}} to determine the appropriate number of terms.
 #' 
 #' @param x A time_series object (see \code{\link[arkhaia]{time_series}}).
 #' @param n_iter The number of iterations to run for the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is 1.
@@ -595,7 +595,7 @@ LSSA_LFI_multi.time_series <- function(x, n_iter = 1, freqs = seq(0.001, 0.5, by
 
 #' Partitioned LSSA-LFI Model Terms and AIC: Composite Number of Parameters
 #'
-#' For multiple time series contained in a \code{\link[arkhaia]{time_series}} object, this function will compute the Akaike Information Criterion (AIC) for the best-fitting models particular to each series, including the case of an intercept-only model. This function can be performed after \code{\link[arkhaia]{LSSA_LFI_candidates}} and \code{\link[arkhaia]{repartition}} to determine the appropriate number of terms. For the situation where all time series must have the same number of terms, \code{\link[arkhaia]{LSSA_LFI_multi}} should be used, but this function should chosose a better fitting model, since it adjusts the number of parameters for each dataset.
+#' For multiple time series contained in a \code{\link[arkhaia]{time_series}} object, this function will compute the Akaike Information Criterion (AIC) for the best-fitting models particular to each series, including the case of an intercept-only model. This function can be performed after \code{\link[arkhaia]{LSSA_LFI_dependence}} and \code{\link[arkhaia]{repartition}} to determine the appropriate number of terms. For the situation where all time series must have the same number of terms, \code{\link[arkhaia]{LSSA_LFI_multi}} should be used, but this function should chosose a better fitting model, since it adjusts the number of parameters for each dataset.
 #' 
 #' @param x A time_series object (see \code{\link[arkhaia]{time_series}}).
 #' @param freqs A vector of frequencies to evaluate. By default a grid from 0.001 to 0.5 is tested at an interval of 0.005.

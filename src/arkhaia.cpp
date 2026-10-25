@@ -351,7 +351,7 @@ arma::mat partition_list_to_matrix_arma(Rcpp::List x) {
 //' @useDynLib arkhaia
 //' @importFrom Rcpp sourceCpp
 // [[Rcpp::export]]
-int LSSA_LFI_candidates_arma(arma::mat & x, arma::vec & start_idx, arma::vec & x_rows, arma::mat & sets, int n_iter, const arma::colvec & freq, int intercept) {
+int LSSA_LFI_dependence_arma(arma::mat & x, arma::vec & start_idx, arma::vec & x_rows, arma::mat & sets, int n_iter, const arma::colvec & freq, int intercept) {
 
     // // datasets
     // int n = x.size();

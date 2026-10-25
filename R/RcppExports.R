@@ -33,8 +33,8 @@ partition_list_to_matrix_arma <- function(x) {
 
 #' @useDynLib arkhaia
 #' @importFrom Rcpp sourceCpp
-LSSA_LFI_candidates_arma <- function(x, start_idx, x_rows, sets, n_iter, freq, intercept) {
-    .Call('_arkhaia_LSSA_LFI_candidates_arma', PACKAGE = 'arkhaia', x, start_idx, x_rows, sets, n_iter, freq, intercept)
+LSSA_LFI_dependence_arma <- function(x, start_idx, x_rows, sets, n_iter, freq, intercept) {
+    .Call('_arkhaia_LSSA_LFI_dependence_arma', PACKAGE = 'arkhaia', x, start_idx, x_rows, sets, n_iter, freq, intercept)
 }
 
 #' @useDynLib arkhaia
