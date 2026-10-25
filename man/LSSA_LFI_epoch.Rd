@@ -9,6 +9,7 @@ LSSA_LFI_epoch(
   x,
   pair = NULL,
   n_iter = 1,
+  freqs = seq(0.001, 0.5, by = 5e-04),
   intercept = TRUE,
   t_range = NULL,
   h_range = NULL,
@@ -20,6 +21,7 @@ LSSA_LFI_epoch(
   x,
   pair = NULL,
   n_iter = 1,
+  freqs = seq(0.001, 0.5, by = 5e-04),
   intercept = TRUE,
   t_range = NULL,
   h_range = NULL,
@@ -33,6 +35,8 @@ LSSA_LFI_epoch(
 \item{pair}{The pair of commodities to evaluate in the list \code{x}, given as indices.}
 
 \item{n_iter}{The number of iterations to run. Default is 1.}
+
+\item{freqs}{A vector of frequencies to evaluate. By default a grid from 0.001 to 0.5 is tested at an interval of 0.005.}
 
 \item{intercept}{Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.}
 

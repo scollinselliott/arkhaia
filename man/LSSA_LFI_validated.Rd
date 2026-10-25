@@ -5,9 +5,21 @@
 \alias{LSSA_LFI_validated.time_series}
 \title{Validated Linear Dependence via LSSA-LFI}
 \usage{
-LSSA_LFI_validated(x, pair = NULL, n_iter = 1, intercept = TRUE)
+LSSA_LFI_validated(
+  x,
+  pair = NULL,
+  n_iter = 1,
+  freqs = seq(0.001, 0.5, by = 5e-04),
+  intercept = TRUE
+)
 
-\method{LSSA_LFI_validated}{time_series}(x, pair = NULL, n_iter = 1, intercept = TRUE)
+\method{LSSA_LFI_validated}{time_series}(
+  x,
+  pair = NULL,
+  n_iter = 1,
+  freqs = seq(0.001, 0.5, by = 5e-04),
+  intercept = TRUE
+)
 }
 \arguments{
 \item{x}{A time_series object (see \code{\link[arkhaia]{time_series}}) with at least three variates.}
@@ -15,6 +27,8 @@ LSSA_LFI_validated(x, pair = NULL, n_iter = 1, intercept = TRUE)
 \item{pair}{The pair of series to evaluate in the \code{x}, given levels in \code{x$variate}.}
 
 \item{n_iter}{The number of iterations to run. Default is 1.}
+
+\item{freqs}{A vector of frequencies to evaluate. By default a grid from 0.001 to 0.5 is tested at an interval of 0.005.}
 
 \item{intercept}{Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.}
 }

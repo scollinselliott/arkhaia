@@ -5,9 +5,23 @@
 \alias{LSSA_LFI_model.time_series}
 \title{LSSA-LFI Model}
 \usage{
-LSSA_LFI_model(x, t_ = NULL, n_iter = 1, intercept = TRUE, label = "model")
+LSSA_LFI_model(
+  x,
+  t_ = NULL,
+  n_iter = 1,
+  freqs = seq(0.001, 0.5, by = 5e-04),
+  intercept = TRUE,
+  label = "model"
+)
 
-\method{LSSA_LFI_model}{time_series}(x, t_ = NULL, n_iter = 1, intercept = TRUE, label = "model")
+\method{LSSA_LFI_model}{time_series}(
+  x,
+  t_ = NULL,
+  n_iter = 1,
+  freqs = seq(0.001, 0.5, by = 5e-04),
+  intercept = TRUE,
+  label = "model"
+)
 }
 \arguments{
 \item{x}{A time_series object (see \code{\link[arkhaia]{time_series}}) with only one variate.}
@@ -15,6 +29,8 @@ LSSA_LFI_model(x, t_ = NULL, n_iter = 1, intercept = TRUE, label = "model")
 \item{t_}{A vector giving samples range of \eqn{t} for computing \eqn{x(t)}. Default is from the minimum to maximum time index sampled at 0.01 intervals.}
 
 \item{n_iter}{The number of iterations to run. Default is 1.}
+
+\item{freqs}{A vector of frequencies to evaluate. By default a grid from 0.001 to 0.5 is tested at an interval of 0.005.}
 
 \item{intercept}{Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.}
 

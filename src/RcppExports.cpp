@@ -38,29 +38,31 @@ BEGIN_RCPP
 END_RCPP
 }
 // LSSA_LFI_arma
-arma::mat LSSA_LFI_arma(const arma::mat& x, int n_iter, int intercept);
-RcppExport SEXP _arkhaia_LSSA_LFI_arma(SEXP xSEXP, SEXP n_iterSEXP, SEXP interceptSEXP) {
+arma::mat LSSA_LFI_arma(const arma::mat& x, int n_iter, const arma::colvec& freq, int intercept);
+RcppExport SEXP _arkhaia_LSSA_LFI_arma(SEXP xSEXP, SEXP n_iterSEXP, SEXP freqSEXP, SEXP interceptSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
     Rcpp::traits::input_parameter< int >::type n_iter(n_iterSEXP);
+    Rcpp::traits::input_parameter< const arma::colvec& >::type freq(freqSEXP);
     Rcpp::traits::input_parameter< int >::type intercept(interceptSEXP);
-    rcpp_result_gen = Rcpp::wrap(LSSA_LFI_arma(x, n_iter, intercept));
+    rcpp_result_gen = Rcpp::wrap(LSSA_LFI_arma(x, n_iter, freq, intercept));
     return rcpp_result_gen;
 END_RCPP
 }
 // LSSA_LFI_model_arma
-arma::mat LSSA_LFI_model_arma(const arma::mat& x, arma::vec t_, int n_iter, int intercept);
-RcppExport SEXP _arkhaia_LSSA_LFI_model_arma(SEXP xSEXP, SEXP t_SEXP, SEXP n_iterSEXP, SEXP interceptSEXP) {
+arma::mat LSSA_LFI_model_arma(const arma::mat& x, arma::vec t_, int n_iter, const arma::colvec& freq, int intercept);
+RcppExport SEXP _arkhaia_LSSA_LFI_model_arma(SEXP xSEXP, SEXP t_SEXP, SEXP n_iterSEXP, SEXP freqSEXP, SEXP interceptSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type t_(t_SEXP);
     Rcpp::traits::input_parameter< int >::type n_iter(n_iterSEXP);
+    Rcpp::traits::input_parameter< const arma::colvec& >::type freq(freqSEXP);
     Rcpp::traits::input_parameter< int >::type intercept(interceptSEXP);
-    rcpp_result_gen = Rcpp::wrap(LSSA_LFI_model_arma(x, t_, n_iter, intercept));
+    rcpp_result_gen = Rcpp::wrap(LSSA_LFI_model_arma(x, t_, n_iter, freq, intercept));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -76,8 +78,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // LSSA_LFI_candidates_arma
-int LSSA_LFI_candidates_arma(arma::mat& x, arma::vec& start_idx, arma::vec& x_rows, arma::mat& sets, int n_iter, int intercept);
-RcppExport SEXP _arkhaia_LSSA_LFI_candidates_arma(SEXP xSEXP, SEXP start_idxSEXP, SEXP x_rowsSEXP, SEXP setsSEXP, SEXP n_iterSEXP, SEXP interceptSEXP) {
+int LSSA_LFI_candidates_arma(arma::mat& x, arma::vec& start_idx, arma::vec& x_rows, arma::mat& sets, int n_iter, const arma::colvec& freq, int intercept);
+RcppExport SEXP _arkhaia_LSSA_LFI_candidates_arma(SEXP xSEXP, SEXP start_idxSEXP, SEXP x_rowsSEXP, SEXP setsSEXP, SEXP n_iterSEXP, SEXP freqSEXP, SEXP interceptSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -86,14 +88,15 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::vec& >::type x_rows(x_rowsSEXP);
     Rcpp::traits::input_parameter< arma::mat& >::type sets(setsSEXP);
     Rcpp::traits::input_parameter< int >::type n_iter(n_iterSEXP);
+    Rcpp::traits::input_parameter< const arma::colvec& >::type freq(freqSEXP);
     Rcpp::traits::input_parameter< int >::type intercept(interceptSEXP);
-    rcpp_result_gen = Rcpp::wrap(LSSA_LFI_candidates_arma(x, start_idx, x_rows, sets, n_iter, intercept));
+    rcpp_result_gen = Rcpp::wrap(LSSA_LFI_candidates_arma(x, start_idx, x_rows, sets, n_iter, freq, intercept));
     return rcpp_result_gen;
 END_RCPP
 }
 // LSSA_LFI_multi_arma
-arma::mat LSSA_LFI_multi_arma(arma::mat& x, arma::vec& start_idx, arma::vec& x_rows, int n_iter, int intercept);
-RcppExport SEXP _arkhaia_LSSA_LFI_multi_arma(SEXP xSEXP, SEXP start_idxSEXP, SEXP x_rowsSEXP, SEXP n_iterSEXP, SEXP interceptSEXP) {
+arma::mat LSSA_LFI_multi_arma(arma::mat& x, arma::vec& start_idx, arma::vec& x_rows, int n_iter, const arma::colvec& freq, int intercept);
+RcppExport SEXP _arkhaia_LSSA_LFI_multi_arma(SEXP xSEXP, SEXP start_idxSEXP, SEXP x_rowsSEXP, SEXP n_iterSEXP, SEXP freqSEXP, SEXP interceptSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -101,8 +104,9 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::vec& >::type start_idx(start_idxSEXP);
     Rcpp::traits::input_parameter< arma::vec& >::type x_rows(x_rowsSEXP);
     Rcpp::traits::input_parameter< int >::type n_iter(n_iterSEXP);
+    Rcpp::traits::input_parameter< const arma::colvec& >::type freq(freqSEXP);
     Rcpp::traits::input_parameter< int >::type intercept(interceptSEXP);
-    rcpp_result_gen = Rcpp::wrap(LSSA_LFI_multi_arma(x, start_idx, x_rows, n_iter, intercept));
+    rcpp_result_gen = Rcpp::wrap(LSSA_LFI_multi_arma(x, start_idx, x_rows, n_iter, freq, intercept));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -504,11 +508,11 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_arkhaia_LSSA_arma", (DL_FUNC) &_arkhaia_LSSA_arma, 3},
     {"_arkhaia_LSSA_resid_arma", (DL_FUNC) &_arkhaia_LSSA_resid_arma, 3},
-    {"_arkhaia_LSSA_LFI_arma", (DL_FUNC) &_arkhaia_LSSA_LFI_arma, 3},
-    {"_arkhaia_LSSA_LFI_model_arma", (DL_FUNC) &_arkhaia_LSSA_LFI_model_arma, 4},
+    {"_arkhaia_LSSA_LFI_arma", (DL_FUNC) &_arkhaia_LSSA_LFI_arma, 4},
+    {"_arkhaia_LSSA_LFI_model_arma", (DL_FUNC) &_arkhaia_LSSA_LFI_model_arma, 5},
     {"_arkhaia_partition_list_to_matrix_arma", (DL_FUNC) &_arkhaia_partition_list_to_matrix_arma, 1},
-    {"_arkhaia_LSSA_LFI_candidates_arma", (DL_FUNC) &_arkhaia_LSSA_LFI_candidates_arma, 6},
-    {"_arkhaia_LSSA_LFI_multi_arma", (DL_FUNC) &_arkhaia_LSSA_LFI_multi_arma, 5},
+    {"_arkhaia_LSSA_LFI_candidates_arma", (DL_FUNC) &_arkhaia_LSSA_LFI_candidates_arma, 7},
+    {"_arkhaia_LSSA_LFI_multi_arma", (DL_FUNC) &_arkhaia_LSSA_LFI_multi_arma, 6},
     {"_arkhaia_dtem_arma", (DL_FUNC) &_arkhaia_dtem_arma, 5},
     {"_arkhaia_dtem_intrcpt_arma", (DL_FUNC) &_arkhaia_dtem_intrcpt_arma, 6},
     {"_arkhaia_lambda_col_arma", (DL_FUNC) &_arkhaia_lambda_col_arma, 3},

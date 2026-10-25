@@ -5,14 +5,26 @@
 \alias{LSSA_LFI_pairwise.time_series}
 \title{Pairwise Selection of Linearly Dependent LSSA-LFI Models}
 \usage{
-LSSA_LFI_pairwise(x, n_iter = 1, intercept = TRUE)
+LSSA_LFI_pairwise(
+  x,
+  n_iter = 1,
+  freqs = seq(0.001, 0.5, by = 5e-04),
+  intercept = TRUE
+)
 
-\method{LSSA_LFI_pairwise}{time_series}(x, n_iter = 1, intercept = TRUE)
+\method{LSSA_LFI_pairwise}{time_series}(
+  x,
+  n_iter = 1,
+  freqs = seq(0.001, 0.5, by = 5e-04),
+  intercept = TRUE
+)
 }
 \arguments{
 \item{x}{A time_series object (see \code{\link[arkhaia]{time_series}}) with at least three variates.}
 
 \item{n_iter}{The number of iterations to run. Default is 1.}
+
+\item{freqs}{A vector of frequencies to evaluate. By default a grid from 0.001 to 0.5 is tested at an interval of 0.005.}
 
 \item{intercept}{Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.}
 }

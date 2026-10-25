@@ -35,13 +35,18 @@ LSSA.time_series <- function(x, freqs = seq(0.001, 0.5, by = 0.0005), intercept 
       intrcpt <- 1
   } else if (intercept == FALSE) {
       intrcpt <- 0
-  }
+  } else (
+    stop('intercept must be TRUE or FALSE')
+  )
+
   P <- LSSA_arma(as.matrix(x[,1:2]), freqs, intrcpt)
 
   if (type == "frequency") {
-    out <- data.frame(freq = freqs, power = P[,1], rss = P[,2], coef_cos = P[,3], coef_sin = P[,4], coef_const = P[,5])
+    out <- data.frame(freqs = freqs, power = P[,1], rss = P[,2], coef_cos = P[,3], coef_sin = P[,4], coef_const = P[,5])
   } else if (type == "period") {
     out <- data.frame(period = 1/freqs, power = P[,1], rss = P[,2], coef_cos = P[,3], coef_sin = P[,4], coef_const = P[,5])
+  } else {
+    stop('type must be "frequency" or "period"')
   }
   return(out)
 }
@@ -55,6 +60,7 @@ LSSA.time_series <- function(x, freqs = seq(0.001, 0.5, by = 0.0005), intercept 
 #' @param x A time_series object (see \code{\link[arkhaia]{time_series}}) with only one variate.
 #' @param subset Whether to subset a multivariate time_series input to fit just one variate. Default is \code{NULL}.
 #' @param n_iter The number of iterations to run. Default is 1.
+#' @param freqs A vector of frequencies to evaluate. By default a grid from 0.001 to 0.5 is tested at an interval of 0.005.
 #' @param intercept Whether to include the intercept. Default is \code{TRUE}.
 #' @param AIC If \code{TRUE}, only the result that has yeilded the lowest AIC is given \insertCite{akaike_information_1973}{arkhaia}. Default is \code{FALSE}.
 #' @returns A list containing:
@@ -70,13 +76,13 @@ LSSA.time_series <- function(x, freqs = seq(0.001, 0.5, by = 0.0005), intercept 
 #'
 #' @importFrom Rdpack reprompt
 #' @export
-LSSA_LFI <- function(x, subset = NULL, n_iter = 1, intercept = TRUE, AIC = FALSE) {
+LSSA_LFI <- function(x, subset = NULL, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE, AIC = FALSE) {
     UseMethod("LSSA_LFI")
 }
 
 #' @rdname LSSA_LFI
 #' @export
-LSSA_LFI.time_series <- function(x, subset = NULL, n_iter = 1, intercept = TRUE, AIC = FALSE) {
+LSSA_LFI.time_series <- function(x, subset = NULL, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE, AIC = FALSE) {
   if (!is.null(subset)) {
     if (subset %in% levels(x$variate)) {
       x <- x[x$variate == subset, ]
@@ -92,10 +98,13 @@ LSSA_LFI.time_series <- function(x, subset = NULL, n_iter = 1, intercept = TRUE,
 
   if (intercept == TRUE) {
     intrcpt = 1
-  } else {
+  } else if (intercept == FALSE) {
     intrcpt = 0
+  } else {
+    stop('intercept must be TRUE or FALSE')
   }
-  out0 <- LSSA_LFI_arma(as.matrix(x[,1:2]), n_iter, intrcpt)
+
+  out0 <- LSSA_LFI_arma(as.matrix(x[,1:2]), n_iter, freqs, intrcpt)
 
   out <- list(coefs = out0[,1:3], freqs = out0[,4], rss = out0[,5], aic = out0[,6])
 
@@ -117,6 +126,7 @@ LSSA_LFI.time_series <- function(x, subset = NULL, n_iter = 1, intercept = TRUE,
 #' @param x A time_series object (see \code{\link[arkhaia]{time_series}}) with more than one variate.
 #' @param sets Candidate sets of variates to evaluate; must be a \code{list} of \code{lists} containing the indices of the levels  in \code{x$variate}. If left \code{NULL}, two sets are evaluated: all series pooled together [1] and all series kept separate [2].
 #' @param n_iter The number of iterations to run for the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is 1.
+#' @param freqs A vector of frequencies to evaluate. By default a grid from 0.001 to 0.5 is tested at an interval of 0.005.
 #' @param intercept Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.
 #' @returns The index of the set yielding the lowest AIC. If \code{sets} is \code{NULL}, the output of \code{[1]} indicates linear dependence; if the output is \code{[2]}, linear independence.
 #'  
@@ -125,16 +135,17 @@ LSSA_LFI.time_series <- function(x, subset = NULL, n_iter = 1, intercept = TRUE,
 #'
 #' @importFrom Rdpack reprompt
 #' @export
-LSSA_LFI_candidates <- function(x, sets = NULL, n_iter = 1, intercept = TRUE) {
+LSSA_LFI_candidates <- function(x, sets = NULL, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE) {
     UseMethod("LSSA_LFI_candidates")
 }
 
 #' @rdname LSSA_LFI_candidates
 #' @export
-LSSA_LFI_candidates.time_series <- function(x, sets = NULL, n_iter = 1, intercept = TRUE) {
+LSSA_LFI_candidates.time_series <- function(x, sets = NULL, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE) {
   if (nlevels(x$variate) < 2) {
     stop("time_series input must contain more than one variate.")
   }
+
   n <- nlevels(x$variate)
   # y <- as.matrix(do.call(rbind, x))
   x_rows <- table(x$variate) # unlist(lapply(x, nrow))
@@ -165,7 +176,7 @@ LSSA_LFI_candidates.time_series <- function(x, sets = NULL, n_iter = 1, intercep
   }
 
   # add 1 for R indexing
-  out <- LSSA_LFI_candidates_arma(as.matrix(x[,1:2]), idx, x_rows, sets0, n_iter, intrcpt) + 1
+  out <- LSSA_LFI_candidates_arma(as.matrix(x[,1:2]), idx, x_rows, sets0, n_iter, freqs, intrcpt) + 1
   
   return(out)
 }
@@ -290,29 +301,32 @@ repartition.time_series <- function(x, set = NULL) {
 #' @param x A time_series object (see \code{\link[arkhaia]{time_series}}) with only one variate.
 #' @param t_  A vector giving samples range of \eqn{t} for computing \eqn{x(t)}. Default is from the minimum to maximum time index sampled at 0.01 intervals.
 #' @param n_iter The number of iterations to run. Default is 1.
+#' @param freqs A vector of frequencies to evaluate. By default a grid from 0.001 to 0.5 is tested at an interval of 0.005.
 #' @param intercept Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.
 #' @param label Default is \code{"model"}.
 #' @returns A data frame containing \eqn{t, x(t)}.
 #' 
 #' @export
-LSSA_LFI_model <- function(x, t_ = NULL, n_iter = 1, intercept = TRUE, label = "model") {
+LSSA_LFI_model <- function(x, t_ = NULL, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE, label = "model") {
     UseMethod("LSSA_LFI_model")
 }
 
 #' @rdname LSSA_LFI_model
 #' @export
-LSSA_LFI_model.time_series <- function(x, t_ = NULL, n_iter = 1, intercept = TRUE, label = "model") {  
+LSSA_LFI_model.time_series <- function(x, t_ = NULL, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE, label = "model") {  
   if (intercept == TRUE) {
     intrcpt <- 1
-  } else {
+  } else if (intercept == FALSE) {
     intrcpt <- 0
+  } else {
+    stop('intercept must be TRUE or FALSE')
   }
 
   if (is.null(t_)) {
     t_ <- seq(min(x[,1]), max(x[,1]), by = 0.01)
   }
 
-  Y <- LSSA_LFI_model_arma(as.matrix(x[,1:2]), t_, n_iter, intrcpt) 
+  Y <- LSSA_LFI_model_arma(as.matrix(x[,1:2]), t_, n_iter, freqs, intrcpt) 
 
   out <- data.frame(t = Y[,1], x = Y[,2], variate =  rep(label, length(t_)))
   colnames(out) <- colnames(x)
@@ -329,18 +343,19 @@ LSSA_LFI_model.time_series <- function(x, t_ = NULL, n_iter = 1, intercept = TRU
 #' @param x A time_series object (see \code{\link[arkhaia]{time_series}}) with at least three variates.
 #' @param pair The pair of series to evaluate in the \code{x}, given levels in \code{x$variate}.
 #' @param n_iter The number of iterations to run. Default is 1.
+#' @param freqs A vector of frequencies to evaluate. By default a grid from 0.001 to 0.5 is tested at an interval of 0.005.
 #' @param intercept Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.
 #'
 #' @returns The probability of linear dependence between two time series, in which 1 indicates linear dependence almost surely and 0 indicates independence.
 #' 
 #' @export
-LSSA_LFI_validated <- function(x, pair = NULL, n_iter = 1, intercept = TRUE) {
+LSSA_LFI_validated <- function(x, pair = NULL, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE) {
     UseMethod("LSSA_LFI_validated")
 }
 
 #' @rdname LSSA_LFI_validated
 #' @export
-LSSA_LFI_validated.time_series <- function(x, pair = NULL, n_iter = 1, intercept = TRUE) {
+LSSA_LFI_validated.time_series <- function(x, pair = NULL, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE) {
   if (nlevels(x$variate) < 3) {
     stop("must have at least three time series in x.")
   }
@@ -384,7 +399,7 @@ LSSA_LFI_validated.time_series <- function(x, pair = NULL, n_iter = 1, intercept
     y_rows <- table(y$variate)
     idx <- c(0, cumsum(y_rows)[1:2]) 
 
-    mod <- LSSA_LFI_candidates_arma(as.matrix(y[,1:2]), idx, y_rows, partition, n_iter, intrcpt) + 1 # add 1 for R indexing
+    mod <- LSSA_LFI_candidates_arma(as.matrix(y[,1:2]), idx, y_rows, partition, n_iter, freqs, intrcpt) + 1 # add 1 for R indexing
     if (mod %in% c(1,2)) {
       res[i] <- 1
     }
@@ -400,28 +415,30 @@ LSSA_LFI_validated.time_series <- function(x, pair = NULL, n_iter = 1, intercept
 #' 
 #' @param x A time_series object (see \code{\link[arkhaia]{time_series}}) with at least three variates.
 #' @param n_iter The number of iterations to run. Default is 1.
+#' @param freqs A vector of frequencies to evaluate. By default a grid from 0.001 to 0.5 is tested at an interval of 0.005.
 #' @param intercept Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.
 
 #' @returns An upper-triangular matrix, containing the probability of linear dependence between series.
 #' 
 #' @export
-LSSA_LFI_pairwise <- function(x, n_iter = 1, intercept = TRUE) {
+LSSA_LFI_pairwise <- function(x, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE) {
     UseMethod("LSSA_LFI_pairwise")
 }
 
 #' @rdname LSSA_LFI_pairwise
 #' @export
-LSSA_LFI_pairwise.time_series <- function(x, n_iter = 1, intercept = TRUE) {
+LSSA_LFI_pairwise.time_series <- function(x, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE) {
   n_factors <- nlevels(x$variate)
   if (n_factors < 3) {
     stop("need at least three variates to evaluate pairwise.")
   }
+
   lev <- levels(x$variate)
   mat <- matrix(NA, nrow = n_factors, ncol = n_factors)
   for (i in 1:(n_factors-1)) {
     for (j in (i+1):n_factors) {
       pair <- c(lev[i],lev[j])
-      mat[i,j] <- LSSA_LFI_validated(x, pair, n_iter = n_iter, intercept = intercept)
+      mat[i,j] <- LSSA_LFI_validated(x, pair, n_iter = n_iter, freqs = freqs, intercept = intercept)
     }
   }
   rownames(mat) <- levels(x$variate)
@@ -438,6 +455,7 @@ LSSA_LFI_pairwise.time_series <- function(x, n_iter = 1, intercept = TRUE) {
 #' @param x A list of data frames.
 #' @param pair The pair of commodities to evaluate in the list \code{x}, given as indices.
 #' @param n_iter The number of iterations to run. Default is 1.
+#' @param freqs A vector of frequencies to evaluate. By default a grid from 0.001 to 0.5 is tested at an interval of 0.005.
 #' @param intercept Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.
 #' @param t_range The range of the time period. Default are the minimum and maximum dates spanned by the data in \code{x}.
 #' @param h_range The range of the potential windows of \eqn{h}. Default is from 0 to entire span of \code{t_range}. 
@@ -446,21 +464,24 @@ LSSA_LFI_pairwise.time_series <- function(x, n_iter = 1, intercept = TRUE) {
 #' @returns A matrix giving the probability of linear dependence, predicated upon time \eqn{t} and window length \eqn{h}.
 #'
 #' @export
-LSSA_LFI_epoch <- function(x, pair = NULL, n_iter = 1, intercept = TRUE, t_range = NULL, h_range = NULL, t_grid = 1, h_grid = 1) {
+LSSA_LFI_epoch <- function(x, pair = NULL, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE, t_range = NULL, h_range = NULL, t_grid = 1, h_grid = 1) {
     UseMethod("LSSA_LFI_epoch")
 }
 
 #' @rdname LSSA_LFI_epoch
 #' @export
-LSSA_LFI_epoch.list <- function(x, pair = NULL, n_iter = 1, intercept = TRUE, t_range = NULL, h_range = NULL, t_grid = 1, h_grid = 1) {
+LSSA_LFI_epoch.list <- function(x, pair = NULL, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE, t_range = NULL, h_range = NULL, t_grid = 1, h_grid = 1) {
   if (is.null(pair)) {
     stop("must supply the pair of data frames in x to be evaluated.")
   }
   if (intercept == TRUE) {
     intrcpt <- 1
-  } else {
+  } else if (intercept == FALSE) {
     intrcpt <- 0
+  } else {
+    stop('intecept must be TRUE or FALSE')
   }
+
   all <- data.frame()
   for (i in 1:length(x)) {
     all <- rbind(all, x[[i]])
@@ -520,6 +541,7 @@ LSSA_LFI_epoch.list <- function(x, pair = NULL, n_iter = 1, intercept = TRUE, t_
 #' 
 #' @param x A time_series object (see \code{\link[arkhaia]{time_series}}).
 #' @param n_iter The number of iterations to run for the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is 1.
+#' @param freqs A vector of frequencies to evaluate. By default a grid from 0.001 to 0.5 is tested at an interval of 0.005.
 #' @param intercept Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.
 #' @param AIC If \code{TRUE}, only the result that has yeilded the lowest AIC is given \insertCite{akaike_information_1973}{arkhaia}. Default is \code{FALSE}.
 #' 
@@ -530,13 +552,13 @@ LSSA_LFI_epoch.list <- function(x, pair = NULL, n_iter = 1, intercept = TRUE, t_
 #'
 #' @importFrom Rdpack reprompt
 #' @export
-LSSA_LFI_multi <- function(x, n_iter = 1, intercept = TRUE, AIC = FALSE) {
+LSSA_LFI_multi <- function(x, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE, AIC = FALSE) {
     UseMethod("LSSA_LFI_multi")
 }
 
 #' @rdname LSSA_LFI_multi
 #' @export
-LSSA_LFI_multi.time_series <- function(x, n_iter = 1, intercept = TRUE, AIC = FALSE) {
+LSSA_LFI_multi.time_series <- function(x, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE, AIC = FALSE) {
   n <- nlevels(x$variate)
   x_rows <- table(x$variate)
   idx <- c(0, cumsum(x_rows)[1:(n-1)]) 
@@ -546,11 +568,13 @@ LSSA_LFI_multi.time_series <- function(x, n_iter = 1, intercept = TRUE, AIC = FA
 
   if (intercept == TRUE) {
     intrcpt <- 1
-  } else {
+  } else if (intercept == FALSE) {
     intrcpt <- 0
+  } else {
+    stop('intercept must be TRUE or FALSE')
   }
 
-  out <- LSSA_LFI_multi_arma(as.matrix(x[,1:2]), idx, x_rows, n_iter, intrcpt)
+  out <- LSSA_LFI_multi_arma(as.matrix(x[,1:2]), idx, x_rows, n_iter, freqs, intrcpt)
 
   out <- as.data.frame(out)
   colnames(out) <- c("n_iter", "rss", "aic")
@@ -568,21 +592,22 @@ LSSA_LFI_multi.time_series <- function(x, n_iter = 1, intercept = TRUE, AIC = FA
 
 #' Partitioned LSSA-LFI Model Terms and AIC: Composite Number of Parameters
 #'
-#' For multiple time series contained in a list, this function will compute the Akaike Information Criterion (AIC) for the best-fitting models particular to each series, including the case of an intercept-only model. This function can be performed after \code{\link[arkhaia]{LSSA_LFI_candidates}} and \code{\link[arkhaia]{repartition}} to determine the appropriate number of terms. For the situation where all time series must have the same number of terms, \code{\link[arkhaia]{LSSA_LFI_multi}} should be used, but this function should chosose a better fitting model, since it adjusts the number of parameters for each dataset.
+#' For multiple time series contained in a \code{\link[arkhaia]{time_series}} object, this function will compute the Akaike Information Criterion (AIC) for the best-fitting models particular to each series, including the case of an intercept-only model. This function can be performed after \code{\link[arkhaia]{LSSA_LFI_candidates}} and \code{\link[arkhaia]{repartition}} to determine the appropriate number of terms. For the situation where all time series must have the same number of terms, \code{\link[arkhaia]{LSSA_LFI_multi}} should be used, but this function should chosose a better fitting model, since it adjusts the number of parameters for each dataset.
 #' 
 #' @param x A time_series object (see \code{\link[arkhaia]{time_series}}).
+#' @param freqs A vector of frequencies to evaluate. By default a grid from 0.001 to 0.5 is tested at an interval of 0.005.
 #' @param intercept Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.
 #' 
 #' @returns A list giving the number of parameters (\code{k}) and residual sum of squares (\code{rss}) for each dataset in \code{x}, along with the AIC for the paritioned model. 
 #' 
 #' @export
-LSSA_LFI_comp <- function(x, intercept = TRUE) {
+LSSA_LFI_comp <- function(x, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE) {
     UseMethod("LSSA_LFI_comp")
 }
 
 #' @rdname LSSA_LFI_comp
 #' @export
-LSSA_LFI_comp.time_series <- function(x, intercept = TRUE) {  
+LSSA_LFI_comp.time_series <- function(x, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE) {  
   # n <- length(x)
   # y <- as.matrix(do.call(rbind, x))
   # nx <- nrow(y)
@@ -593,8 +618,10 @@ LSSA_LFI_comp.time_series <- function(x, intercept = TRUE) {
 
   if (intercept == TRUE) {
     intrcpt <- 1
-  } else {
+  } else if (intercept == FALSE) {
     intrcpt <- 0
+  } else {
+    stop('intercept must be TRUE or FALSE')
   }
 
   rss_i <- numeric(n)
@@ -876,7 +903,8 @@ time_series.numeric <- function(input = NULL, t = NULL, x = NULL, variate = NULL
   return(out)
 }
 
-# #' @export 
-# print.time_series <- function(...) {
-# }
+#' @export 
+plot.time_series <- function(x, ...) {
+  plot(x$t, x$x, ...)
+}
 

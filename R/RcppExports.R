@@ -15,14 +15,14 @@ LSSA_resid_arma <- function(dat, freq, intercept) {
 
 #' @useDynLib arkhaia
 #' @importFrom Rcpp sourceCpp
-LSSA_LFI_arma <- function(x, n_iter, intercept) {
-    .Call('_arkhaia_LSSA_LFI_arma', PACKAGE = 'arkhaia', x, n_iter, intercept)
+LSSA_LFI_arma <- function(x, n_iter, freq, intercept) {
+    .Call('_arkhaia_LSSA_LFI_arma', PACKAGE = 'arkhaia', x, n_iter, freq, intercept)
 }
 
 #' @useDynLib arkhaia
 #' @importFrom Rcpp sourceCpp
-LSSA_LFI_model_arma <- function(x, t_, n_iter, intercept) {
-    .Call('_arkhaia_LSSA_LFI_model_arma', PACKAGE = 'arkhaia', x, t_, n_iter, intercept)
+LSSA_LFI_model_arma <- function(x, t_, n_iter, freq, intercept) {
+    .Call('_arkhaia_LSSA_LFI_model_arma', PACKAGE = 'arkhaia', x, t_, n_iter, freq, intercept)
 }
 
 #' @useDynLib arkhaia
@@ -33,14 +33,14 @@ partition_list_to_matrix_arma <- function(x) {
 
 #' @useDynLib arkhaia
 #' @importFrom Rcpp sourceCpp
-LSSA_LFI_candidates_arma <- function(x, start_idx, x_rows, sets, n_iter, intercept) {
-    .Call('_arkhaia_LSSA_LFI_candidates_arma', PACKAGE = 'arkhaia', x, start_idx, x_rows, sets, n_iter, intercept)
+LSSA_LFI_candidates_arma <- function(x, start_idx, x_rows, sets, n_iter, freq, intercept) {
+    .Call('_arkhaia_LSSA_LFI_candidates_arma', PACKAGE = 'arkhaia', x, start_idx, x_rows, sets, n_iter, freq, intercept)
 }
 
 #' @useDynLib arkhaia
 #' @importFrom Rcpp sourceCpp
-LSSA_LFI_multi_arma <- function(x, start_idx, x_rows, n_iter, intercept) {
-    .Call('_arkhaia_LSSA_LFI_multi_arma', PACKAGE = 'arkhaia', x, start_idx, x_rows, n_iter, intercept)
+LSSA_LFI_multi_arma <- function(x, start_idx, x_rows, n_iter, freq, intercept) {
+    .Call('_arkhaia_LSSA_LFI_multi_arma', PACKAGE = 'arkhaia', x, start_idx, x_rows, n_iter, freq, intercept)
 }
 
 #' @useDynLib arkhaia

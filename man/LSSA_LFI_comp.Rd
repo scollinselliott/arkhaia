@@ -5,12 +5,14 @@
 \alias{LSSA_LFI_comp.time_series}
 \title{Partitioned LSSA-LFI Model Terms and AIC: Composite Number of Parameters}
 \usage{
-LSSA_LFI_comp(x, intercept = TRUE)
+LSSA_LFI_comp(x, freqs = seq(0.001, 0.5, by = 5e-04), intercept = TRUE)
 
-\method{LSSA_LFI_comp}{time_series}(x, intercept = TRUE)
+\method{LSSA_LFI_comp}{time_series}(x, freqs = seq(0.001, 0.5, by = 5e-04), intercept = TRUE)
 }
 \arguments{
 \item{x}{A time_series object (see \code{\link[arkhaia]{time_series}}).}
+
+\item{freqs}{A vector of frequencies to evaluate. By default a grid from 0.001 to 0.5 is tested at an interval of 0.005.}
 
 \item{intercept}{Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.}
 }
@@ -18,5 +20,5 @@ LSSA_LFI_comp(x, intercept = TRUE)
 A list giving the number of parameters (\code{k}) and residual sum of squares (\code{rss}) for each dataset in \code{x}, along with the AIC for the paritioned model.
 }
 \description{
-For multiple time series contained in a list, this function will compute the Akaike Information Criterion (AIC) for the best-fitting models particular to each series, including the case of an intercept-only model. This function can be performed after \code{\link[arkhaia]{LSSA_LFI_candidates}} and \code{\link[arkhaia]{repartition}} to determine the appropriate number of terms. For the situation where all time series must have the same number of terms, \code{\link[arkhaia]{LSSA_LFI_multi}} should be used, but this function should chosose a better fitting model, since it adjusts the number of parameters for each dataset.
+For multiple time series contained in a \code{\link[arkhaia]{time_series}} object, this function will compute the Akaike Information Criterion (AIC) for the best-fitting models particular to each series, including the case of an intercept-only model. This function can be performed after \code{\link[arkhaia]{LSSA_LFI_candidates}} and \code{\link[arkhaia]{repartition}} to determine the appropriate number of terms. For the situation where all time series must have the same number of terms, \code{\link[arkhaia]{LSSA_LFI_multi}} should be used, but this function should chosose a better fitting model, since it adjusts the number of parameters for each dataset.
 }
