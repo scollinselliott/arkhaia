@@ -10,7 +10,7 @@ trim_epoch(x, epoch = NULL)
 \method{trim_epoch}{time_series}(x, epoch = NULL)
 }
 \arguments{
-\item{x}{A time_series object (see \code{\link[arkhaia]{time_series}}).}
+\item{x}{A \code{\link[arkhaia]{time_series}} object.}
 
 \item{epoch}{A numeric vector given the start and end time indices of the epoch.}
 }

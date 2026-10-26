@@ -22,7 +22,7 @@ LSSA_LFI_dependence(
 )
 }
 \arguments{
-\item{x}{A time_series object (see \code{\link[arkhaia]{time_series}}) with more than one variate.}
+\item{x}{A \code{\link[arkhaia]{time_series}} object with more than one variate.}
 
 \item{sets}{Candidate partitions of variates to evaluate; must be a \code{list} of \code{lists} containing the indices of the levels  in \code{x$variate}. If left \code{NULL}, two sets are evaluated: all series pooled together \code{[1]} and all series kept separate \code{[2]}.}
 

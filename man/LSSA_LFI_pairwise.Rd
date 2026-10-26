@@ -20,7 +20,7 @@ LSSA_LFI_pairwise(
 )
 }
 \arguments{
-\item{x}{A time_series object (see \code{\link[arkhaia]{time_series}}) with at least three variates.}
+\item{x}{A \code{\link[arkhaia]{time_series}} object with at least three variates.}
 
 \item{n_iter}{The number of iterations to run. Default is 1.}
 

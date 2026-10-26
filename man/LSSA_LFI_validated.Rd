@@ -22,7 +22,7 @@ LSSA_LFI_validated(
 )
 }
 \arguments{
-\item{x}{A time_series object (see \code{\link[arkhaia]{time_series}}) with at least three variates.}
+\item{x}{A \code{\link[arkhaia]{time_series}} object with at least three variates.}
 
 \item{pair}{The pair of series to evaluate in the \code{x}, given levels in \code{x$variate}.}
 

@@ -22,7 +22,7 @@ LSSA_LFI_multi(
 )
 }
 \arguments{
-\item{x}{A time_series object (see \code{\link[arkhaia]{time_series}}).}
+\item{x}{A \code{\link[arkhaia]{time_series}} object.}
 
 \item{n_iter}{The number of iterations to run for the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is 1.}
 
