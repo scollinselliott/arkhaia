@@ -44,7 +44,7 @@ A list containing
 }
 }
 \description{
-For multiple time-indexed observations and a number of events, \eqn{r = 1, \ldots, n_r}, that occur at a given time index, this function performs a regression of the form \eqn{x(t) = \beta_0 + \sum_{r = 1}^{n_r} \gamma (t-t_r) I(t_r \geq t ) e^{-\lambda t} }, where \eqn{I(t_r \geq t )} is an indicator function equaling 1 if \eqn{t \geq t_r}. Estimation of \eqn{\gamma}, \eqn{\lambda}, and \eqn{\beta_0} is performed numerically on specified ranges of potential values. The intercept term is not used where cases where a zero intercept is expected (e.g., standardized observations).
+For multiple time-indexed observations and a number of events, \eqn{r = 1, \ldots, n_r}, that occur at a given time index, this function performs a regression of the form \eqn{x(t) = \beta_0 + \sum_{r = 1}^{n_r} \gamma (t-t_r) I(t_r \leq t ) e^{-\lambda t} }, where \eqn{I(t_r \geq t )} is an indicator function equaling 1 if \eqn{t \leq t_r}. Estimation of \eqn{\gamma}, \eqn{\lambda}, and \eqn{\beta_0} is performed numerically on specified ranges of potential values. The intercept term is not used where cases where a zero intercept is expected (e.g., standardized observations).
 }
 \examples{
 # generate example of positive trend (gamma = 2) 

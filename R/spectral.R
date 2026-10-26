@@ -637,7 +637,7 @@ LSSA_LFI_comp.time_series <- function(x, freqs = seq(0.001, 0.5, by = 0.0005), i
 
 #' Decaying Trend-after-Event Model
 #'
-#' For multiple time-indexed observations and a number of events, \eqn{r = 1, \ldots, n_r}, that occur at a given time index, this function performs a regression of the form \eqn{x(t) = \beta_0 + \sum_{r = 1}^{n_r} \gamma (t-t_r) I(t_r \geq t ) e^{-\lambda t} }, where \eqn{I(t_r \geq t )} is an indicator function equaling 1 if \eqn{t \geq t_r}. Estimation of \eqn{\gamma}, \eqn{\lambda}, and \eqn{\beta_0} is performed numerically on specified ranges of potential values. The intercept term is not used where cases where a zero intercept is expected (e.g., standardized observations).
+#' For multiple time-indexed observations and a number of events, \eqn{r = 1, \ldots, n_r}, that occur at a given time index, this function performs a regression of the form \eqn{x(t) = \beta_0 + \sum_{r = 1}^{n_r} \gamma (t-t_r) I(t_r \leq t ) e^{-\lambda t} }, where \eqn{I(t_r \geq t )} is an indicator function equaling 1 if \eqn{t \leq t_r}. Estimation of \eqn{\gamma}, \eqn{\lambda}, and \eqn{\beta_0} is performed numerically on specified ranges of potential values. The intercept term is not used where cases where a zero intercept is expected (e.g., standardized observations).
 #' 
 #' @param x A data frame of two columns, with the first column containing time indices and the second containing values.
 #' @param events A vector of the time indices of the events, \eqn{t_1, \ldots, t_{n_r}}.
