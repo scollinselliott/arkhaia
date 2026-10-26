@@ -24,7 +24,7 @@ LSSA_LFI(
 )
 }
 \arguments{
-\item{x}{A time_series object (see \code{\link[arkhaia]{time_series}}) with only one variate.}
+\item{x}{A \code{\link[arkhaia]{time_series}} object with only one variate.}
 
 \item{subset}{Whether to subset a multivariate time_series input to fit just one variate. Default is \code{NULL}.}
 
@@ -46,7 +46,7 @@ A list containing:
 }
 }
 \description{
-Performs a simple least squares fitting to time indexed data of the form  \eqn{x(t) = \beta_{0} + \sum_{i =1}^n \beta_{1i} \cos (2 \pi f t) + \beta_{2i} \sin(2 \pi f t)}, using an input of frequencies; the lowest frequency peak (not the highest power frequency) is chosen for regression, up to a chosen number of iterations. Intercept may be ommitted. The lowest frequency is equivalent to the longest period.
+Performs a simple least squares fitting to time indexed data of the form  \eqn{x(t) = \beta_{0} + \sum_{i =1}^n \beta_{1i} \cos (2 \pi f t) + \beta_{2i} \sin(2 \pi f t)}, using an input of frequencies (see \code{\link[arkhaia]{LSSA}}). In a lowest frequency iteration (LFI), the lowest frequency peak (not the highest powered frequency) is chosen for regression, up to a chosen number of iterations. Intercept may be ommitted. The lowest frequency is equivalent to the longest period.
 }
 \references{
 \insertAllCited{}

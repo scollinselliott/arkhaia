@@ -18,7 +18,7 @@ repartition(x, set = NULL)
 A \code{list} containing the data according to the partition structure described by \code{set}.
 }
 \description{
-Given multiple time series in a \code{\link[arkhaia]{time_series}} object (\code{x}), group the variates into a new set of variates, expressed as a list of the variate names (\code{set}). Returns a \code{time_series} object using the new partitioning of variates.
+Given multiple time series in a \code{\link[arkhaia]{time_series}} object, this function renames the variates according to new grouping, expressed as a list of the variate names in each group (\code{set}). Returns a \code{time_series} object using the new partitioning of variates.
 }
 \examples{
 idx <- runif(40, 0, 100)

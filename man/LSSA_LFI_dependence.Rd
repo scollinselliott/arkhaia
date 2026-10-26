@@ -24,7 +24,7 @@ LSSA_LFI_dependence(
 \arguments{
 \item{x}{A time_series object (see \code{\link[arkhaia]{time_series}}) with more than one variate.}
 
-\item{sets}{Candidate partitions of variates to evaluate; must be a \code{list} of \code{lists} containing the indices of the levels  in \code{x$variate}. If left \code{NULL}, two sets are evaluated: all series pooled together [1] and all series kept separate [2].}
+\item{sets}{Candidate partitions of variates to evaluate; must be a \code{list} of \code{lists} containing the indices of the levels  in \code{x$variate}. If left \code{NULL}, two sets are evaluated: all series pooled together \code{[1]} and all series kept separate \code{[2]}.}
 
 \item{n_iter}{The number of iterations to run for the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is 1.}
 
@@ -33,7 +33,7 @@ LSSA_LFI_dependence(
 \item{intercept}{Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.}
 }
 \value{
-The index of the set yielding the lowest AIC. If \code{sets} is \code{NULL}, the output of \code{[1]} indicates linear dependence; if the output is \code{[2]}, linear independence.
+The index of the set yielding the lowest AIC. If \code{sets} is \code{NULL}, the output of \code{[1]} indicates linear dependence among all time series is preferred; if the output is \code{[2]}, linear independence among all time series.
 }
 \description{
 For a \code{\link[arkhaia]{time_series}} with multiple variates, will compute the Akaike Information Criterion (AIC) for each candidate set \insertCite{akaike_information_1973}{arkhaia}, in order to determine whether some variates are dependent upon the same process.

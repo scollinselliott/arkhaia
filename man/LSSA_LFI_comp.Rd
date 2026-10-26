@@ -18,7 +18,14 @@ LSSA_LFI_comp(x, freqs = seq(0.001, 0.5, by = 5e-04), intercept = TRUE)
 }
 \value{
 A list giving the number of parameters (\code{k}) and residual sum of squares (\code{rss}) for each dataset in \code{x}, along with the AIC for the paritioned model.
+
+A list containing
+\itemize{
+ \item \code{k} The number of sets of parameters in each group.
+\item \code{rss} The residual sum of squares for each group.
+\item \code{aic} The AIC of the model.
+}
 }
 \description{
-For multiple time series contained in a \code{\link[arkhaia]{time_series}} object, this function will compute the Akaike Information Criterion (AIC) for the best-fitting models particular to each series, including the case of an intercept-only model. This function can be performed after \code{\link[arkhaia]{LSSA_LFI_dependence}} and \code{\link[arkhaia]{repartition}} to determine the appropriate number of terms. For the situation where all time series must have the same number of terms, \code{\link[arkhaia]{LSSA_LFI_multi}} should be used, but this function should chosose a better fitting model, since it adjusts the number of parameters for each dataset.
+For multiple time series contained in a \code{\link[arkhaia]{time_series}} object, this function yields the optimal number of terms in a LSSA-LFI model according to the Akaike Information Criterion (AIC), with the number of terms in each variate (group) free to vary, including the case of an intercept-only model. This function can be performed after \code{\link[arkhaia]{LSSA_LFI_dependence}} has determined the optimal partition into which to group linearly dependent series and likewise \code{\link[arkhaia]{repartition}} has been run to regroup dependent series together. For the situation where all time series must have the same number of terms, \code{\link[arkhaia]{LSSA_LFI_multi}} should be used, but this function can elicit a better fitting model, since it allows for a differing number of parameters for each variate.
 }

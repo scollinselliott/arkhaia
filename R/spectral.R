@@ -2,7 +2,7 @@
 #'
 #' Performs a simple least squares fitting to time indexed data of the form \eqn{x(t) = \beta_{0} + \sum_{i =1}^n \beta_{1i} \cos (2 \pi f t) + \beta_{2i} \sin(2 \pi f t)}, using a range of potential frequencies \insertCite{vanicek_approximate_1969,vanicek_further_1971}{arkhaia}. Intercept may be ommitted. 
 #' 
-#' @param x A time_series object (see \code{\link[arkhaia]{time_series}}) with only one variate.
+#' @param x A \code{\link[arkhaia]{time_series}} object.
 #' @param freqs A vector of frequencies to evaluate. By default a grid from 0.001 to 0.5 is tested at an interval of 0.005.
 #' @param intercept Whether to include the intercept. Default is \code{TRUE}.
 #' @param type Type of output. Can be either \code{"frequency"} (the default) or \code{"period"}.
@@ -55,9 +55,9 @@ LSSA.time_series <- function(x, freqs = seq(0.001, 0.5, by = 0.0005), intercept 
 
 #' Least Squares Spectral Analysis via Lowest Frequency Iteration (LSSA-LFI)
 #'
-#' Performs a simple least squares fitting to time indexed data of the form  \eqn{x(t) = \beta_{0} + \sum_{i =1}^n \beta_{1i} \cos (2 \pi f t) + \beta_{2i} \sin(2 \pi f t)}, using an input of frequencies; the lowest frequency peak (not the highest power frequency) is chosen for regression, up to a chosen number of iterations. Intercept may be ommitted. The lowest frequency is equivalent to the longest period.
+#' Performs a simple least squares fitting to time indexed data of the form  \eqn{x(t) = \beta_{0} + \sum_{i =1}^n \beta_{1i} \cos (2 \pi f t) + \beta_{2i} \sin(2 \pi f t)}, using an input of frequencies (see \code{\link[arkhaia]{LSSA}}). In a lowest frequency iteration (LFI), the lowest frequency peak (not the highest powered frequency) is chosen for regression, up to a chosen number of iterations. Intercept may be ommitted. The lowest frequency is equivalent to the longest period.
 #' 
-#' @param x A time_series object (see \code{\link[arkhaia]{time_series}}) with only one variate.
+#' @param x A \code{\link[arkhaia]{time_series}} object with only one variate.
 #' @param subset Whether to subset a multivariate time_series input to fit just one variate. Default is \code{NULL}.
 #' @param n_iter The number of iterations to run. Default is 1.
 #' @param freqs A vector of frequencies to evaluate. By default a grid from 0.001 to 0.5 is tested at an interval of 0.005.
@@ -124,11 +124,11 @@ LSSA_LFI.time_series <- function(x, subset = NULL, n_iter = 1, freqs = seq(0.001
 #' For a \code{\link[arkhaia]{time_series}} with multiple variates, will compute the Akaike Information Criterion (AIC) for each candidate set \insertCite{akaike_information_1973}{arkhaia}, in order to determine whether some variates are dependent upon the same process.
 #' 
 #' @param x A time_series object (see \code{\link[arkhaia]{time_series}}) with more than one variate.
-#' @param sets Candidate partitions of variates to evaluate; must be a \code{list} of \code{lists} containing the indices of the levels  in \code{x$variate}. If left \code{NULL}, two sets are evaluated: all series pooled together [1] and all series kept separate [2].
+#' @param sets Candidate partitions of variates to evaluate; must be a \code{list} of \code{lists} containing the indices of the levels  in \code{x$variate}. If left \code{NULL}, two sets are evaluated: all series pooled together \code{[1]} and all series kept separate \code{[2]}.
 #' @param n_iter The number of iterations to run for the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is 1.
 #' @param freqs A vector of frequencies to evaluate. By default a grid from 0.001 to 0.5 is tested at an interval of 0.005.
 #' @param intercept Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.
-#' @returns The index of the set yielding the lowest AIC. If \code{sets} is \code{NULL}, the output of \code{[1]} indicates linear dependence; if the output is \code{[2]}, linear independence.
+#' @returns The index of the set yielding the lowest AIC. If \code{sets} is \code{NULL}, the output of \code{[1]} indicates linear dependence among all time series is preferred; if the output is \code{[2]}, linear independence among all time series.
 #'  
 #' @references
 #'   \insertAllCited{}
@@ -218,7 +218,7 @@ trim_epoch.time_series <- function(x, epoch = NULL) {
 
 #' Repartition (Regroup) Variates
 #'
-#' Given multiple time series in a \code{\link[arkhaia]{time_series}} object (\code{x}), group the variates into a new set of variates, expressed as a list of the variate names (\code{set}). Returns a \code{time_series} object using the new partitioning of variates.
+#' Given multiple time series in a \code{\link[arkhaia]{time_series}} object, this function renames the variates according to new grouping, expressed as a list of the variate names in each group (\code{set}). Returns a \code{time_series} object using the new partitioning of variates.
 #' 
 #' @param x A \code{time_series} object containing multiple  time series, each of which should be a matrix or data frame with time index in the first column and value in the second.
 #' @param set A \code{list} of vectors containing the names of variates in each of the new groups.
@@ -536,8 +536,6 @@ LSSA_LFI_epoch.list <- function(x, pair = NULL, n_iter = 1, freqs = seq(0.001, 0
 
 
 
-
-
 #' Partitioned LSSA-LFI Model Terms and AIC
 #'
 #' For multiple time series contained in a \code{\link[arkhaia]{time_series}} object, this function will compute the Akaike Information Criterion (AIC) as the number of terms (\code{n_iter}) is increased. This function can be performed after \code{\link[arkhaia]{LSSA_LFI_dependence}} and \code{\link[arkhaia]{repartition}} to determine the appropriate number of terms.
@@ -595,13 +593,19 @@ LSSA_LFI_multi.time_series <- function(x, n_iter = 1, freqs = seq(0.001, 0.5, by
 
 #' Partitioned LSSA-LFI Model Terms and AIC: Composite Number of Parameters
 #'
-#' For multiple time series contained in a \code{\link[arkhaia]{time_series}} object, this function will compute the Akaike Information Criterion (AIC) for the best-fitting models particular to each series, including the case of an intercept-only model. This function can be performed after \code{\link[arkhaia]{LSSA_LFI_dependence}} and \code{\link[arkhaia]{repartition}} to determine the appropriate number of terms. For the situation where all time series must have the same number of terms, \code{\link[arkhaia]{LSSA_LFI_multi}} should be used, but this function should chosose a better fitting model, since it adjusts the number of parameters for each dataset.
+#' For multiple time series contained in a \code{\link[arkhaia]{time_series}} object, this function yields the optimal number of terms in a LSSA-LFI model according to the Akaike Information Criterion (AIC), with the number of terms in each variate (group) free to vary, including the case of an intercept-only model. This function can be performed after \code{\link[arkhaia]{LSSA_LFI_dependence}} has determined the optimal partition into which to group linearly dependent series and likewise \code{\link[arkhaia]{repartition}} has been run to regroup dependent series together. For the situation where all time series must have the same number of terms, \code{\link[arkhaia]{LSSA_LFI_multi}} should be used, but this function can elicit a better fitting model, since it allows for a differing number of parameters for each variate.
 #' 
 #' @param x A time_series object (see \code{\link[arkhaia]{time_series}}).
 #' @param freqs A vector of frequencies to evaluate. By default a grid from 0.001 to 0.5 is tested at an interval of 0.005.
 #' @param intercept Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.
 #' 
 #' @returns A list giving the number of parameters (\code{k}) and residual sum of squares (\code{rss}) for each dataset in \code{x}, along with the AIC for the paritioned model. 
+#' @returns A list containing
+#' \itemize{
+#'  \item \code{k} The number of sets of parameters in each group.
+#' \item \code{rss} The residual sum of squares for each group.
+#' \item \code{aic} The AIC of the model.
+#' }
 #' 
 #' @export
 LSSA_LFI_comp <- function(x, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE) {
@@ -787,12 +791,12 @@ print.dtem <- function(x, ...) {
 
 #' Create a Time Series Object
 #'
-#' Creates an object of class \code{time_series} from a matrix or data frame, or by giving a filename for a \code{csv} file in the working directory. The first column contains time indices (\code{t}), the second the value of observations (\code{x}), both of which must be numeric, and the third contains a label as a factor column (\code{variate}). Multiple time series are contained in the same \code{time_series} object, distinguished by different labels.
+#' Creates an object of class \code{time_series}. Input may be given as a matrix or data frame, by giving a filename for a \code{csv} file in the working directory, or directly from numeric vectors. The output consists of a \code{data.frame} of class \code{time_series}, in which the first column contains time indices (\code{t}), the second the value of observations (\code{x}), and the third contains a label as a factor column (\code{variate}). Multiple time series may be contained in the same \code{time_series} object, distinguished by different labels in the \code{variate} column.
 #' 
-#' @param input A matrix, data frame, or a filename given as character.
-#' @param t If used, ignores ime indices of the observations; requires also input  \code{x}
-#' @param x The values of the 
-#' @param variate The label of the variate if 
+#' @param input A matrix or data frame; or a filename given as character.
+#' @param t A numeric vector of time indices; if used, also requires also input \code{x}.
+#' @param x A numeric vector of values observed at time indices in \code{t}. 
+#' @param variate The label of the variate. If none is given, default is \code{"x"}.
 #' @param log Whether to take the logarithm of observations for \code{x} (default is \code{FALSE}).
 #' @param inverse Whether to use the inverse of observations (default is \code{FALSE}). If both \code{log} and \code{inverse} are true, the log inverse (\eqn{\log(1/x)}) is used.
 #' @param standard Whether to standardize the observations, using \eqn{z = (x -\bar{x})/s}, grouped by variate (default is \code{FALSE}). This operation is performed after \code{log} and/or \code{inverse}.

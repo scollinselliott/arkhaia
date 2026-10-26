@@ -20,7 +20,7 @@ LSSA(
 )
 }
 \arguments{
-\item{x}{A time_series object (see \code{\link[arkhaia]{time_series}}) with only one variate.}
+\item{x}{A \code{\link[arkhaia]{time_series}} object.}
 
 \item{freqs}{A vector of frequencies to evaluate. By default a grid from 0.001 to 0.5 is tested at an interval of 0.005.}
 

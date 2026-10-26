@@ -64,13 +64,13 @@ time_series(
 )
 }
 \arguments{
-\item{input}{A matrix, data frame, or a filename given as character.}
+\item{input}{A matrix or data frame; or a filename given as character.}
 
-\item{t}{If used, ignores ime indices of the observations; requires also input  \code{x}}
+\item{t}{A numeric vector of time indices; if used, also requires also input \code{x}.}
 
-\item{x}{The values of the}
+\item{x}{A numeric vector of values observed at time indices in \code{t}.}
 
-\item{variate}{The label of the variate if}
+\item{variate}{The label of the variate. If none is given, default is \code{"x"}.}
 
 \item{log}{Whether to take the logarithm of observations for \code{x} (default is \code{FALSE}).}
 
@@ -88,7 +88,7 @@ time_series(
 A time_series object.
 }
 \description{
-Creates an object of class \code{time_series} from a matrix or data frame, or by giving a filename for a \code{csv} file in the working directory. The first column contains time indices (\code{t}), the second the value of observations (\code{x}), both of which must be numeric, and the third contains a label as a factor column (\code{variate}). Multiple time series are contained in the same \code{time_series} object, distinguished by different labels.
+Creates an object of class \code{time_series}. Input may be given as a matrix or data frame, by giving a filename for a \code{csv} file in the working directory, or directly from numeric vectors. The output consists of a \code{data.frame} of class \code{time_series}, in which the first column contains time indices (\code{t}), the second the value of observations (\code{x}), and the third contains a label as a factor column (\code{variate}). Multiple time series may be contained in the same \code{time_series} object, distinguished by different labels in the \code{variate} column.
 }
 \examples{
 idx <- runif(100,0,100)
