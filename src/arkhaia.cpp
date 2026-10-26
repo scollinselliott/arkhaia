@@ -208,7 +208,7 @@ arma::mat LSSA_LFI_arma(const arma::mat & x, int n_iter, const arma::colvec & fr
                 break;
             }
 
-            idx = 999;
+            idx = nfreq;
             for (int i = 1; i < n_pow; i++) {
                 if (diff[i-1] < 0) {
                     if (i-1 < idx) {
@@ -217,6 +217,10 @@ arma::mat LSSA_LFI_arma(const arma::mat & x, int n_iter, const arma::colvec & fr
                         } 
                     }
                 }
+            }
+
+            if (idx == nfreq) {
+                Rcpp::stop("no lowest peak in frequencies detected in successive iterations. Increase upper threshold of freqs, or decrease n_iter");
             }
 
             freq1 = freq[idx];

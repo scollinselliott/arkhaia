@@ -2,7 +2,7 @@
 % Please edit documentation in R/spectral.R
 \name{LSSA_LFI_epoch}
 \alias{LSSA_LFI_epoch}
-\alias{LSSA_LFI_epoch.list}
+\alias{LSSA_LFI_epoch.time_series}
 \title{Period-Variable Pairwise Selection of Linearly Dependent LSSA-LFI Models}
 \usage{
 LSSA_LFI_epoch(
@@ -17,7 +17,7 @@ LSSA_LFI_epoch(
   h_grid = 1
 )
 
-\method{LSSA_LFI_epoch}{list}(
+\method{LSSA_LFI_epoch}{time_series}(
   x,
   pair = NULL,
   n_iter = 1,
@@ -30,9 +30,9 @@ LSSA_LFI_epoch(
 )
 }
 \arguments{
-\item{x}{A list of data frames.}
+\item{x}{A \code{\link[arkhaia]{time_series}} object with at least three variates.}
 
-\item{pair}{The pair of commodities to evaluate in the list \code{x}, given as indices.}
+\item{pair}{The pair of series to evaluate in the \code{x}, given levels in \code{x$variate}.}
 
 \item{n_iter}{The number of iterations to run. Default is 1.}
 
@@ -52,5 +52,5 @@ LSSA_LFI_epoch(
 A matrix giving the probability of linear dependence, predicated upon time \eqn{t} and window length \eqn{h}.
 }
 \description{
-Evaluate pairwise linear dependence between two time series using a LSSA-LFI valdiated model selection (see \code{\link[arkhaia]{LSSA_LFI_validated}})), with variable length time period.
+Evaluate pairwise linear dependence between two time series using a LSSA-LFI valdiated model selection (see \code{\link[arkhaia]{LSSA_LFI_validated}}), with variable length time period.
 }

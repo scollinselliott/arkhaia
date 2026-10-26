@@ -177,6 +177,8 @@ LSSA_LFI_dependence.time_series <- function(x, sets = NULL, n_iter = 1, freqs = 
     stop('intercept must be TRUE or FALSE')
   )
 
+  message(paste0("Total number of models to evaluate:", length(sets)*n_iter, "\n"))
+
   # add 1 for R indexing
   out <- LSSA_LFI_dependence_arma(as.matrix(x[,1:2]), idx, x_rows, sets0, n_iter, freqs, intrcpt) + 1
   
@@ -311,7 +313,7 @@ LSSA_LFI_model.time_series <- function(x, t_ = NULL, n_iter = 1, freqs = seq(0.0
 
 #' Validated Linear Dependence via LSSA-LFI
 #'
-#' Probability of linear dependence between two groups of time series observations using a LSSA-LFI model selection (see \code{\link[arkhaia]{LSSA_LFI_dependence}}), on the basis of the inclusion of a third "attendant" variate. The third attendant variate is selected from the remaining time series in the list, hence the input list must include at least three times series.
+#' Probability of linear dependence between two groups of time series observations using a LSSA-LFI model selection (see \code{\link[arkhaia]{LSSA_LFI_dependence}}), on the basis of the inclusion of a third "attendant" variate. The pair of series to be evaluated must be given, with the third attendant variate is selected from all remaining variates in the time series. The input must include at least three times series.
 #' 
 #' @param x A \code{\link[arkhaia]{time_series}} object with at least three variates.
 #' @param pair The pair of series to evaluate in the \code{x}, given levels in \code{x$variate}.
@@ -319,7 +321,7 @@ LSSA_LFI_model.time_series <- function(x, t_ = NULL, n_iter = 1, freqs = seq(0.0
 #' @param freqs A vector of frequencies to evaluate. By default a grid from 0.001 to 0.5 is tested at an interval of 0.005.
 #' @param intercept Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.
 #'
-#' @returns The probability of linear dependence between two time series, in which 1 indicates linear dependence almost surely and 0 indicates independence.
+#' @returns The probability of linear dependence between two time series, in which 1 indicates certainty in linear dependence and 0 indicates independence.
 #' 
 #' @export
 LSSA_LFI_validated <- function(x, pair = NULL, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE) {
@@ -424,10 +426,10 @@ LSSA_LFI_pairwise.time_series <- function(x, n_iter = 1, freqs = seq(0.001, 0.5,
 
 #' Period-Variable Pairwise Selection of Linearly Dependent LSSA-LFI Models
 #'
-#' Evaluate pairwise linear dependence between two time series using a LSSA-LFI valdiated model selection (see \code{\link[arkhaia]{LSSA_LFI_validated}})), with variable length time period. 
+#' Evaluate pairwise linear dependence between two time series using a LSSA-LFI valdiated model selection (see \code{\link[arkhaia]{LSSA_LFI_validated}}), with variable length time period. 
 #' 
-#' @param x A list of data frames.
-#' @param pair The pair of commodities to evaluate in the list \code{x}, given as indices.
+#' @param x A \code{\link[arkhaia]{time_series}} object with at least three variates.
+#' @param pair The pair of series to evaluate in the \code{x}, given levels in \code{x$variate}.
 #' @param n_iter The number of iterations to run. Default is 1.
 #' @param freqs A vector of frequencies to evaluate. By default a grid from 0.001 to 0.5 is tested at an interval of 0.005.
 #' @param intercept Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.
@@ -444,7 +446,7 @@ LSSA_LFI_epoch <- function(x, pair = NULL, n_iter = 1, freqs = seq(0.001, 0.5, b
 
 #' @rdname LSSA_LFI_epoch
 #' @export
-LSSA_LFI_epoch.list <- function(x, pair = NULL, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE, t_range = NULL, h_range = NULL, t_grid = 1, h_grid = 1) {
+LSSA_LFI_epoch.time_series <- function(x, pair = NULL, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE, t_range = NULL, h_range = NULL, t_grid = 1, h_grid = 1) {
   if (is.null(pair)) {
     stop("must supply the pair of data frames in x to be evaluated.")
   }
@@ -480,19 +482,19 @@ LSSA_LFI_epoch.list <- function(x, pair = NULL, n_iter = 1, freqs = seq(0.001, 0
         tmp <- list()
         do_lssa <- TRUE
         n_obs_ <- c()
-        for (i in 1:length(x)) {
-          trimmed <- trim_epoch(x[[i]], epoch = c(t_[ti], t_[ti] + h_[hi]))
-          n_obs <- nrow(trimmed)
-          n_obs_ <- c(n_obs_, n_obs)
-          if (n_obs < 4) {
-            do_lssa <- FALSE
-          }
-          tmp[[i]] <- trimmed
-        } 
+
+        trimmed <- trim_epoch(x, epoch = c(t_[ti], t_[ti] + h_[hi]))
+        n_obs_ <- table(x$variate)
+
+        if (TRUE %in% (n_obs_ < 4)) {
+          do_lssa <- FALSE
+        }
+        tmp <- trimmed
+        
         if (do_lssa == TRUE) {
           n_iter_ <- min(c(n_obs_, n_iter))
 
-          out[(length(h_) - hi)+1,ti] <- LSSA_LFI_validated(tmp, pair, n_iter_, intrcpt)
+          out[(length(h_) - hi)+1,ti] <- LSSA_LFI_validated(tmp, pair, n_iter_, freqs, intrcpt)
         }
       }
     }
@@ -504,6 +506,8 @@ LSSA_LFI_epoch.list <- function(x, pair = NULL, n_iter = 1, freqs = seq(0.001, 0
   return(out)
 
 }
+
+
 
 
 

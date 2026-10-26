@@ -77,7 +77,7 @@ In cases where the frequency $f_i = \omega_i / 2 \pi$ is unknown, the method dev
 
 ```{r, fig.width = 5, fig.height = 4, fig.align = "center"}
 Z2_lssa <- LSSA(Z2, freqs = seq(0.005, 1.0, by = 0.005))
-plot(power ~ freq, Z2_lssa, type = "l")
+plot(power ~ freqs, Z2_lssa, type = "l")
 ```
 
 Typically, the frequency with the highest peak would be chosen, as it would result in the best model fit, and then one could regress another set of terms on the residuals, and choose the highest frequency, and so on. 
@@ -143,13 +143,13 @@ lines(z ~ t, data = mod1_fit, type = "l", col = "black")
 
 The goal then is to check if a model which pools the observations of $z_1(t)$ and $z_2(t)$ together fits better when described by one set of parameters, rather than two sets of parameters. If the datasets are independent, a model where their parameters are free to vary from one another should fit better.
 
-This task is performed with the `LSSA_LFI_candidates()` function, which takes a list of data frames, a number of iterations, and whether to include an intercept. While the number of terms for each dataset were 2, it is possible that a moderl with more terms fits the pooled data better, and so it will be set to 100 to evaluate all options up to that iteration. The intercept will again be set to `FALSE`. It also includes a `sets` argument, in which one specifies a `list` of partitions of the data to evaluate. If no partition is given, by default the function evaluates two situations: one in which the all datasets are independent, and one in which all are dependent. For just two datasets, this consists of two situations. But, as the number of datasets increase, the number of possible partitions incease exponentially as they are dependent upon Bell's number (e.g., for six datasets, the total number of partitions comes to 203).
+This task is performed with the `LSSA_LFI_dependence()` function, which takes a list of data frames, a number of iterations, and whether to include an intercept. While the number of terms for each dataset were 2, it is possible that a moderl with more terms fits the pooled data better, and so it will be set to 100 to evaluate all options up to that iteration. The intercept will again be set to `FALSE`. It also includes a `sets` argument, in which one specifies a `list` of partitions of the data to evaluate. If no partition is given, by default the function evaluates two situations: one in which the all datasets are independent, and one in which all are dependent. For just two datasets, this consists of two situations. But, as the number of datasets increase, the number of possible partitions incease exponentially as they are dependent upon Bell's number (e.g., for six datasets, the total number of partitions comes to 203).
 
-For `sets = NULL`, the `LSSA_LFI_candidates()` function returns one of two potential outcomes. The first is `[1]`, which is the set of all datasets pooled together, indicating that linear dependence is a better fit. The second is `[2]`, indicating that independence is a better fit.
+For `sets = NULL`, the `LSSA_LFI_dependence()` function returns one of two potential outcomes. The first is `[1]`, which is the set of all datasets pooled together, indicating that linear dependence is a better fit. The second is `[2]`, indicating that independence is a better fit.
 
 ```{r}
 Z12 <- rbind(Z1, Z2)
-mod_cand <- LSSA_LFI_candidates(Z12, n_iter = 100, intercept = FALSE)
+mod_cand <- LSSA_LFI_dependence(Z12, n_iter = 100, intercept = FALSE)
 mod_cand
 ```
 
@@ -157,7 +157,7 @@ The result of `[1]` indicates that there exists a linear dependence for the two 
 
 ```{r}
 Z13 <- rbind(Z1, Z3)
-mod_cand <- LSSA_LFI_candidates(Z13, n_iter = 100, intercept = FALSE)
+mod_cand <- LSSA_LFI_dependence(Z13, n_iter = 100, intercept = FALSE)
 mod_cand
 ```
 

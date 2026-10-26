@@ -33,8 +33,8 @@ LSSA_LFI_validated(
 \item{intercept}{Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.}
 }
 \value{
-The probability of linear dependence between two time series, in which 1 indicates linear dependence almost surely and 0 indicates independence.
+The probability of linear dependence between two time series, in which 1 indicates certainty in linear dependence and 0 indicates independence.
 }
 \description{
-Probability of linear dependence between two groups of time series observations using a LSSA-LFI model selection (see \code{\link[arkhaia]{LSSA_LFI_dependence}}), on the basis of the inclusion of a third "attendant" variate. The third attendant variate is selected from the remaining time series in the list, hence the input list must include at least three times series.
+Probability of linear dependence between two groups of time series observations using a LSSA-LFI model selection (see \code{\link[arkhaia]{LSSA_LFI_dependence}}), on the basis of the inclusion of a third "attendant" variate. The pair of series to be evaluated must be given, with the third attendant variate is selected from all remaining variates in the time series. The input must include at least three times series.
 }
