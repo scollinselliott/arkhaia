@@ -27,8 +27,8 @@ test_that("LSSA detects frequency", {
 })
 
 test_that("Correct candidate model selected", {
-  res1 <- LSSA_LFI_candidates(Y1, n_iter = 50)
-  res2 <- LSSA_LFI_candidates(Y2, n_iter = 50)
+  res1 <- LSSA_LFI_dependence(Y1, n_iter = 50)
+  res2 <- LSSA_LFI_dependence(Y2, n_iter = 50)
   expect_equal(res1, 1)
   expect_equal(res2, 2)
 })
