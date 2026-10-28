@@ -318,18 +318,18 @@ LSSA_LFI_model.time_series <- function(x, t_ = NULL, n_iter = 1, freqs = seq(0.0
 #' @param n_iter The number of iterations to run. Default is 1.
 #' @param freqs A vector of frequencies to evaluate. By default a grid from 0.001 to 0.5 is tested at an interval of 0.005.
 #' @param intercept Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.
-#' @param prob The form of probability used in the output. Default is \code{"binomial"}, returning a probability of \eqn{k/(n-2)}, where \eqn{k} are the number of times the pair is validated as dependent, and \eqn{n} is the total number of variates in the input. If \code{"jeffreys"} is used, the Jeffreys prior is used in a Beta distribution, returning \eqn{\alpha = k + 0.5, \beta = n - k - 1.5}, with a probability of \eqn{\alpha/(\alpha + \beta)}.
+#' @param prob The form of probability used in the output. Default is \code{"haldane"}, returning a probability of \eqn{k/(n-2)}, where \eqn{k} are the number of times the pair is validated as dependent, and \eqn{n} is the total number of variates in the input. If \code{"jeffreys"} is used, the Jeffreys prior is used in a Beta distribution, returning \eqn{\alpha = k + 0.5, \beta = n - k - 1.5}, with a probability of \eqn{\alpha/(\alpha + \beta)}.
 #'
 #' @returns The probability of linear dependence between two time series, in which 1 indicates certainty in linear dependence and 0 indicates independence.
 #' 
 #' @export
-LSSA_LFI_validated <- function(x, pair = NULL, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE, prob = "binomial") {
+LSSA_LFI_validated <- function(x, pair = NULL, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE, prob = "haldane") {
     UseMethod("LSSA_LFI_validated")
 }
 
 #' @rdname LSSA_LFI_validated
 #' @export
-LSSA_LFI_validated.time_series <- function(x, pair = NULL, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE, prob = "binomial") {
+LSSA_LFI_validated.time_series <- function(x, pair = NULL, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE, prob = "haldane") {
   if (nlevels(x$variate) < 3) {
     stop("must have at least three time series in x.")
   }
@@ -384,12 +384,12 @@ LSSA_LFI_validated.time_series <- function(x, pair = NULL, n_iter = 1, freqs = s
     beta <- length(attend) - alpha + 0.5
     coefs <- c(alpha, beta)
     names(coefs) <- c("alpha", "beta")
-    out <- list(prob = alpha/(alpha + beta), coefs = coefs)
-  } else if (pron == "binomial") {
+    out <- list(mean = alpha/(alpha + beta), coefs = coefs)
+  } else if (pron == "haldane") {
     k <- sum(res)
     coefs <- c(k, length(attend))
     names(coefs) <- c("k", "n")
-    out <- list(prob = k/length(attend), coefs = coefs)
+    out <- list(mean = k/length(attend), coefs = coefs)
   }
   return(out)
 }
@@ -404,34 +404,44 @@ LSSA_LFI_validated.time_series <- function(x, pair = NULL, n_iter = 1, freqs = s
 #' @param n_iter The number of iterations to run. Default is 1.
 #' @param freqs A vector of frequencies to evaluate. By default a grid from 0.001 to 0.5 is tested at an interval of 0.005.
 #' @param intercept Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.
-#' @param prob The form of probability used in the output. Default is \code{"binomial"}, returning a probability of \eqn{k/(n-2)}, where \eqn{k} are the number of times the pair is validated as dependent, and \eqn{n} is the total number of variates in the input. If \code{"jeffreys"} is used, the Jeffreys prior is used in a Beta distribution, returning \eqn{\alpha = k + 0.5, \beta = n - k - 1.5}, with a probability of \eqn{\alpha/(\alpha + \beta)}.
+#' @param prob The form of probability used in the output. Default is \code{"haldane"}, returning a probability of \eqn{k/(n-2)}, where \eqn{k} are the number of times the pair is validated as dependent, and \eqn{n} is the total number of variates in the input. If \code{"jeffreys"} is used, the Jeffreys prior is used in a Beta distribution, returning \eqn{\alpha = k + 0.5, \beta = n - k - 1.5}, with a probability of \eqn{\alpha/(\alpha + \beta)}.
 #' @returns An upper-triangular matrix, containing the probability of linear dependence between series.
 #' 
 #' @export
-LSSA_LFI_pairwise <- function(x, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE, prob = "binomial") {
+LSSA_LFI_pairwise <- function(x, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE, prob = "haldane") {
     UseMethod("LSSA_LFI_pairwise")
 }
 
 #' @rdname LSSA_LFI_pairwise
 #' @export
-LSSA_LFI_pairwise.time_series <- function(x, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE, prob = "binomial") {
+LSSA_LFI_pairwise.time_series <- function(x, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE, prob = "haldane") {
   n_factors <- nlevels(x$variate)
   if (n_factors < 3) {
     stop("need at least three variates to evaluate pairwise.")
   }
 
   lev <- levels(x$variate)
-  mat <- matrix(NA, nrow = n_factors, ncol = n_factors)
+  mat_k <- matrix(NA, nrow = n_factors, ncol = n_factors)
   for (i in 1:(n_factors-1)) {
     for (j in (i+1):n_factors) {
       pair <- c(lev[i],lev[j])
-      out <- LSSA_LFI_validated(x, pair, n_iter = n_iter, freqs = freqs, intercept = intercept, prob = prob)
-      mat[i,j] <- out$prob
+      out <- LSSA_LFI_validated(x, pair, n_iter = n_iter, freqs = freqs, intercept = intercept, prob = "haldane")
+      mat_k[i,j] <- out$coefs$alpha
     }
   }
-  rownames(mat) <- levels(x$variate)
-  colnames(mat) <- levels(x$variate)
-  return(mat)
+  if (prob == "haldane") {
+    mat <- mat_k / (n_factors-2)
+    rownames(mat) <- levels(x$variate)
+    colnames(mat) <- levels(x$variate)
+    out <- list(mean = mat)
+  } else if (prob == "jeffreys") {
+    mat_alpha <- mat_k + 0.5
+    mat_beta <- n_factors - mat_k - 1.5
+    mat <- mat_alpha / (mat_alpha + mat_beta)
+    coefs <- list(alpha = mat_alpha, beta = mat_beta)
+    out <- list(mean = mat, coefs = coefs)
+  }
+  return(out)
 }
 
 
