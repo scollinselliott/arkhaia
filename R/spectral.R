@@ -345,6 +345,9 @@ LSSA_LFI_validated.time_series <- function(x, pair = NULL, n_iter = 1, freqs = s
   if (NA %in% match(pair, levels(x$variate))) {
     stop("pair element not in variate")
   }
+  if (!(prob %in% c("haldane", "jeffreys"))) {
+    stop('prob must be "haldane" or "jeffreys"')
+  }
 
   base <- x[x$variate %in% pair,]
   base$variate <- as.numeric(factor(base$variate))
@@ -426,7 +429,7 @@ LSSA_LFI_pairwise.time_series <- function(x, n_iter = 1, freqs = seq(0.001, 0.5,
     for (j in (i+1):n_factors) {
       pair <- c(lev[i],lev[j])
       out <- LSSA_LFI_validated(x, pair, n_iter = n_iter, freqs = freqs, intercept = intercept, prob = "haldane")
-      mat_k[i,j] <- out$coefs$alpha
+      mat_k[i,j] <- out$coefs[1]
     }
   }
   if (prob == "haldane") {
