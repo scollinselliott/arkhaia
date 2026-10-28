@@ -69,6 +69,3 @@ res <- dtem(dat, events, gamma = c(-2.5,2.5), lam = c(0,0.1))
 res$coefs
 
 }
-\references{
-\insertAllCited{}
-}

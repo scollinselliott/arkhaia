@@ -121,7 +121,7 @@ LSSA_LFI.time_series <- function(x, subset = NULL, n_iter = 1, freqs = seq(0.001
 
 #' Linear Dependence via LSSA-LFI Model Selection of Partitioned Variates
 #'
-#' For a \code{\link[arkhaia]{time_series}} with multiple variates, will compute the Akaike Information Criterion (AIC) for each candidate set \insertCite{akaike_information_1973}{arkhaia}, in order to determine whether some variates are dependent upon the same process.
+#' For a \code{\link[arkhaia]{time_series}} with multiple variates, will compute the Akaike Information Criterion (AIC) for candidate partitions of sets of variates \insertCite{akaike_information_1973}{arkhaia}, using a \code{\link[arkhaia]{LSSA-LFI}} model, in order to determine whether variates are dependent upon the same process.
 #' 
 #' @param x A \code{\link[arkhaia]{time_series}} object with more than one variate.
 #' @param sets Candidate partitions of variates to evaluate; must be a \code{list} of \code{lists} containing the indices of the levels  in \code{x$variate}. If left \code{NULL}, two sets are evaluated: all series pooled together \code{[1]} and all series kept separate \code{[2]}.
@@ -318,17 +318,18 @@ LSSA_LFI_model.time_series <- function(x, t_ = NULL, n_iter = 1, freqs = seq(0.0
 #' @param n_iter The number of iterations to run. Default is 1.
 #' @param freqs A vector of frequencies to evaluate. By default a grid from 0.001 to 0.5 is tested at an interval of 0.005.
 #' @param intercept Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.
+#' @param prob The form of probability used in the output. Default is \code{"binomial"}, returning a probability of \eqn{k/(n-2)}, where \eqn{k} are the number of times the pair is validated as dependent, and \eqn{n} is the total number of variates in the input. If \code{"beta"} is used, the Jeffreys prior is used in a Beta distribution, returning \eqn{\alpha = k + 0.5, \beta = n - k - 1.5}, with a probability of \eqn{\alpha/(\alpha + \beta)}.
 #'
 #' @returns The probability of linear dependence between two time series, in which 1 indicates certainty in linear dependence and 0 indicates independence.
 #' 
 #' @export
-LSSA_LFI_validated <- function(x, pair = NULL, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE) {
+LSSA_LFI_validated <- function(x, pair = NULL, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE, prob = "binomial") {
     UseMethod("LSSA_LFI_validated")
 }
 
 #' @rdname LSSA_LFI_validated
 #' @export
-LSSA_LFI_validated.time_series <- function(x, pair = NULL, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE) {
+LSSA_LFI_validated.time_series <- function(x, pair = NULL, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE, prob = "binomial") {
   if (nlevels(x$variate) < 3) {
     stop("must have at least three time series in x.")
   }
@@ -378,7 +379,19 @@ LSSA_LFI_validated.time_series <- function(x, pair = NULL, n_iter = 1, freqs = s
       res[i] <- 1
     }
   }
-  return(mean(res))
+  if (prob == "beta") {
+    alpha <- sum(res) + 0.5
+    beta <- length(attend) - alpha + 0.5
+    coefs <- c(alpha, beta)
+    names(coefs) <- c("alpha", "beta")
+    out <- list(prob = alpha/(alpha + beta), coefs = coefs)
+  } else if (pron == "binomial") {
+    k <- sum(res)
+    coefs <- c(k, length(attend))
+    names(coefs) <- c("k", "n")
+    out <- list(prob = k/length(attend), coefs = coefs)
+  }
+  return(out)
 }
 
 
@@ -391,17 +404,17 @@ LSSA_LFI_validated.time_series <- function(x, pair = NULL, n_iter = 1, freqs = s
 #' @param n_iter The number of iterations to run. Default is 1.
 #' @param freqs A vector of frequencies to evaluate. By default a grid from 0.001 to 0.5 is tested at an interval of 0.005.
 #' @param intercept Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.
-
+#' @param prob The form of probability used in the output. Default is \code{"binomial"}, returning a probability of \eqn{k/(n-2)}, where \eqn{k} are the number of times the pair is validated as dependent, and \eqn{n} is the total number of variates in the input. If \code{"beta"} is used, the Jeffreys prior is used in a Beta distribution, returning \eqn{\alpha = k + 0.5, \beta = n - k - 1.5}, with a probability of \eqn{\alpha/(\alpha + \beta)}.
 #' @returns An upper-triangular matrix, containing the probability of linear dependence between series.
 #' 
 #' @export
-LSSA_LFI_pairwise <- function(x, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE) {
+LSSA_LFI_pairwise <- function(x, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE, prob = "binomial") {
     UseMethod("LSSA_LFI_pairwise")
 }
 
 #' @rdname LSSA_LFI_pairwise
 #' @export
-LSSA_LFI_pairwise.time_series <- function(x, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE) {
+LSSA_LFI_pairwise.time_series <- function(x, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE, prob = "binomial") {
   n_factors <- nlevels(x$variate)
   if (n_factors < 3) {
     stop("need at least three variates to evaluate pairwise.")
@@ -412,7 +425,8 @@ LSSA_LFI_pairwise.time_series <- function(x, n_iter = 1, freqs = seq(0.001, 0.5,
   for (i in 1:(n_factors-1)) {
     for (j in (i+1):n_factors) {
       pair <- c(lev[i],lev[j])
-      mat[i,j] <- LSSA_LFI_validated(x, pair, n_iter = n_iter, freqs = freqs, intercept = intercept)
+      out <- LSSA_LFI_validated(x, pair, n_iter = n_iter, freqs = freqs, intercept = intercept, prob = prob)
+      mat[i,j] <- out$prob
     }
   }
   rownames(mat) <- levels(x$variate)
@@ -673,9 +687,6 @@ LSSA_LFI_comp.time_series <- function(x, freqs = seq(0.001, 0.5, by = 0.0005), i
 #'  \item A vector of coefficients and the residual sum of squares.
 #'  \item A matrix of the residual sum of squares for samples within the ranges of gamma and lambda.
 #' }
-#' 
-#' @references
-#'   \insertAllCited{}
 #' 
 #' @importFrom Rdpack reprompt
 #' @export

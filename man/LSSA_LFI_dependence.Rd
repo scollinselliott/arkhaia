@@ -36,7 +36,7 @@ LSSA_LFI_dependence(
 The index of the set yielding the lowest AIC. If \code{sets} is \code{NULL}, the output of \code{[1]} indicates linear dependence among all time series is preferred; if the output is \code{[2]}, linear independence among all time series.
 }
 \description{
-For a \code{\link[arkhaia]{time_series}} with multiple variates, will compute the Akaike Information Criterion (AIC) for each candidate set \insertCite{akaike_information_1973}{arkhaia}, in order to determine whether some variates are dependent upon the same process.
+For a \code{\link[arkhaia]{time_series}} with multiple variates, will compute the Akaike Information Criterion (AIC) for candidate partitions of sets of variates \insertCite{akaike_information_1973}{arkhaia}, using a \code{\link[arkhaia]{LSSA-LFI}} model, in order to determine whether variates are dependent upon the same process.
 }
 \references{
 \insertAllCited{}

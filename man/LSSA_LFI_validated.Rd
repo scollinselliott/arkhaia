@@ -10,7 +10,8 @@ LSSA_LFI_validated(
   pair = NULL,
   n_iter = 1,
   freqs = seq(0.001, 0.5, by = 5e-04),
-  intercept = TRUE
+  intercept = TRUE,
+  prob = "binomial"
 )
 
 \method{LSSA_LFI_validated}{time_series}(
@@ -18,7 +19,8 @@ LSSA_LFI_validated(
   pair = NULL,
   n_iter = 1,
   freqs = seq(0.001, 0.5, by = 5e-04),
-  intercept = TRUE
+  intercept = TRUE,
+  prob = "binomial"
 )
 }
 \arguments{
@@ -31,6 +33,8 @@ LSSA_LFI_validated(
 \item{freqs}{A vector of frequencies to evaluate. By default a grid from 0.001 to 0.5 is tested at an interval of 0.005.}
 
 \item{intercept}{Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.}
+
+\item{prob}{The form of probability used in the output. Default is \code{"binomial"}, returning a probability of \eqn{k/(n-2)}, where \eqn{k} are the number of times the pair is validated as dependent, and \eqn{n} is the total number of variates in the input. If \code{"beta"} is used, the Jeffreys prior is used in a Beta distribution, returning \eqn{\alpha = k + 0.5, \beta = n - k - 1.5}, with a probability of \eqn{\alpha/(\alpha + \beta)}.}
 }
 \value{
 The probability of linear dependence between two time series, in which 1 indicates certainty in linear dependence and 0 indicates independence.
