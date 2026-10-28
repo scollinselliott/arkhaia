@@ -385,7 +385,7 @@ LSSA_LFI_validated.time_series <- function(x, pair = NULL, n_iter = 1, freqs = s
     coefs <- c(alpha, beta)
     names(coefs) <- c("alpha", "beta")
     out <- list(mean = alpha/(alpha + beta), coefs = coefs)
-  } else if (pron == "haldane") {
+  } else if (prob == "haldane") {
     k <- sum(res)
     coefs <- c(k, length(attend))
     names(coefs) <- c("k", "n")
