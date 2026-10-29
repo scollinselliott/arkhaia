@@ -318,7 +318,7 @@ LSSA_LFI_model.time_series <- function(x, t_ = NULL, n_iter = 1, freqs = seq(0.0
 #' @param n_iter The number of iterations to run. Default is 1.
 #' @param freqs A vector of frequencies to evaluate. By default a grid from 0.001 to 0.5 is tested at an interval of 0.005.
 #' @param intercept Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.
-#' @param prob The form of probability used in the output \insertCite{haldane_note_1932,jeffreys_theory_1961}{arkhaia}. Default is \code{"haldane"}, returning a probability of \eqn{k/(n-2)}, where \eqn{k} are the number of times the pair is validated as dependent, and \eqn{n} is the total number of variates in the input. If \code{"jeffreys"} is used, the Jeffreys prior is used in a Beta distribution, returning \eqn{\alpha = k + 0.5, \beta = n - k - 1.5}, with a probability of \eqn{\alpha/(\alpha + \beta)}.
+#' @param prob The form of probability used in the output \insertCite{haldane_note_1932,jeffreys_theory_1961}{arkhaia}. Default is \code{"haldane"}, returning a probability of \eqn{k/(n-2)}, where \eqn{k} are the number of times the pair is validated as dependent, and \eqn{n} is the total number of variates in the input. If \code{"jeffreys"} is used, the Jeffreys prior is used in a Beta distribution, returning \eqn{\alpha = k + 0.5, \beta = n - k - 1.5}, with a mean probability of \eqn{\alpha/(\alpha + \beta)}. The option \code{"laplace"} uses a flat prior, returning \eqn{\alpha = k + 1, \beta = n - k - 1}. Note that the mean of the Beta distribution is not necessarily the most probable outcome.
 #'
 #' @returns The probability of linear dependence between two time series, in which 1 indicates certainty in linear dependence and 0 indicates independence.
 #' 
@@ -348,8 +348,8 @@ LSSA_LFI_validated.time_series <- function(x, pair = NULL, n_iter = 1, freqs = s
   if (NA %in% match(pair, levels(x$variate))) {
     stop("pair element not in variate")
   }
-  if (!(prob %in% c("haldane", "jeffreys"))) {
-    stop('prob must be "haldane" or "jeffreys"')
+  if (!(prob %in% c("haldane", "jeffreys", "laplace"))) {
+    stop('prob must be "haldane", "jeffreys", or "laplace"')
   }
 
   base <- x[x$variate %in% pair,]
@@ -396,6 +396,12 @@ LSSA_LFI_validated.time_series <- function(x, pair = NULL, n_iter = 1, freqs = s
     coefs <- c(k, length(attend))
     names(coefs) <- c("k", "n")
     out <- list(mean = k/length(attend), coefs = coefs)
+  } else if (prob == "laplace") {
+    alpha <- sum(res) + 1
+    beta <- length(attend) - alpha + 1
+    coefs <- c(alpha, beta)
+    names(coefs) <- c("alpha", "beta")
+    out <- list(mean = alpha/(alpha + beta), coefs = coefs)
   }
   return(out)
 }
@@ -410,7 +416,7 @@ LSSA_LFI_validated.time_series <- function(x, pair = NULL, n_iter = 1, freqs = s
 #' @param n_iter The number of iterations to run. Default is 1.
 #' @param freqs A vector of frequencies to evaluate. By default a grid from 0.001 to 0.5 is tested at an interval of 0.005.
 #' @param intercept Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.
-#' @param prob The form of probability used in the output. Default is \code{"haldane"}, returning a mean probability of \eqn{k/(n-2)}, where \eqn{k} are the number of times the pair is validated as dependent, and \eqn{n} is the total number of variates in the input. If \code{"jeffreys"} is used, the Jeffreys prior is used in a Beta distribution, returning \eqn{\alpha = k + 0.5, \beta = n - k - 1.5}, with a mean probability of \eqn{\alpha/(\alpha + \beta)}. Note that the mean of the Beta distribution is not necessarily the most probable outcome.
+#' @param prob The form of probability used in the output \insertCite{haldane_note_1932,jeffreys_theory_1961}{arkhaia}. Default is \code{"haldane"}, returning a probability of \eqn{k/(n-2)}, where \eqn{k} are the number of times the pair is validated as dependent, and \eqn{n} is the total number of variates in the input. If \code{"jeffreys"} is used, the Jeffreys prior is used in a Beta distribution, returning \eqn{\alpha = k + 0.5, \beta = n - k - 1.5}, with a mean probability of \eqn{\alpha/(\alpha + \beta)}. The option \code{"laplace"} uses a flat prior, returning \eqn{\alpha = k + 1, \beta = n - k - 1}. Note that the mean of the Beta distribution is not necessarily the most probable outcome.
 #' @returns An upper-triangular matrix, containing the probability of linear dependence between series.
 #' 
 #' @export
@@ -443,6 +449,12 @@ LSSA_LFI_pairwise.time_series <- function(x, n_iter = 1, freqs = seq(0.001, 0.5,
   } else if (prob == "jeffreys") {
     mat_alpha <- mat_k + 0.5
     mat_beta <- n_factors - mat_k - 1.5
+    mat <- mat_alpha / (mat_alpha + mat_beta)
+    coefs <- list(alpha = mat_alpha, beta = mat_beta)
+    out <- list(mean = mat, coefs = coefs)
+  } else if (prob == "laplace") {
+    mat_alpha <- mat_k + 1
+    mat_beta <- n_factors - mat_k - 1
     mat <- mat_alpha / (mat_alpha + mat_beta)
     coefs <- list(alpha = mat_alpha, beta = mat_beta)
     out <- list(mean = mat, coefs = coefs)
