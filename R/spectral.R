@@ -778,7 +778,7 @@ DTE.time_series <- function(x, events, gamma = c(-10,10), lambda = c(0,5), inter
   }
 
   out <- list(coefs = coefs,  rss = out0)
-  class(out) <- c("dtem", "list")
+  class(out) <- c("DTE", "list")
   return(out)
 }
 
