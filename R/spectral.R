@@ -318,9 +318,12 @@ LSSA_LFI_model.time_series <- function(x, t_ = NULL, n_iter = 1, freqs = seq(0.0
 #' @param n_iter The number of iterations to run. Default is 1.
 #' @param freqs A vector of frequencies to evaluate. By default a grid from 0.001 to 0.5 is tested at an interval of 0.005.
 #' @param intercept Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.
-#' @param prob The form of probability used in the output. Default is \code{"haldane"}, returning a probability of \eqn{k/(n-2)}, where \eqn{k} are the number of times the pair is validated as dependent, and \eqn{n} is the total number of variates in the input. If \code{"jeffreys"} is used, the Jeffreys prior is used in a Beta distribution, returning \eqn{\alpha = k + 0.5, \beta = n - k - 1.5}, with a probability of \eqn{\alpha/(\alpha + \beta)}.
+#' @param prob The form of probability used in the output \insertCite{haldane_note_1932,jeffreys_theory_1961}{arkhaia}. Default is \code{"haldane"}, returning a probability of \eqn{k/(n-2)}, where \eqn{k} are the number of times the pair is validated as dependent, and \eqn{n} is the total number of variates in the input. If \code{"jeffreys"} is used, the Jeffreys prior is used in a Beta distribution, returning \eqn{\alpha = k + 0.5, \beta = n - k - 1.5}, with a probability of \eqn{\alpha/(\alpha + \beta)}.
 #'
 #' @returns The probability of linear dependence between two time series, in which 1 indicates certainty in linear dependence and 0 indicates independence.
+#' 
+#' @references
+#'   \insertAllCited{}
 #' 
 #' @export
 LSSA_LFI_validated <- function(x, pair = NULL, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE, prob = "haldane") {
@@ -407,7 +410,7 @@ LSSA_LFI_validated.time_series <- function(x, pair = NULL, n_iter = 1, freqs = s
 #' @param n_iter The number of iterations to run. Default is 1.
 #' @param freqs A vector of frequencies to evaluate. By default a grid from 0.001 to 0.5 is tested at an interval of 0.005.
 #' @param intercept Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.
-#' @param prob The form of probability used in the output. Default is \code{"haldane"}, returning a probability of \eqn{k/(n-2)}, where \eqn{k} are the number of times the pair is validated as dependent, and \eqn{n} is the total number of variates in the input. If \code{"jeffreys"} is used, the Jeffreys prior is used in a Beta distribution, returning \eqn{\alpha = k + 0.5, \beta = n - k - 1.5}, with a probability of \eqn{\alpha/(\alpha + \beta)}.
+#' @param prob The form of probability used in the output. Default is \code{"haldane"}, returning a mean probability of \eqn{k/(n-2)}, where \eqn{k} are the number of times the pair is validated as dependent, and \eqn{n} is the total number of variates in the input. If \code{"jeffreys"} is used, the Jeffreys prior is used in a Beta distribution, returning \eqn{\alpha = k + 0.5, \beta = n - k - 1.5}, with a mean probability of \eqn{\alpha/(\alpha + \beta)}. Note that the mean of the Beta distribution is not necessarily the most probable outcome.
 #' @returns An upper-triangular matrix, containing the probability of linear dependence between series.
 #' 
 #' @export

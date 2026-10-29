@@ -34,11 +34,14 @@ LSSA_LFI_validated(
 
 \item{intercept}{Whether to include the intercept in the least squares spectral analysis via lowest frequency iteration (LSSA-LFI). Default is \code{TRUE}.}
 
-\item{prob}{The form of probability used in the output. Default is \code{"haldane"}, returning a probability of \eqn{k/(n-2)}, where \eqn{k} are the number of times the pair is validated as dependent, and \eqn{n} is the total number of variates in the input. If \code{"jeffreys"} is used, the Jeffreys prior is used in a Beta distribution, returning \eqn{\alpha = k + 0.5, \beta = n - k - 1.5}, with a probability of \eqn{\alpha/(\alpha + \beta)}.}
+\item{prob}{The form of probability used in the output \insertCite{haldane_note_1932,jeffreys_theory_1961}{arkhaia}. Default is \code{"haldane"}, returning a probability of \eqn{k/(n-2)}, where \eqn{k} are the number of times the pair is validated as dependent, and \eqn{n} is the total number of variates in the input. If \code{"jeffreys"} is used, the Jeffreys prior is used in a Beta distribution, returning \eqn{\alpha = k + 0.5, \beta = n - k - 1.5}, with a probability of \eqn{\alpha/(\alpha + \beta)}.}
 }
 \value{
 The probability of linear dependence between two time series, in which 1 indicates certainty in linear dependence and 0 indicates independence.
 }
 \description{
 Probability of linear dependence between two groups of time series observations using a LSSA-LFI model selection (see \code{\link[arkhaia]{LSSA_LFI_dependence}}), on the basis of the inclusion of a third "attendant" variate. The pair of series to be evaluated must be given, with the third attendant variate is selected from all remaining variates in the time series. The input must include at least three times series.
+}
+\references{
+\insertAllCited{}
 }
