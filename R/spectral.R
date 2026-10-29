@@ -121,7 +121,7 @@ LSSA_LFI.time_series <- function(x, subset = NULL, n_iter = 1, freqs = seq(0.001
 
 #' Linear Dependence via LSSA-LFI Model Selection of Partitioned Variates
 #'
-#' For a \code{\link[arkhaia]{time_series}} with multiple variates, will compute the Akaike Information Criterion (AIC) for candidate partitions of sets of variates \insertCite{akaike_information_1973}{arkhaia}, using a \code{\link[arkhaia]{LSSA-LFI}} model, in order to determine whether variates are dependent upon the same process.
+#' For a \code{\link[arkhaia]{time_series}} with multiple variates, will compute the Akaike Information Criterion (AIC) for candidate partitions of sets of variates \insertCite{akaike_information_1973}{arkhaia}, using a \code{\link[arkhaia]{LSSA_LFI}} model, in order to determine whether variates are dependent upon the same process.
 #' 
 #' @param x A \code{\link[arkhaia]{time_series}} object with more than one variate.
 #' @param sets Candidate partitions of variates to evaluate; must be a \code{list} of \code{lists} containing the indices of the levels  in \code{x$variate}. If left \code{NULL}, two sets are evaluated: all series pooled together \code{[1]} and all series kept separate \code{[2]}.
@@ -669,7 +669,7 @@ LSSA_LFI_comp.time_series <- function(x, freqs = seq(0.001, 0.5, by = 0.0005), i
 
 #' Decaying Trend-after-Event Model
 #'
-#' For multiple time-indexed observations and a number of events, \eqn{r = 1, \ldots, n_r}, that occur at a given time index, this function performs a regression of the form \eqn{x(t) = \beta_0 + \sum_{r = 1}^{n_r} \gamma (t-t_r) I(t_r \leq t ) e^{-\lambda t} }, where \eqn{I(t_r \geq t )} is an indicator function equaling 1 if \eqn{t \leq t_r}. Estimation of \eqn{\gamma}, \eqn{\lambda}, and \eqn{\beta_0} is performed numerically on specified ranges of potential values. The intercept term is not used where cases where a zero intercept is expected (e.g., standardized observations).
+#' For multiple time-indexed observations and a number of events, \eqn{r = 1, \ldots, n_r}, that occur at a given time index, this function performs a regression of the form \eqn{x(t) = \beta_0 + \sum_{r = 1}^{n_r} \gamma e^{-\lambda t} (t-t_r) I(t_r \leq t )  }, where \eqn{I(t_r \leq t )} is an indicator function equaling 1 if \eqn{t_r \leq t}. Estimation of \eqn{\gamma}, \eqn{\lambda}, and \eqn{\beta_0} is performed numerically on specified ranges of potential values. The intercept term is not used where cases where a zero intercept is expected (e.g., standardized observations).
 #' 
 #' @param x A data frame of two columns, with the first column containing time indices and the second containing values.
 #' @param events A vector of the time indices of the events, \eqn{t_1, \ldots, t_{n_r}}.
@@ -695,7 +695,7 @@ LSSA_LFI_comp.time_series <- function(x, freqs = seq(0.001, 0.5, by = 0.0005), i
 #' dat <- time_series(t = t_, x = y)
 #' 
 #' # fit model
-#' res <- dtem(dat, events, gamma = c(-2.5,2.5), lam = c(0,0.1))
+#' res <- DTE(dat, events, gamma = c(-2.5,2.5), lam = c(0,0.1))
 #' 
 #' # coefficients
 #' res$coefs
@@ -708,13 +708,13 @@ LSSA_LFI_comp.time_series <- function(x, freqs = seq(0.001, 0.5, by = 0.0005), i
 #' 
 #' @importFrom Rdpack reprompt
 #' @export
-dtem <- function(x, events, gamma = c(-10,10), lambda = c(0,5), intercept = FALSE, incr = 0.01) {
-    UseMethod("dtem")
+DTE <- function(x, events, gamma = c(-10,10), lambda = c(0,5), intercept = FALSE, incr = 0.01) {
+    UseMethod("DTE")
 }
 
-#' @rdname dtem
+#' @rdname DTE
 #' @export
-dtem.time_series <- function(x, events, gamma = c(-10,10), lambda = c(0,5), intercept = FALSE, incr = 0.01) {
+DTE.time_series <- function(x, events, gamma = c(-10,10), lambda = c(0,5), intercept = FALSE, incr = 0.01) {
   if (!(is.numeric(events))) {
     stop("events must be numeric")
   }
@@ -784,7 +784,7 @@ dtem.time_series <- function(x, events, gamma = c(-10,10), lambda = c(0,5), inte
 
 
 #' @export 
-print.dtem <- function(x, ...) {
+print.DTE <- function(x, ...) {
   cat("Decaying Trend-after-Event Regression: \n")
   print(x$coefs)
 }
@@ -916,4 +916,79 @@ time_series.numeric <- function(input = NULL, t = NULL, x = NULL, variate = NULL
 plot.time_series <- function(x, ...) {
   plot(x$t, x$x, ...)
 }
+
+
+
+#' Beta Distribution - Highest Density Region (HDR)
+#' 
+#' Given parameters \eqn{\alpha} and \eqn{\beta}, and the amount of probability to be contained in the region of highest density, will return the lower and upper bounds of the highest density region using a numerical approach. The HDR will not be estimated if both \eqn{\alpha, \beta < 1}. 
+#' 
+#' If \eqn{\alpha < 1} or \eqn{\beta < 1}, the integral of the p.d.f. will be improper, but the HDR can still be estimated.
+#' 
+#' @param alpha The parameter \eqn{\alpha}.
+#' @param beta The parameter \eqn{beta}.
+#' @param prob The amount of probability to be contained in the HDR.
+#' @param grid The interval of the sampling grid to estimate the HDR. Default is \code{0.001}.
+#'  
+#' @returns Lower and upper bounds of the HDR.
+#' 
+#' @export
+betaHDR <- function(alpha, beta, prob, grid = 0.001) {
+  UseMethod("betaHDR")
+}
+#' 
+#' @rdname betaHDR
+#' @export
+betaHDR.numeric <- function(alpha, beta, prob, grid = 0.001) {
+  if (length(alpha) == 2) {
+    alpha <- alpha[1]
+    beta <- beta[2]
+  }
+  if (!inherits(beta, "numeric") | length(beta) > 1) {
+    stop('invalid input for beta.')
+  }
+  if (alpha == 1.0 & beta == 1.0) {
+    stop("continuous uniform distribution. No unique HDR.")
+  }
+  if (alpha < 1.0 & beta < 1.0) {
+    stop("both alpha and beta cannot be < 1.")
+  }
+  x <- seq(0, 1, by = grid)
+  y <- stats::dbeta(x, alpha, beta)
+  y_seq <- seq(0, max(y), by = grid)
+  chk <- TRUE
+  idx <- 0
+  if (alpha > 1 & beta > 1) {
+    for (i in length(y_seq):1) {
+      if (chk == TRUE) {
+        pr <- sum(y[y_seq[i] < y]) / sum(y)
+        if (prob < pr) {
+          chk <- FALSE
+        }
+        idx <- i
+      }
+    }
+  }
+
+  x3 <- max(x[y_seq[idx] < y])
+  x2 <- min(x[y_seq[idx] < y])
+  x4 <- x3 + grid
+  x1 <- x2 - grid
+  y <-  stats::dbeta(c(x1,x2,x3,x4), alpha, beta)
+
+  if (x1 > 0) {
+    L <- stats::approx(c(y[1], y[2]), y = c(x1, x2), xout = y_seq[idx])$y
+  } else {
+    L <- 0
+  }
+  if (x4 < length(x)) {
+    U <- stats::approx(c(y[4], y[3]), y = c(x4, x3), xout = y_seq[idx])$y
+  } else {
+    U <- 1
+  }
+  return(c(L, U))
+}
+
+
+
 

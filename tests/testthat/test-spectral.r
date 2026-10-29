@@ -39,8 +39,8 @@ test_that("trim_epoch works", {
 })
 
 test_that("Correct validated candidate model selected", {
-  res <- LSSA_LFI_validated(Y3, pair = c("x1", "x2"), n_iter = 50) 
-  expect_equal(res, 1)
+  res <- LSSA_LFI_validated(Y3, pair = c("x1", "x2"), n_iter = 50)
+  expect_equal(res$mean, 1)
 })
 
 test_that("Pairwise validated candidate model selection works", {
@@ -50,7 +50,7 @@ test_that("Pairwise validated candidate model selection works", {
   rownames(expected) <- c("x1", "x2", "x3")
   colnames(expected) <- c("x1", "x2", "x3")
   res <- LSSA_LFI_pairwise(Y3, n_iter = 50) 
-  expect_equal(res, expected)
+  expect_equal(res$mean, expected)
 })
 
 test_that("repartition works", {
