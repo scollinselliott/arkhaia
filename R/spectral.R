@@ -938,7 +938,11 @@ time_series.numeric <- function(input = NULL, t = NULL, x = NULL, variate = NULL
 
 #' @export 
 plot.time_series <- function(x, ...) {
-  plot(x$t, x$x, ...)
+  if (names(x)[2] == "x") {
+    plot(x$t, x$x, ...)
+  } else if (names(z)[2] == "z") {
+    plot(x$t, x$z, ...)
+  }
 }
 
 
