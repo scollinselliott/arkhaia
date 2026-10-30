@@ -11,7 +11,8 @@ DTE(
   gamma = c(-10, 10),
   lambda = c(0, 5),
   intercept = FALSE,
-  incr = 0.01
+  incr = 0.01,
+  weights = TRUE
 )
 
 \method{DTE}{time_series}(
@@ -20,7 +21,8 @@ DTE(
   gamma = c(-10, 10),
   lambda = c(0, 5),
   intercept = FALSE,
-  incr = 0.01
+  incr = 0.01,
+  weights = TRUE
 )
 }
 \arguments{
@@ -35,12 +37,15 @@ DTE(
 \item{intercept}{The range of values of the intercept \eqn{\beta_0} to evaluate. If  \code{FALSE} is given instead (the default) no intercept term is included.}
 
 \item{incr}{Increment by which to sample values of \code{gamma} and \code{lambda}. Default is \code{0.01}.}
+
+\item{weights}{For multivariate time series, will weight the residual sum of squares proportionally to the number of observations in each variate, if \code{TRUE} (the default). If \code{FALSE} all observations are weighted the same.}
 }
 \value{
 A list containing
 \itemize{
- \item A vector of coefficients and the residual sum of squares.
- \item A matrix of the residual sum of squares for samples within the ranges of gamma and lambda.
+ \item \code{$coefs} A vector of coefficients and the residual sum of squares.
+ \item \code{$residuals} A matrix of the residual sum of squares for samples within the ranges of \eqn{\gamma} and \eqn{\lambda}.
+  item \code{$y} A vector of the values of \eqn{f(x)} according to the coefficients.
 }
 }
 \description{
@@ -49,6 +54,7 @@ For multiple time-indexed observations and a number of events, \eqn{r = 1, \ldot
 \examples{
 # generate example of positive trend (gamma = 2) 
 # after event with slow decay (lambda = 0.05)
+set.seed(9)
 t_ <- runif(100, 0, 100)
 events <- c(0, 54, 89)
 gam <- 2

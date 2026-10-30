@@ -689,10 +689,12 @@ LSSA_LFI_comp.time_series <- function(x, freqs = seq(0.001, 0.5, by = 0.0005), i
 #' @param lambda The range of values of \eqn{\lambda} to evaluate. Default is \code{c(0,5)}.
 #' @param intercept The range of values of the intercept \eqn{\beta_0} to evaluate. If  \code{FALSE} is given instead (the default) no intercept term is included.
 #' @param incr Increment by which to sample values of \code{gamma} and \code{lambda}. Default is \code{0.01}.
+#' @param weights For multivariate time series, will weight the residual sum of squares proportionally to the number of observations in each variate, if \code{TRUE} (the default). If \code{FALSE} all observations are weighted the same.
 #' 
 #' @examples
 #' # generate example of positive trend (gamma = 2) 
 #' # after event with slow decay (lambda = 0.05)
+#' set.seed(9)
 #' t_ <- runif(100, 0, 100)
 #' events <- c(0, 54, 89)
 #' gam <- 2
@@ -714,19 +716,20 @@ LSSA_LFI_comp.time_series <- function(x, freqs = seq(0.001, 0.5, by = 0.0005), i
 #' 
 #' @returns A list containing
 #' \itemize{
-#'  \item A vector of coefficients and the residual sum of squares.
-#'  \item A matrix of the residual sum of squares for samples within the ranges of gamma and lambda.
+#'  \item \code{$coefs} A vector of coefficients and the residual sum of squares.
+#'  \item \code{$residuals} A matrix of the residual sum of squares for samples within the ranges of \eqn{\gamma} and \eqn{\lambda}.
+#'   item \code{$y} A vector of the values of \eqn{f(x)} according to the coefficients.
 #' }
 #' 
 #' @importFrom Rdpack reprompt
 #' @export
-DTE <- function(x, events, gamma = c(-10,10), lambda = c(0,5), intercept = FALSE, incr = 0.01) {
+DTE <- function(x, events, gamma = c(-10,10), lambda = c(0,5), intercept = FALSE, incr = 0.01, weights = TRUE) {
     UseMethod("DTE")
 }
 
 #' @rdname DTE
 #' @export
-DTE.time_series <- function(x, events, gamma = c(-10,10), lambda = c(0,5), intercept = FALSE, incr = 0.01) {
+DTE.time_series <- function(x, events, gamma = c(-10,10), lambda = c(0,5), intercept = FALSE, incr = 0.01, weights = TRUE) {
   if (!(is.numeric(events))) {
     stop("events must be numeric")
   }
@@ -766,10 +769,13 @@ DTE.time_series <- function(x, events, gamma = c(-10,10), lambda = c(0,5), inter
   if ((gamma[2]-gamma[1]) < incr | (lambda[2]-lambda[1]) < incr) {
     stop("invalid increment used")
   }
+  if (!inherits(weights, "logical")) {
+    stop("weights must be logical.")
+  }
 
   gammas <- seq(gamma[1], gamma[2], by = incr)
   lambdas <- seq(lambda[1], lambda[2], by = incr)
-  if (nlevels(x$variate) > 1) {
+  if (nlevels(x$variate) > 1 & weights == TRUE) {
     total <- table(x$variate)
     weights <- 1/total[x$variate]
   } else {
@@ -788,8 +794,14 @@ DTE.time_series <- function(x, events, gamma = c(-10,10), lambda = c(0,5), inter
     coefs <- c(gammas[idx[1]], lambdas[idx[2]], intercepts[idx[3]], out0[idx])
     names(coefs) <- c("gamma", "lambda", "intercept", "rss")
   }
+  if (is.numeric(intercept)) {
+    intrcpt <- intercepts[idx[3]]
+  } else if (intercept == FALSE) {
+    intrcpt <- 0
+  }
+  y <- dtem_model_arma(as.vector(x[,1]), events, gammas[idx[1]], lambdas[idx[2]], intrcpt)
 
-  out <- list(coefs = coefs,  rss = out0)
+  out <- list(coefs = coefs,  rss = out0, y = y)
   class(out) <- c("DTE", "list")
   return(out)
 }
@@ -799,7 +811,7 @@ DTE.time_series <- function(x, events, gamma = c(-10,10), lambda = c(0,5), inter
 print.DTE <- function(x, ...) {
   cat("Decaying Trend-after-Event Regression: \n")
   print(x$coefs)
-}
+} 
 
 
 
@@ -935,10 +947,10 @@ plot.time_series <- function(x, ...) {
 #' 
 #' Given parameters \eqn{\alpha} and \eqn{\beta}, and the amount of probability to be contained in the region of highest density, will return the lower and upper bounds of the highest density region using a numerical approach. The HDR will not be estimated if both \eqn{\alpha, \beta < 1}. 
 #' 
-#' If \eqn{\alpha < 1} or \eqn{\beta < 1}, the integral of the p.d.f. will be improper, but the HDR can still be estimated.
+#' If \eqn{\alpha < 1} or \eqn{\beta < 1}, the integral of the p.d.f. will be improper, but the HDR can still be estimated. The most probable outcome will approach either 0 or 1, though with the p.d.f. \eqn{f(x) \rightarrow \infty}.
 #' 
 #' @param alpha The parameter \eqn{\alpha}.
-#' @param beta The parameter \eqn{beta}.
+#' @param beta The parameter \eqn{\beta}.
 #' @param prob The amount of probability to be contained in the HDR.
 #' @param grid The interval of the sampling grid to estimate the HDR. Default is \code{0.001}.
 #'  

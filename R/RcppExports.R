@@ -51,6 +51,12 @@ dtem_arma <- function(x, events, gammas, lambdas, weights) {
 
 #' @useDynLib arkhaia
 #' @importFrom Rcpp sourceCpp
+dtem_model_arma <- function(x, events, gamma, lambda, intrcpt) {
+    .Call('_arkhaia_dtem_model_arma', PACKAGE = 'arkhaia', x, events, gamma, lambda, intrcpt)
+}
+
+#' @useDynLib arkhaia
+#' @importFrom Rcpp sourceCpp
 dtem_intrcpt_arma <- function(x, events, gammas, lambdas, intercept, weights) {
     .Call('_arkhaia_dtem_intrcpt_arma', PACKAGE = 'arkhaia', x, events, gammas, lambdas, intercept, weights)
 }

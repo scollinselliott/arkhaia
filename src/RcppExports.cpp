@@ -125,6 +125,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// dtem_model_arma
+arma::vec dtem_model_arma(const arma::vec& x, arma::vec& events, double& gamma, double& lambda, double& intrcpt);
+RcppExport SEXP _arkhaia_dtem_model_arma(SEXP xSEXP, SEXP eventsSEXP, SEXP gammaSEXP, SEXP lambdaSEXP, SEXP intrcptSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type events(eventsSEXP);
+    Rcpp::traits::input_parameter< double& >::type gamma(gammaSEXP);
+    Rcpp::traits::input_parameter< double& >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< double& >::type intrcpt(intrcptSEXP);
+    rcpp_result_gen = Rcpp::wrap(dtem_model_arma(x, events, gamma, lambda, intrcpt));
+    return rcpp_result_gen;
+END_RCPP
+}
 // dtem_intrcpt_arma
 arma::cube dtem_intrcpt_arma(const arma::mat& x, arma::vec& events, arma::vec& gammas, arma::vec& lambdas, arma::vec& intercept, arma::vec& weights);
 RcppExport SEXP _arkhaia_dtem_intrcpt_arma(SEXP xSEXP, SEXP eventsSEXP, SEXP gammasSEXP, SEXP lambdasSEXP, SEXP interceptSEXP, SEXP weightsSEXP) {
@@ -514,6 +529,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_arkhaia_LSSA_LFI_dependence_arma", (DL_FUNC) &_arkhaia_LSSA_LFI_dependence_arma, 7},
     {"_arkhaia_LSSA_LFI_multi_arma", (DL_FUNC) &_arkhaia_LSSA_LFI_multi_arma, 6},
     {"_arkhaia_dtem_arma", (DL_FUNC) &_arkhaia_dtem_arma, 5},
+    {"_arkhaia_dtem_model_arma", (DL_FUNC) &_arkhaia_dtem_model_arma, 5},
     {"_arkhaia_dtem_intrcpt_arma", (DL_FUNC) &_arkhaia_dtem_intrcpt_arma, 6},
     {"_arkhaia_lambda_col_arma", (DL_FUNC) &_arkhaia_lambda_col_arma, 3},
     {"_arkhaia_trunc_pois_mat_arma", (DL_FUNC) &_arkhaia_trunc_pois_mat_arma, 3},

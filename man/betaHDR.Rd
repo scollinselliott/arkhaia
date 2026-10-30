@@ -12,7 +12,7 @@ betaHDR(alpha, beta, prob, grid = 0.001)
 \arguments{
 \item{alpha}{The parameter \eqn{\alpha}.}
 
-\item{beta}{The parameter \eqn{beta}.}
+\item{beta}{The parameter \eqn{\beta}.}
 
 \item{prob}{The amount of probability to be contained in the HDR.}
 
@@ -25,5 +25,5 @@ Lower and upper bounds of the HDR.
 Given parameters \eqn{\alpha} and \eqn{\beta}, and the amount of probability to be contained in the region of highest density, will return the lower and upper bounds of the highest density region using a numerical approach. The HDR will not be estimated if both \eqn{\alpha, \beta < 1}.
 }
 \details{
-If \eqn{\alpha < 1} or \eqn{\beta < 1}, the integral of the p.d.f. will be improper, but the HDR can still be estimated.
+If \eqn{\alpha < 1} or \eqn{\beta < 1}, the integral of the p.d.f. will be improper, but the HDR can still be estimated. The most probable outcome will approach either 0 or 1, though with the p.d.f. \eqn{f(x) \rightarrow \infty}.
 }

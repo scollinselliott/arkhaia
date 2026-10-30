@@ -529,6 +529,30 @@ arma::mat dtem_arma(const arma::mat & x, arma::vec & events, arma::vec & gammas,
 //' @useDynLib arkhaia
 //' @importFrom Rcpp sourceCpp
 // [[Rcpp::export]]
+arma::vec dtem_model_arma(const arma::vec & x, arma::vec & events, double & gamma,  double & lambda, double & intrcpt) {
+    int nT = x.n_elem;
+    int nE = events.n_elem;
+
+    arma::vec xhat (nT); 
+
+    for (int i = 0; i < nT; i++) {
+        for (int r = 0; r < nE; r++) {
+            if (events[r] < x[i]) {
+                xhat[i] = xhat[i] + (x[i] - events[r]) * gamma * std::exp(-1 * lambda * (x[i] - events[r])) ;
+            }
+        }
+    }
+    for (int i = 0; i < nT; i++) {
+        xhat[i] = xhat[i] + intrcpt;
+    }
+    return xhat;
+}
+
+
+
+//' @useDynLib arkhaia
+//' @importFrom Rcpp sourceCpp
+// [[Rcpp::export]]
 arma::cube dtem_intrcpt_arma(const arma::mat & x, arma::vec & events, arma::vec & gammas,  arma::vec & lambdas, arma::vec & intercept, arma::vec & weights) {
     int nT = x.n_rows;
     int nE = events.n_elem;
@@ -560,17 +584,6 @@ arma::cube dtem_intrcpt_arma(const arma::mat & x, arma::vec & events, arma::vec 
     }
     return rss;
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 
