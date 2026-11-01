@@ -718,7 +718,7 @@ LSSA_LFI_comp.time_series <- function(x, freqs = seq(0.001, 0.5, by = 0.0005), i
 #' \itemize{
 #'  \item \code{$coefs} A vector of coefficients and the residual sum of squares.
 #'  \item \code{$residuals} A matrix of the residual sum of squares for samples within the ranges of \eqn{\gamma} and \eqn{\lambda}.
-#'   item \code{$y} A vector of the values of \eqn{f(x)} according to the coefficients.
+#'   \item \code{$y} A vector of the values of \eqn{f(x)} according to the coefficients.
 #' }
 #' 
 #' @importFrom Rdpack reprompt
@@ -968,6 +968,9 @@ betaHDR <- function(alpha, beta, prob, grid = 0.001) {
 #' @rdname betaHDR
 #' @export
 betaHDR.numeric <- function(alpha, beta, prob, grid = 0.001) {
+  if (prob >= 1) {
+    stop('prob must be less than 1.')
+  }
   if (length(alpha) == 2) {
     alpha <- alpha[1]
     beta <- beta[2]
@@ -978,43 +981,87 @@ betaHDR.numeric <- function(alpha, beta, prob, grid = 0.001) {
   if (alpha == 1.0 & beta == 1.0) {
     stop("continuous uniform distribution. No unique HDR.")
   }
+  if (alpha == 0 | beta == 0) {
+    stop("alpha, beta cannot equal 0.")
+  }
   if (alpha < 1.0 & beta < 1.0) {
     stop("both alpha and beta cannot be < 1.")
   }
   x <- seq(0, 1, by = grid)
-  y <- stats::dbeta(x, alpha, beta)
-  y_seq <- seq(0, max(y), by = grid)
-  chk <- TRUE
-  idx <- 0
   if (alpha > 1 & beta > 1) {
+    y <- stats::dbeta(x, alpha, beta)
+    argmax <- x[which.max(y)]
+    y_seq <- seq(0, max(y), by = grid)
+    chk <- TRUE
+    idx <- 0
     for (i in length(y_seq):1) {
       if (chk == TRUE) {
-        pr <- sum(y[y_seq[i] < y]) / sum(y)
+        pr <- sum(y[y_seq[i] < y]) * grid
         if (prob < pr) {
           chk <- FALSE
         }
         idx <- i
       }
     }
-  }
 
-  x3 <- max(x[y_seq[idx] < y])
-  x2 <- min(x[y_seq[idx] < y])
-  x4 <- x3 + grid
-  x1 <- x2 - grid
-  y <-  stats::dbeta(c(x1,x2,x3,x4), alpha, beta)
+    x3 <- max(x[y_seq[idx] < y])
+    x2 <- min(x[y_seq[idx] < y])
+    x4 <- x3 + grid
+    x1 <- x2 - grid
+    y <-  stats::dbeta(c(x1,x2,x3,x4), alpha, beta)
 
-  if (x1 > 0) {
-    L <- stats::approx(c(y[1], y[2]), y = c(x1, x2), xout = y_seq[idx])$y
-  } else {
+    if (x1 > 0) {
+      L <- stats::approx(c(y[1], y[2]), y = c(x1, x2), xout = y_seq[idx])$y
+    } else {
+      L <- 0
+    }
+    if (x4 < length(x)) {
+      U <- stats::approx(c(y[4], y[3]), y = c(x4, x3), xout = y_seq[idx])$y
+    } else {
+      U <- 1
+    }
+  } else if (alpha <= 1.0 & beta >= 1.0) {
+    x <- x[x > 0]
+    y <- stats::dbeta(x, alpha, beta)
+    plot(x,y)
+    y_seq <- seq(0, max(y), by = grid)
+    chk <- TRUE
+    idx <- 0
+    for (i in 1:length(y_seq)) {
+      if (chk == TRUE) {
+        pr <- sum(y[y < y_seq[i]]) * grid
+        if (1 - prob < pr) {
+          chk <- FALSE
+        }
+        idx <- i
+      }
+    }
+    argmax <- 0.0
     L <- 0
-  }
-  if (x4 < length(x)) {
-    U <- stats::approx(c(y[4], y[3]), y = c(x4, x3), xout = y_seq[idx])$y
-  } else {
+    U <- min(x[y < y_seq[idx]])
+  } else if (alpha >= 1.0 & beta <= 1.0) {
+    x <- x[x < 1]
+    y <- stats::dbeta(x, alpha, beta)
+    y_seq <- seq(0, max(y), by = grid)
+    chk <- TRUE
+    idx <- 0
+    for (i in 1:length(y_seq)) {
+      if (chk == TRUE) {
+        pr <- sum(y[y < y_seq[i]]) * grid
+        if (1 - prob < pr) {
+          chk <- FALSE
+        }
+        idx <- i
+      }
+    }
+    argmax <- 1.0
+    L <- max(x[y < y_seq[idx]])
     U <- 1
   }
-  return(c(L, U))
+
+  out <- c(L, U, argmax)
+  names(out) <- c("lower", "upper", "argmax")
+  return(out)
 }
 
 

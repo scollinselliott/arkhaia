@@ -45,7 +45,7 @@ A list containing
 \itemize{
  \item \code{$coefs} A vector of coefficients and the residual sum of squares.
  \item \code{$residuals} A matrix of the residual sum of squares for samples within the ranges of \eqn{\gamma} and \eqn{\lambda}.
-  item \code{$y} A vector of the values of \eqn{f(x)} according to the coefficients.
+  \item \code{$y} A vector of the values of \eqn{f(x)} according to the coefficients.
 }
 }
 \description{
