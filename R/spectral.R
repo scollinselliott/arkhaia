@@ -1023,7 +1023,6 @@ betaHDR.numeric <- function(alpha, beta, prob, grid = 0.001) {
   } else if (alpha <= 1.0 & beta >= 1.0) {
     x <- x[x > 0]
     y <- stats::dbeta(x, alpha, beta)
-    plot(x,y)
     y_seq <- seq(0, max(y), by = grid)
     chk <- TRUE
     idx <- 0
