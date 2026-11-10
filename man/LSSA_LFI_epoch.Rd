@@ -14,7 +14,8 @@ LSSA_LFI_epoch(
   t_range = NULL,
   h_range = NULL,
   t_grid = 1,
-  h_grid = 1
+  h_grid = 1,
+  prob = "haldane"
 )
 
 \method{LSSA_LFI_epoch}{time_series}(
@@ -26,7 +27,8 @@ LSSA_LFI_epoch(
   t_range = NULL,
   h_range = NULL,
   t_grid = 1,
-  h_grid = 1
+  h_grid = 1,
+  prob = "haldane"
 )
 }
 \arguments{
@@ -47,6 +49,8 @@ LSSA_LFI_epoch(
 \item{t_grid}{The length of interval along which to sample \eqn{t}. Default is 1.}
 
 \item{h_grid}{The length of interval along which to sample \eqn{h}. Default is 1.}
+
+\item{prob}{The form of probability used in the output. Default is \code{"haldane"}; other options are \code{"jeffreys"}, \code{"laplace"}. See \code{\link[arkhaia]{LSSA_LFI_validated}}.}
 }
 \value{
 A matrix giving the probability of linear dependence, predicated upon time \eqn{t} and window length \eqn{h}.

@@ -3,7 +3,7 @@
 \name{DTE}
 \alias{DTE}
 \alias{DTE.time_series}
-\title{Decaying Trend-after-Event Model}
+\title{Fit a Decaying Trend-after-Event (DTE) Model}
 \usage{
 DTE(
   x,
@@ -26,7 +26,7 @@ DTE(
 )
 }
 \arguments{
-\item{x}{A data frame of two columns, with the first column containing time indices and the second containing values.}
+\item{x}{A \code{\link[arkhaia]{time_series}} object.}
 
 \item{events}{A vector of the time indices of the events, \eqn{t_1, \ldots, t_{n_r}}.}
 

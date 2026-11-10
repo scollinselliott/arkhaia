@@ -210,6 +210,7 @@ trim_epoch.time_series <- function(x, epoch = NULL) {
 
   out <- x[x$t > epoch[1] & x$t < epoch[2]  ,]
   out <- as.data.frame(out)
+  out$variate <- factor(out$variate)
   class(out) <- c("time_series", "data.frame")
   return(out)
 }
@@ -464,8 +465,6 @@ LSSA_LFI_pairwise.time_series <- function(x, n_iter = 1, freqs = seq(0.001, 0.5,
 
 
 
-
-
 #' Period-Variable Pairwise Selection of Linearly Dependent LSSA-LFI Models
 #'
 #' Evaluate pairwise linear dependence between two time series using a LSSA-LFI valdiated model selection (see \code{\link[arkhaia]{LSSA_LFI_validated}}), with variable length time period. 
@@ -479,16 +478,17 @@ LSSA_LFI_pairwise.time_series <- function(x, n_iter = 1, freqs = seq(0.001, 0.5,
 #' @param h_range The range of the potential windows of \eqn{h}. Default is from 0 to entire span of \code{t_range}. 
 #' @param t_grid The length of interval along which to sample \eqn{t}. Default is 1.
 #' @param h_grid The length of interval along which to sample \eqn{h}. Default is 1.
+#' @param prob The form of probability used in the output. Default is \code{"haldane"}; other options are \code{"jeffreys"}, \code{"laplace"}. See \code{\link[arkhaia]{LSSA_LFI_validated}}.
 #' @returns A matrix giving the probability of linear dependence, predicated upon time \eqn{t} and window length \eqn{h}.
 #'
 #' @export
-LSSA_LFI_epoch <- function(x, pair = NULL, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE, t_range = NULL, h_range = NULL, t_grid = 1, h_grid = 1) {
+LSSA_LFI_epoch <- function(x, pair = NULL, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE, t_range = NULL, h_range = NULL, t_grid = 1, h_grid = 1, prob = "haldane") {
     UseMethod("LSSA_LFI_epoch")
 }
 
 #' @rdname LSSA_LFI_epoch
 #' @export
-LSSA_LFI_epoch.time_series <- function(x, pair = NULL, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE, t_range = NULL, h_range = NULL, t_grid = 1, h_grid = 1) {
+LSSA_LFI_epoch.time_series <- function(x, pair = NULL, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE, t_range = NULL, h_range = NULL, t_grid = 1, h_grid = 1, prob = "haldane") {
   if (is.null(pair)) {
     stop("must supply the pair of data frames in x to be evaluated.")
   }
@@ -497,15 +497,15 @@ LSSA_LFI_epoch.time_series <- function(x, pair = NULL, n_iter = 1, freqs = seq(0
   } else if (intercept == FALSE) {
     intrcpt <- 0
   } else {
-    stop('intecept must be TRUE or FALSE')
+    stop('intecept must be TRUE or FALSE.')
+  }
+  n_factors <- nlevels(x$variate)
+  if (n_factors < 3) {
+    stop("need at least three variates to evaluate pairwise.")
   }
 
-  all <- data.frame()
-  for (i in 1:length(x)) {
-    all <- rbind(all, x[[i]])
-  }
-  start_ <- min(all$t)
-  end_ <- max(all$t)
+  start_ <- min(x$t)
+  end_ <- max(x$t)
   if (is.null(t_range)) {
     t_ <- seq(start_, end_, by = t_grid)
   } else {
@@ -516,40 +516,63 @@ LSSA_LFI_epoch.time_series <- function(x, pair = NULL, n_iter = 1, freqs = seq(0
   } else {
     h_ <- seq(h_range[1], h_range[2], by = h_grid)
   }
-  out <- matrix(NA, nrow = length(t_), ncol = length(h_))
+  mat_k <- matrix(NA, nrow = length(t_), ncol = length(h_))
+  mat_n <- matrix(NA, nrow = length(t_), ncol = length(h_))
 
   for (ti in 1:length(t_)) {
     for (hi in 1:length(h_)) {
       if (t_[ti] + h_[hi] <= end_) {
-        tmp <- list()
         do_lssa <- TRUE
-        n_obs_ <- c()
 
         trimmed <- trim_epoch(x, epoch = c(t_[ti], t_[ti] + h_[hi]))
-        n_obs_ <- table(x$variate)
+        n_obs_ <- table(trimmed$variate)
+        vars_ <- names(n_obs_[n_obs_ > 3])
+        trimmed <- trimmed[trimmed$variate %in% vars_,]
+        trimmed$variate <- factor(trimmed$variate)
 
-        if (TRUE %in% (n_obs_ < 4)) {
+        if (nlevels(trimmed$variate) < 3) {
           do_lssa <- FALSE
         }
-        tmp <- trimmed
+        if (!(pair[1] %in% vars_ & pair[2] %in% vars_)) {
+          do_lssa <- FALSE
+        }
         
         if (do_lssa == TRUE) {
           n_iter_ <- min(c(n_obs_, n_iter))
-
-          out[(length(h_) - hi)+1,ti] <- LSSA_LFI_validated(tmp, pair, n_iter_, freqs, intrcpt)
+          out0 <- LSSA_LFI_validated(trimmed, pair, n_iter = n_iter_, freqs = freqs, intercept = intercept, prob = "haldane")
+          mat_k[(length(h_) - hi)+1,ti] <- out0$coefs[1]
+          mat_n[(length(h_) - hi)+1,ti] <- out0$coefs[2]
         }
       }
     }
     message("Percent complete: ", round(ti/length(t_), 2)*100, "%")
   }
+  colnames(mat_k) <- t_
+  rownames(mat_k) <- rev(h_)
+  colnames(mat_n) <- t_
+  rownames(mat_n) <- rev(h_)
+    
+  if (prob == "haldane") {
+    mat <- mat_k / mat_n
+    coefs <- list(k = mat_k, n = mat_n)
+    out <- list(mean = mat, coefs = coefs)
+  } else if (prob == "jeffreys") {
+    mat_alpha <- mat_k + 0.5
+    mat_beta <- mat_n - mat_k + 0.5
+    mat <- mat_alpha / (mat_alpha + mat_beta)
+    coefs <- list(alpha = mat_alpha, beta = mat_beta)
+    out <- list(mean = mat, coefs = coefs)
+  } else if (prob == "laplace") {
+    mat_alpha <- mat_k + 1
+    mat_beta <- mat_n - mat_k + 1
+    mat <- mat_alpha / (mat_alpha + mat_beta)
+    coefs <- list(alpha = mat_alpha, beta = mat_beta)
+    out <- list(mean = mat, coefs = coefs)
+  }
 
-  colnames(out) <- t_
-  rownames(out) <- rev(h_)
   return(out)
 
 }
-
-
 
 
 
@@ -679,11 +702,11 @@ LSSA_LFI_comp.time_series <- function(x, freqs = seq(0.001, 0.5, by = 0.0005), i
 
 
 
-#' Decaying Trend-after-Event Model
+#' Fit a Decaying Trend-after-Event (DTE) Model
 #'
 #' For multiple time-indexed observations and a number of events, \eqn{r = 1, \ldots, n_r}, that occur at a given time index, this function performs a regression of the form \eqn{x(t) = \beta_0 + \sum_{r = 1}^{n_r} \gamma e^{-\lambda t} (t-t_r) I(t_r \leq t )  }, where \eqn{I(t_r \leq t )} is an indicator function equaling 1 if \eqn{t_r \leq t}. Estimation of \eqn{\gamma}, \eqn{\lambda}, and \eqn{\beta_0} is performed numerically on specified ranges of potential values. The intercept term is not used where cases where a zero intercept is expected (e.g., standardized observations).
 #' 
-#' @param x A data frame of two columns, with the first column containing time indices and the second containing values.
+#' @param x A \code{\link[arkhaia]{time_series}} object.
 #' @param events A vector of the time indices of the events, \eqn{t_1, \ldots, t_{n_r}}.
 #' @param gamma The range of values of \eqn{\gamma} to evaluate. Default is \code{c(-10,10)}.
 #' @param lambda The range of values of \eqn{\lambda} to evaluate. Default is \code{c(0,5)}.
@@ -815,6 +838,44 @@ print.DTE <- function(x, ...) {
 
 
 
+
+#' Decaying Trend-after-Event (DTE) Model
+#'
+#' Generates a data frame of values \eqn{x(t)} of a decaying trend-after-event model (see \code{\link[arkhaia]{DTE}}) given a range of \eqn{t}, and specified values of \eqn{\gamma, \lambda, \beta_0}. 
+#' 
+#' @param x  A vector giving samples range of \eqn{t} for computing \eqn{x(t)}.
+#' @param events A vector of the time indices of the events, \eqn{t_1, \ldots, t_{n_r}}.
+#' @param gamma The rate parameter \eqn{\gamma}.
+#' @param lambda The decay parameter \eqn{\lambda}.
+#' @param intercept The value of the intercept \eqn{\beta_0}. Default is \code{0}.
+#' @param label Default is \code{"model"}.
+#' @returns A \code{\link[arkhaia]{time_series}} object containing \eqn{t, x(t)}.
+#' 
+#' @export
+DTE_model <- function(x = NULL, events = NULL, gamma = NULL, lambda = NULL, intercept = 0, label = "model") {
+    UseMethod("DTE_model")
+}
+
+#' @rdname DTE_model
+#' @export
+DTE_model.numeric <- function(x = NULL, events = NULL, gamma = NULL, lambda = NULL, intercept = 0, label = "model") {
+  if (is.null(x) | is.null(gamma) | is.null(events) | is.null(lambda) | is.null(intercept)) {
+    stop("one or more inputs is NULL.")
+  }
+  if (!(inherits(x, "numeric") & inherits(events, "numeric") & inherits(gamma, "numeric") & inherits(lambda, "numeric") & inherits(intercept, "numeric") )) {
+    stop("inputs must be numeric.")
+  } 
+
+  y <- dtem_model_arma(x, events, gamma, lambda, intercept)
+
+  out <- data.frame(t = x, x = y, variate =  rep(label, length(x)))
+  class(out) <- c("time_series", "data.frame")
+  return(out)
+}
+
+
+
+
 #' Create a Time Series Object
 #'
 #' Creates an object of class \code{time_series}. Input may be given as a matrix or data frame, by giving a filename for a \code{csv} file in the working directory, or directly from numeric vectors. The output consists of a \code{data.frame} of class \code{time_series}, in which the first column contains time indices (\code{t}), the second the value of observations (\code{x}), and the third contains a label as a factor column (\code{variate}). Multiple time series may be contained in the same \code{time_series} object, distinguished by different labels in the \code{variate} column.
@@ -940,7 +1001,7 @@ time_series.numeric <- function(input = NULL, t = NULL, x = NULL, variate = NULL
 plot.time_series <- function(x, ...) {
   if (names(x)[2] == "x") {
     plot(x$t, x$x, ...)
-  } else if (names(z)[2] == "z") {
+  } else if (names(x)[2] == "z") {
     plot(x$t, x$z, ...)
   }
 }
