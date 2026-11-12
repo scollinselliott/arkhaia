@@ -1126,4 +1126,66 @@ betaHDR.numeric <- function(alpha, beta, prob, grid = 0.001) {
 
 
 
+#' Standardize Time Series by Period Breaks
+#'
+#' For \code{\link[arkhaia]{time_series}} object and a vector of time indices which constitute period breaks, returns another \code{\link[arkhaia]{time_series}} in which observations are standardized period by period. E.g., where currency values are retariffed at specific points in time, this function ensures that values are standardized according to the valuations used within their own time period. Breaks create half-open intervals, as either the end of a period or its start. For an end, a break at \eqn{t_i} creates two periods, \eqn{[t_0, t_i ], (t_i, t_n]}, whereas the start (the default) creates two periods  \eqn{[t_0, t_i), [t_i, t_n]}.
+#' 
+#' @param x A \code{\link[arkhaia]{time_series}} object.
+#' @param breaks A vector of the time indices of the period breaks.
+#' @param start Whether the breaks are the start or end of a period. If \code{TRUE} (the default) the 
+#' 
+#' @examples
+#' x <- time_series(t = 1:10, x = c(rnorm(5, mean = 3, sd = 4), rnorm(5, mean = -1, sd = 0.5) ))
+#' standardize_epoch(x, breaks = 5, start = FALSE)
+#' 
+#' @returns A time_series object.
+#' 
+#' @export
+standardize_epoch <- function(x, breaks = NULL, start = TRUE) {
+  UseMethod("standardize_epoch")
+}
+#' 
+#' @rdname standardize_epoch
+#' @export
+standardize_epoch.time_series <- function(x, breaks = NULL, start = TRUE) {
+  if (is.null(breaks) | !is.numeric(breaks)) {
+    stop('breaks must be numeric vector.')
+  }
+  if (length(breaks) < 1) {
+    stop('breaks must have at least one element.')
+  }
+  colnames(x) <- c("t", "x", "variate")
+  breaks <- sort(breaks)
+  epoch <- numeric(nrow(x))
+  if (length(breaks) > 1) {
+    epoch[x$t < breaks[1]] <- 1
+    epoch[x$t > breaks[length(breaks)]] <- length(breaks) + 1
+    if (identical(start, TRUE) ) {
+      for (i in 2:length(breaks)) {
+        epoch[breaks[i-1] <= x$t & x$t < breaks[i]] <- i
+      }
+    } else if (identical(start, FALSE) ) {
+      for (i in 2:length(breaks)) {
+        epoch[breaks[i-1] < x$t & x$t <= breaks[i]] <- i
+      }
+    } else {
+      stop('start must be TRUE or FALSE.')
+    }
+  } else if (length(breaks) == 1) {
+    if (identical(start, TRUE) ) {
+      epoch[x$t < breaks] <- 1
+      epoch[x$t >= breaks] <- 2
+    } else if (identical(start, FALSE) ) {
+      epoch[x$t <= breaks] <- 1
+      epoch[x$t > breaks] <- 2
+    } else {
+      stop('start must be TRUE or FALSE.')
+    }
+  }
+  x$epoch <- factor(paste(x$variate, epoch))
+  z <- array2DF(tapply(x$x, x$epoch, scale))$Value
+  out <- data.frame(t = x$t, z = z, variate = x$variate)
+  class(out) <- c("time_series", "data.frame")
+  return(out)
+}
 
