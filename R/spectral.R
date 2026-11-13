@@ -91,7 +91,7 @@ LSSA_LFI.time_series <- function(x, subset = NULL, n_iter = 1, freqs = seq(0.001
       stop("subset not in variate column.")
     }
   }
-
+  x$variate <- factor(x$variate)
   if (nlevels(x[,3]) > 1) {
     warning("more than one variate in time series. Pooling observations.")
   }
@@ -145,7 +145,7 @@ LSSA_LFI_dependence.time_series <- function(x, sets = NULL, n_iter = 1, freqs = 
   if (nlevels(x$variate) < 2) {
     stop("time_series input must contain more than one variate.")
   }
-
+  x$variate <- factor(x$variate)
   n <- nlevels(x$variate)
   # y <- as.matrix(do.call(rbind, x))
   x_rows <- table(x$variate) # unlist(lapply(x, nrow))
@@ -334,6 +334,7 @@ LSSA_LFI_validated <- function(x, pair = NULL, n_iter = 1, freqs = seq(0.001, 0.
 #' @rdname LSSA_LFI_validated
 #' @export
 LSSA_LFI_validated.time_series <- function(x, pair = NULL, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE, prob = "haldane") {
+  x$variate <- factor(x$variate)
   if (nlevels(x$variate) < 3) {
     stop("must have at least three time series in x.")
   }
