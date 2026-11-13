@@ -20,7 +20,7 @@ standardize_epoch(x, breaks = NULL, start = TRUE)
 A time_series object.
 }
 \description{
-For \code{\link[arkhaia]{time_series}} object and a vector of time indices which constitute period breaks, returns another \code{\link[arkhaia]{time_series}} in which observations are standardized period by period. E.g., where currency values are retariffed at specific points in time, this function ensures that values are standardized according to the valuations used within their own time period. Breaks create half-open intervals, as either the end of a period or its start. For an end, a break at \eqn{t_i} creates two periods, \eqn{[t_0, t_i ], (t_i, t_n]}, whereas the start (the default) creates two periods  \eqn{[t_0, t_i), [t_i, t_n]}.
+For a \code{\link[arkhaia]{time_series}} object and a vector of time indices which constitute period breaks, returns another \code{\link[arkhaia]{time_series}} in which observations are standardized internally to their period. Breaks create half-open intervals, as either the end of a period or its start. For an end, a break at \eqn{t_i} creates two periods, \eqn{[t_0, t_i ], (t_i, t_n]}, whereas the start (the default) creates two periods  \eqn{[t_0, t_i), [t_i, t_n]}.
 }
 \examples{
 x <- time_series(t = 1:10, x = c(rnorm(5, mean = 3, sd = 4), rnorm(5, mean = -1, sd = 0.5) ))

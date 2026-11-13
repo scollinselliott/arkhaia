@@ -1128,7 +1128,7 @@ betaHDR.numeric <- function(alpha, beta, prob, grid = 0.001) {
 
 #' Standardize Time Series by Period Breaks
 #'
-#' For \code{\link[arkhaia]{time_series}} object and a vector of time indices which constitute period breaks, returns another \code{\link[arkhaia]{time_series}} in which observations are standardized period by period. E.g., where currency values are retariffed at specific points in time, this function ensures that values are standardized according to the valuations used within their own time period. Breaks create half-open intervals, as either the end of a period or its start. For an end, a break at \eqn{t_i} creates two periods, \eqn{[t_0, t_i ], (t_i, t_n]}, whereas the start (the default) creates two periods  \eqn{[t_0, t_i), [t_i, t_n]}.
+#' For a \code{\link[arkhaia]{time_series}} object and a vector of time indices which constitute period breaks, returns another \code{\link[arkhaia]{time_series}} in which observations are standardized internally to their period. Breaks create half-open intervals, as either the end of a period or its start. For an end, a break at \eqn{t_i} creates two periods, \eqn{[t_0, t_i ], (t_i, t_n]}, whereas the start (the default) creates two periods  \eqn{[t_0, t_i), [t_i, t_n]}.
 #' 
 #' @param x A \code{\link[arkhaia]{time_series}} object.
 #' @param breaks A vector of the time indices of the period breaks.
@@ -1188,4 +1188,5 @@ standardize_epoch.time_series <- function(x, breaks = NULL, start = TRUE) {
   class(out) <- c("time_series", "data.frame")
   return(out)
 }
+
 
