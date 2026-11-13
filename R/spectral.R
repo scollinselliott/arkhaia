@@ -429,6 +429,7 @@ LSSA_LFI_pairwise <- function(x, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005
 #' @rdname LSSA_LFI_pairwise
 #' @export
 LSSA_LFI_pairwise.time_series <- function(x, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE, prob = "haldane") {
+  x$variate <- factor(x$variate)
   n_factors <- nlevels(x$variate)
   if (n_factors < 3) {
     stop("need at least three variates to evaluate pairwise.")
@@ -490,6 +491,7 @@ LSSA_LFI_epoch <- function(x, pair = NULL, n_iter = 1, freqs = seq(0.001, 0.5, b
 #' @rdname LSSA_LFI_epoch
 #' @export
 LSSA_LFI_epoch.time_series <- function(x, pair = NULL, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE, t_range = NULL, h_range = NULL, t_grid = 1, h_grid = 1, prob = "haldane") {
+  x$variate <- factor(x$variate)
   if (is.null(pair)) {
     stop("must supply the pair of data frames in x to be evaluated.")
   }
@@ -601,6 +603,7 @@ LSSA_LFI_multi <- function(x, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), 
 #' @rdname LSSA_LFI_multi
 #' @export
 LSSA_LFI_multi.time_series <- function(x, n_iter = 1, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE, AIC = FALSE) {
+  x$variate <- factor(x$variate)
   n <- nlevels(x$variate)
   x_rows <- table(x$variate)
   idx <- c(0, cumsum(x_rows)[1:(n-1)]) 
@@ -656,9 +659,7 @@ LSSA_LFI_comp <- function(x, freqs = seq(0.001, 0.5, by = 0.0005), intercept = T
 #' @rdname LSSA_LFI_comp
 #' @export
 LSSA_LFI_comp.time_series <- function(x, freqs = seq(0.001, 0.5, by = 0.0005), intercept = TRUE) {  
-  # n <- length(x)
-  # y <- as.matrix(do.call(rbind, x))
-  # nx <- nrow(y)
+  x$variate <- factor(x$variate)
   nx <- nrow(x)
   n <- nlevels(x$variate)
   x_rows <- table(x$variate) # unlist(lapply(x, nrow))
@@ -754,6 +755,7 @@ DTE <- function(x, events, gamma = c(-10,10), lambda = c(0,5), intercept = FALSE
 #' @rdname DTE
 #' @export
 DTE.time_series <- function(x, events, gamma = c(-10,10), lambda = c(0,5), intercept = FALSE, incr = 0.01, weights = TRUE) {
+  x$variate <- factor(x$variate)
   if (!(is.numeric(events))) {
     stop("events must be numeric")
   }
@@ -1149,6 +1151,7 @@ standardize_epoch <- function(x, breaks = NULL, start = TRUE) {
 #' @rdname standardize_epoch
 #' @export
 standardize_epoch.time_series <- function(x, breaks = NULL, start = TRUE) {
+  x$variate <- factor(x$variate)
   if (is.null(breaks) | !is.numeric(breaks)) {
     stop('breaks must be numeric vector.')
   }
